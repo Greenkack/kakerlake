@@ -1,0 +1,54 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "Skubulatschi"
+		}
+	],
+	"settings": {
+		"github.copilot.enable": {
+			"python": true,
+			"sql": true,
+			"markdown": true,
+			"javascript": true,
+			"typescript": true,
+			"bash": true,
+			"powershell": true,
+			"csharp": true,
+			"dockerfile": true,
+			"yaml": true,
+			"graphql": true,
+			"latex": true,
+			"proto": true,
+			"hcl": true,
+			"rego": true,
+			"json": true,
+			"toml": true,
+			"env": true,
+			"log": true,
+			"diff": true,
+			"jupyter": true,
+			"changelog": true,
+			"diagram": true,
+			"blade": true,
+			"text": true,
+			"Auto fix": true,
+			"xlsx": true,
+			"csv": true,
+			"git-commit": true,
+			"xml": true,
+			"ini": true,
+			"makefile": true,
+			"html": true,
+			"css": true
+		},
+		"github.copilot.chat.codesearch.enabled": true,
+		"github.copilot.chat.agent.thinkingTool": true,
+		"github.copilot.chat.editor.temporalContext.enabled": true,
+		"github.copilot.chat.edits.temporalContext.enabled": true,
+		"github.copilot.chat.generateTests.codeLens": true,
+		"github.copilot.chat.notebook.followCellExecution.enabled": true
+	}
+}

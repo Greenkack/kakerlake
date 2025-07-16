@@ -1,0 +1,79 @@
+# ---------------------------------------------------------------
+# construct.yaml – Steuerdatei für Conda-Constructor  ≥3.11
+# Projekt: OmersSolarDingelDangel
+# ---------------------------------------------------------------
+name: OmersSolarDingelDangel
+version: "1.0.0"
+installer_type: exe          # erzeugt Setup.EXE
+default_prefix: "C:\\Omers\\OmersSolarDingelDangel"
+
+# Optik ----------------------------------------------------------
+welcome_image: Omer.ico      # 800×400 PNG/JPG/ICO
+icon_image:    Omer.ico
+
+# Kanäle ----------------------------------------------------------
+channels:
+  - defaults
+  - conda-forge
+
+# Basis-Pakete (Conda löst Abhängigkeiten selbst)
+specs:
+  - python 3.12*
+  - pip
+  - streamlit
+  # --- dein kompletter Paket-Block (gekürzt) -------------
+  - altair
+  - pandas
+  - numpy
+  - scipy
+  - pyinstaller
+  - pvlib
+  - matplotlib
+  - plotly
+  - pyarrow
+  - pydeck
+  - sqlalchemy
+  - pypdf
+  - watchdog
+  - requests
+  - ...
+  # --------------------------------------------------------
+
+# ---------------------------------------------------------------
+#  Fertige Artefakte & Zusatz-Skripte kopieren
+#  - from: <Quelle relativ zu diesem YAML>
+#    to:   <Unterordner im endgültigen PREFIX>
+# ---------------------------------------------------------------
+files:
+  # 1) deine gebaute One-File-EXE (liegt _vor_ constructor-Aufruf
+  #    schon in dist/…)
+  - from: dist/OmersSolarDingelDangel.exe
+    to: .
+
+  # 2) Icon wird für Desktop-Verknüpfung gebraucht
+  - from: Omer.ico
+    to: .
+
+  # 3) alle internen Hilfs-Skripte in Unterordner "extras"
+{% for fn in [
+    'locales.py', 'database.py', 'product_db.py', 'data_input.py', 'calculations.py',
+    'analysis.py', 'crm.py', 'admin_panel.py', 'pdf_ui.py', 'quick_calc.py',
+    'options.py', 'pv_visuals.py', 'ai_companion.py', 'multi_offer_generator.py',
+    'add_company_id_column.py', 'ai_models.py', 'analyze_pdf_debug.py',
+    'analyze_session_state.py', 'app_status.py', 'check_db.py', 'check_db_column.py',
+    'check_lines.py', 'check_matrix_db.py', 'check_products.py',
+    'debug_integration_snippet.py', 'debug_pdf_validation.py', 'doc_output.py',
+    'financial_tools.py', 'fix_pdf_generation.py', 'fix_pdf_generation_simple.py',
+    'gui_clean.py', 'gui_integration_test.py', 'gui_new.py', 'info_platform.py',
+    'local_storage.py', 'map_integration.py', 'pdf_debug_widget.py',
+    'pdf_generator_cleaned.py', 'pdf_preview.py', 'pdf_status_widget.py',
+    'pdf_styles.py', 'pdf_widgets.py', 'scenario_manager.py',
+    'session_state_detective.py', 'session_state_fix.py', 'test_design_simple.py',
+    'test_new_features.py', 'update_tariffs.py', 'utils.py', 'variant_input.py'
+] %}
+  - from: {{ fn }}
+    to: extras
+{% endfor %}
+
+# Post-Install-Hook (legt Desktop-Link an usw.)
+post_install: post_install.bat

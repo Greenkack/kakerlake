@@ -1,0 +1,24 @@
+{
+  // ─── Copilot-PromptFile-Referenz ────────────────────────────────
+  "github.copilot.chat.promptFiles": [
+    "${workspaceFolder}/.copilot/prompts/ultra-ai_persona.md"
+  ],
+
+  // ─── Gemini Ultra AI Persona Tuning ─────────────────────────────
+  "gemini.chat.model": "gemini-2.5-pro",            // Ultra AI 2.5 Pro
+  "gemini.chat.maxTokens": 1048576,                // Input-Limit: 1 048 576 Tokens
+  "gemini.chat.outputTokens": 65535,               // Output-Limit: 65 535 Tokens
+  "gemini.chat.temperature": 0.4,                  // deterministischer Output
+  "gemini.chat.topP": 1.0,                         // volle Wahrscheinlichkeitspalette
+  "gemini.chat.autoRefresh": false,                // kein automatisches Nachladen
+  "gemini.chat.followUps": "none",                 // keine automatischen Folgefragen
+  "gemini.persona.mode": "turbo",                  // Hochleistungs-Modus
+  "gemini.persona.focus": "ultra-konzentriert",    // Deep-Context-Analyse
+  "gemini.persona.predictiveAnalysis": true,       // Abhängigkeits-Prognosen aktiv
+  "gemini.persona.errorForecasting": true,         // Syntax-/Logik-Warnungen aktiv
+  "gemini.persona.contextRetention": "holistic",   // gesamter Projekt-Context
+  "gemini.safety.level": "strict"                  // strenge Sicherheitschecks
+
+  // (Falls du auch Modes und ToolSets anpassen willst, füge hier
+  //  zusätzlich deine "github.copilot.modes" und "github.copilot.toolSets" ein.)
+}
