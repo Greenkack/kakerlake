@@ -1,0 +1,65 @@
+2025-07-13 01:37:29,781 - INFO - ================================================================================
+2025-07-13 01:37:29,781 - INFO - STARTE SYSTEMATISCHE PDF-VERGLEICHSANALYSE
+2025-07-13 01:37:29,781 - INFO - Ziel: Unterschiede zwischen Einzel-PDF und Multi-PDF finden
+2025-07-13 01:37:29,781 - INFO - ================================================================================
+2025-07-13 01:37:29,781 - INFO - Simuliere Einzel-PDF Datenstruktur...
+2025-07-13 01:37:29,781 - INFO - Simuliere Multi-PDF Datenstruktur...
+2025-07-13 01:37:29,781 - INFO - 
+==================================================
+2025-07-13 01:37:29,781 - INFO - ANALYSE PROJECT_DATA - EINZEL-PDF
+2025-07-13 01:37:29,781 - INFO - ==================================================
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Top Level Keys: ['customer_data', 'project_details', 'consumption_data']
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Customer Data Keys: ['salutation', 'first_name', 'last_name', 'address', 'house_number', 'zip_code', 'city']
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Project Details Keys: ['selected_module_id', 'selected_inverter_id', 'selected_storage_id', 'module_quantity', 'include_storage', 'include_additional_components', 'visualize_roof_in_pdf_satellite']
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Selected Module ID: 1
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Selected Inverter ID: 5
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Selected Storage ID: 10
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Module Quantity: 25
+2025-07-13 01:37:29,781 - INFO - 
+==================================================
+2025-07-13 01:37:29,781 - INFO - ANALYSE PROJECT_DATA - MULTI-PDF
+2025-07-13 01:37:29,781 - INFO - ==================================================
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Top Level Keys: ['customer_data', 'project_details']
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Customer Data Keys: ['salutation', 'first_name', 'last_name', 'address', 'house_number', 'zip_code', 'city']
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Project Details Keys: ['module_quantity', 'include_storage', 'include_additional_components', 'selected_module_id', 'selected_inverter_id', 'selected_storage_id', 'selected_storage_storage_power_kw']
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Selected Module ID: 1
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Selected Inverter ID: 5
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Selected Storage ID: 10
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Module Quantity: 25
+2025-07-13 01:37:29,781 - INFO - 
+==================================================
+2025-07-13 01:37:29,781 - INFO - ANALYSE ANALYSIS_RESULTS - EINZEL-PDF
+2025-07-13 01:37:29,781 - INFO - ==================================================
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Gesamt Keys: 9
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Critical KPIs verfügbar: ['anlage_kwp', 'annual_pv_production_kwh', 'total_investment_netto', 'amortization_time_years', 'self_supply_rate_percent', 'annual_financial_benefit_year1']
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Charts verfügbar: 3
+2025-07-13 01:37:29,781 - INFO - EINZEL-PDF - Charts mit Daten: 3
+2025-07-13 01:37:29,781 - INFO - 
+==================================================
+2025-07-13 01:37:29,781 - INFO - ANALYSE ANALYSIS_RESULTS - MULTI-PDF
+2025-07-13 01:37:29,781 - INFO - ==================================================
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Gesamt Keys: 6
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Critical KPIs verfügbar: ['anlage_kwp', 'annual_pv_production_kwh', 'total_investment_netto', 'amortization_time_years', 'self_supply_rate_percent', 'annual_financial_benefit_year1']
+2025-07-13 01:37:29,781 - INFO - MULTI-PDF - Charts verfügbar: 0
+2025-07-13 01:37:29,794 - INFO - MULTI-PDF - Charts mit Daten: 0
+2025-07-13 01:37:29,794 - INFO - 
+============================================================
+2025-07-13 01:37:29,794 - INFO - VERGLEICH PDF-FUNKTIONSAUFRUFE
+2025-07-13 01:37:29,794 - INFO - Quelle 1: EINZEL-PDF vs Quelle 2: MULTI-PDF
+2025-07-13 01:37:29,794 - INFO - ============================================================
+2025-07-13 01:37:29,794 - INFO - Keine kritischen Unterschiede in den Produktfeldern gefunden.
+2025-07-13 01:37:29,794 - INFO - 
+============================================================
+2025-07-13 01:37:29,794 - INFO - ZUSAMMENFASSUNG DER ANALYSE
+2025-07-13 01:37:29,794 - INFO - ============================================================
+2025-07-13 01:37:29,795 - INFO - Gefundene Unterschiede: 0
+2025-07-13 01:37:29,795 - INFO - Kritische Probleme: 0
+2025-07-13 01:37:29,819 - INFO - Das Problem liegt wahrscheinlich NICHT in der Datenübergabe.
+2025-07-13 01:37:29,819 - INFO - Mögliche andere Ursachen:
+2025-07-13 01:37:29,819 - INFO -   - Unterschiede in PDF-Template/Rendering-Logik
+2025-07-13 01:37:29,819 - INFO -   - Verschiedene inclusion_options zwischen Einzel- und Multi-PDF
+2025-07-13 01:37:29,821 - INFO -   - Unterschiedliche sections_to_include Parameter
+2025-07-13 01:37:29,821 - INFO -   - Fehler in get_product_by_id_func oder ähnlichen Callback-Funktionen
+2025-07-13 01:37:29,822 - INFO - 
+Detaillierte Ergebnisse in 'pdf_comparison_results.json' gespeichert.
+2025-07-13 01:37:29,822 - INFO - Debug-Log in 'debug_pdf_comparison.log' verfügbar.

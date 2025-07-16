@@ -1,0 +1,49 @@
+{
+  "extended_calculations": {
+    "total_investment": 15000,
+    "annual_savings": 1200,
+    "annual_production_kwh": 10000,
+    "pv_size_kwp": 10,
+    "total_embodied_energy_kwh": 20000,
+    "co2_avoidance_per_year_tons": 2.5,
+    "dynamic_payback_3_percent": 8.5,
+    "internal_rate_of_return": 12.0,
+    "lcoe": 0.08,
+    "net_present_value": 5000,
+    "total_roi_percent": 15.0
+  },
+  "advanced_calculations": {
+    "degradation_analysis": {
+      "degradation_rate": 0.5,
+      "impact_on_production": 1000
+    },
+    "shading_analysis": {
+      "shading_factor": 0.1,
+      "impact_on_production": 800
+    },
+    "grid_interaction": {
+      "grid_interaction_effect": 0.2,
+      "impact_on_savings": 240
+    },
+    "carbon_footprint": {
+      "annual_emissions_reduction": 2.5,
+      "equivalent_trees_saved": 100
+    },
+    "peak_shaving": {
+      "peak_shaving_effect": 0.3,
+      "savings_on_peak_hours": 360
+    },
+    "battery_cycles": {
+      "total_cycles": 500,
+      "impact_on_lifetime": 5
+    },
+    "weather_impact": {
+      "weather_factor": 0.9,
+      "impact_on_production": 900
+    },
+    "energy_independence": {
+      "independence_rate": 0.75,
+      "impact_on_savings": 900
+    }
+  }
+}

@@ -1,0 +1,18 @@
+# construct.yaml  –  Minimalbeispiel  (Windows 64-bit)
+
+name: OmersSolarDingelDangel     # Paket-/Projektname
+version: "1.0.0"                 # SemVer-String in Anführungszeichen
+installer_type: exe              # Windows-Setup
+default_prefix: "C:\\OmersSolarDingelDangel"   # Zielpfad
+
+channels:                        # Wo Conda die Pakete lädt
+  - defaults
+  - conda-forge
+
+specs:                           # unbedingt benötigte Pakete
+  - python 3.12*
+  - pip
+  - streamlit                    #  ⇦ deine App braucht das
+
+# (optional) Skript nach Installation ausführen
+post_install: post_install.bat
