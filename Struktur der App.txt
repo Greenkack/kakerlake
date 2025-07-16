@@ -1,0 +1,43 @@
+C:\SolarDING\
+├─ Hauptordner
+│   ├ admin.py                                     
+│   ├ admin_panel.py                             
+│   ├ ai_models.py                                
+│   ├ analysis.py                                 
+│   ├ calculations.py                             
+│   ├ check_lines.py                              
+│   ├ crm.py                                      
+│   ├ data_input.py                               
+│   ├ database.py                                 
+│   ├ de.json                                   
+│   ├ financial_tools.py                        
+│   ├ gui.py                                    
+│   ├ info_platform.py
+│   ├ locales.py
+│   ├ map_integration.py
+│   ├ options.py
+│   ├ pdf_generator.py
+│   ├ product_db.py
+│   ├ quick_calc.py
+│   ├ scenario_manager.py
+│   ├ skins.py
+│   ├ three_d_viz.py
+│   ├ utils.py
+│   └ visualizer.py
+├─ \data
+│   ├ app_data.db
+│   ├ MeineProdukte.xlsx
+│   └ price_matrix.xlsx
+└─ \__pycache__
+    ├ admin_panel.cpython-313.pyc
+    ├ analysis.cpython-313.pyc
+    ├ calculations.cpython-313.pyc
+    ├ crm.cpython-313.pyc
+    ├ data_input.cpython-313.pyc
+    ├ database.cpython-313.pyc
+    ├ gui.cpython-313.pyc
+    ├ info_platform.cpython-313.pyc
+    ├ locales.cpython-313.pyc
+    ├ options.cpython-313.pyc
+    ├ product_db.cpython-313.pyc
+    └ quick_calc.cpython-313.pyc

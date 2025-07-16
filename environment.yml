@@ -1,0 +1,30 @@
+# ------------------------------------------------------------------
+#  environment.yml – vollständige Umgebung deiner App
+#  Constructor liest diese Datei automatisch ein
+# ------------------------------------------------------------------
+name: omers_env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  # Conda-Pakete
+  - python=3.12
+  - pip
+  - streamlit
+  - numpy
+  - pandas
+  - requests
+  - pyarrow
+  - gitpython
+  - watchdog
+  - pyinstaller
+
+  # Nur als pip-Wheel vorhanden:
+  - pip:
+      - blinker
+      - cachetools
+      - colorama
+      - tenacity
+      - typing_extensions
+      - tzdata
+      # … hier weitere reine-pip-Pakete anfügen

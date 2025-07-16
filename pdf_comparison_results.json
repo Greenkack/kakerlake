@@ -1,0 +1,103 @@
+{
+  "single_pdf_analysis": {
+    "source": "EINZEL-PDF",
+    "has_project_data": true,
+    "top_level_keys": [
+      "customer_data",
+      "project_details",
+      "consumption_data"
+    ],
+    "customer_data": {
+      "exists": true,
+      "keys": [
+        "salutation",
+        "first_name",
+        "last_name",
+        "address",
+        "house_number",
+        "zip_code",
+        "city"
+      ],
+      "last_name": "Mustermann",
+      "first_name": "Max"
+    },
+    "project_details": {
+      "exists": true,
+      "keys": [
+        "selected_module_id",
+        "selected_inverter_id",
+        "selected_storage_id",
+        "module_quantity",
+        "include_storage",
+        "include_additional_components",
+        "visualize_roof_in_pdf_satellite"
+      ],
+      "selected_module_id": 1,
+      "selected_inverter_id": 5,
+      "selected_storage_id": 10,
+      "module_quantity": 25,
+      "include_storage": true,
+      "include_additional_components": false
+    },
+    "other_data": {
+      "consumption_data": {
+        "exists": true,
+        "keys": [
+          "annual_consumption_kwh"
+        ]
+      }
+    }
+  },
+  "multi_pdf_analysis": {
+    "source": "MULTI-PDF",
+    "has_project_data": true,
+    "top_level_keys": [
+      "customer_data",
+      "project_details"
+    ],
+    "customer_data": {
+      "exists": true,
+      "keys": [
+        "salutation",
+        "first_name",
+        "last_name",
+        "address",
+        "house_number",
+        "zip_code",
+        "city"
+      ],
+      "last_name": "Mustermann",
+      "first_name": "Max"
+    },
+    "project_details": {
+      "exists": true,
+      "keys": [
+        "module_quantity",
+        "include_storage",
+        "include_additional_components",
+        "selected_module_id",
+        "selected_inverter_id",
+        "selected_storage_id",
+        "selected_storage_storage_power_kw"
+      ],
+      "selected_module_id": 1,
+      "selected_inverter_id": 5,
+      "selected_storage_id": 10,
+      "module_quantity": 25,
+      "include_storage": true,
+      "include_additional_components": false
+    },
+    "other_data": {}
+  },
+  "comparison": {
+    "source_1": "EINZEL-PDF",
+    "source_2": "MULTI-PDF",
+    "differences": [],
+    "critical_issues": []
+  },
+  "summary": {
+    "total_differences": 0,
+    "critical_issues": 0,
+    "analysis_completed": true
+  }
+}

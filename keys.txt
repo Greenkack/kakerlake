@@ -1,0 +1,69 @@
+# Erstelle ein Dictionary für 'texts', das alle benötigten Schlüssel enthält.
+# FÜGE HIER ALLE KEYS HINZU, DIE DEINE render_data_input FUNKTION VERWENDET!
+test_texts_data = {
+    'please_select_option': '--- Bitte wählen ---',
+    'customer_data_header': 'Kundendaten (Test)',
+    'anlage_type_label': 'Anlagentyp', 'feed_in_type_label': 'Einspeisetyp', 'customer_type_label': 'Kundentyp',
+    'salutation_label': 'Anrede', 'title_label': 'Titel', 'first_name_label': 'Vorname', 'last_name_label': 'Nachname',
+    'num_persons_label': 'Personen im Haushalt', 'full_address_label': 'Komplette Adresse (Test)',
+    'parse_address_button': 'Adresse verarbeiten (Test)', 'address_parsing_placeholder': 'Adressparsing läuft...',
+    'address_parsing_state_region_placeholder': 'Info: Bundesland/Region Parsing ist hier nicht aktiv.',
+    'street_label': 'Straße', 'house_number_label': 'Hausnr.', 'zip_code_label': 'PLZ', 'city_label': 'Ort',
+    'state_label': 'Bundesland', 'region_label': 'Region', 'show_map_text': 'Karte anzeigen (Test)',
+    'email_label': 'E-Mail', 'phone_landline_label': 'Tel. Festnetz', 'phone_mobile_label': 'Tel. Mobil',
+    'show_aerial_images_button': 'Luftbilder (Test)', 'consumption_analysis_header': 'Bedarfsanalyse (Test)',
+    'consumption_costs_header': 'Verbräuche und Kosten', 'annual_consumption_kwh_label': 'Jahresverbrauch Haushalt (kWh)',
+    'annual_heating_kwh_optional_label': 'Jahresverbrauch Heizung (kWh, optional)', 'total_annual_consumption_label': 'Gesamtjahresverbrauch (kWh)',
+    'monthly_costs_household_label': 'Monatl. Kosten Haushalt (€)', 'monthly_costs_heating_optional_label': 'Monatl. Kosten Heizung (€, optional)',
+    'total_annual_costs_label': 'Gesamtjahreskosten (€)', 'electricity_price_label': 'Strompreis (€/kWh)',
+    'consumption_unknown_button': 'Verbrauchswerte unbekannt? (Test)', 'building_data_header': 'Daten des Gebäudes',
+    'build_year_label': 'Baujahr Haus', 'build_year_warning_old': 'Warnung: Zählerschrank alt!', 'build_year_info_mid': 'Info: Zählerschrank prüfen.',
+    'build_year_success_new': 'Info: Zählerschrank wahrscheinlich ok.', 'roof_type_label': 'Dachart',
+    'roof_covering_label': 'Dacheindeckung', 'roof_covering_warning': 'Warnung: Höhere Montagekosten möglich.',
+    'roof_covering_trapez_info': 'Info: Spezielle Montage.', 'roof_covering_info': 'Info: Belegung wahrscheinlich ok.',
+    'free_roof_area_label': 'Freie Dachfläche (m²)', 'roof_orientation_label': 'Dachausrichtung',
+    'roof_inclination_label': 'Dachneigung (°)', 'building_height_gt_7m_label': 'Gebäudehöhe > 7m (Gerüst nötig)',
+    'future_consumption_header': 'Zukunftsplanung', 'consider_future_consumption_label': 'Zukünftigen Mehrverbrauch berücksichtigen',
+    'future_consumption_info_active': 'Planen Sie zusätzlichen Verbrauch...', 'future_ev_header': 'E-Auto',
+    'future_ev_label': 'E-Auto geplant/vorhanden', 'future_ev_kmyr_label': 'Fahrleistung/Jahr (km)',
+    'future_ev_consumption_label': 'Verbrauch / 100km (kWh)', 'future_ev_annual_consumption_estimated': 'Geschätzter Jahresverbrauch E-Auto:',
+    'future_hp_header': 'Wärmepumpe', 'future_hp_label': 'Wärmepumpe geplant/vorhanden',
+    'future_hp_heat_demand_label': 'Jährl. Wärmebedarf (kWh)', 'future_hp_cop_label': 'Durchschnittl. COP',
+    'future_hp_annual_consumption_estimated': 'Geschätzter Jahresstromverbrauch WP:', 'technology_selection_header': 'Technikauswahl',
+    'module_quantity_label': 'Anzahl Module', 'module_model_label': 'PV Modul Modell', 'module_capacity_label': 'Leistung / Modul (W)',
+    'module_details_not_found': 'Moduldetails nicht gefunden', 'module_details_not_loaded': 'Moduldetails konnten nicht geladen werden.',
+    'anlage_size_label': 'Anlagengröße (kWp)', 'inverter_selection_header': 'Wechselrichter',
+    'inverter_model_label': 'WR Modell', 'inverter_power_label': 'Leistung WR (kW)', 'inverter_details_not_found': 'WR Details nicht gefunden',
+    'inverter_details_not_loaded': 'WR Details konnten nicht geladen werden.', 'inverter_pv_ratio_label': 'Verhältnis PV kWp / WR kW',
+    'inverter_ratio_great': 'Optimal dimensioniert.', 'inverter_ratio_good': 'Solide Dimensionierung.',
+    'inverter_ratio_low': 'Dimensionierung prüfen.', 'inverter_ratio_no_inverter': 'WR-Leistung fehlt.',
+    'inverter_ratio_no_pv': 'PV-Leistung fehlt.', 'storage_selection_header': 'Batteriespeicher',
+    'include_storage_label': 'Speicher einplanen', 'storage_model_label': 'Speicher Modell',
+    'storage_capacity_model_label': 'Kapazität Modell (kWh)', 'storage_price_model_label': 'Preis Modell (€)',
+    'storage_details_not_found': 'Speicherdetails nicht gefunden', 'storage_details_not_loaded': 'Speicherdetails konnten nicht geladen werden.',
+    'storage_capacity_manual_label': 'Gewünschte Gesamtkapazität (kWh)', 'storage_consumption_ratio_label': 'Verhältnis Speicher kWh / Tagesverbrauch kWh',
+    'storage_ratio_great': 'Speichergröße passend.', 'storage_ratio_good': 'Speichergröße prüfen.',
+    'storage_ratio_low': 'Speichergröße unpassend.', 'storage_ratio_no_consumption': 'Verbrauch fehlt, Speicherbewertung nicht möglich.',
+    'additional_components_header': 'Zusatzkomponenten', 'include_additional_components_label': 'Zusatzkomponenten einplanen',
+    'other_components_header': 'Standard Zubehör', 'wallbox_model_label': 'Wallbox Modell',
+    'ems_model_label': 'EMS Modell', 'optimizer_model_label': 'Optimierer Modell',
+    'other_additional_components_header': 'Sonstige Zusatzkomponenten', 'carport_model_label': 'Carport Modell',
+    'notstrom_model_label': 'Notstrom Modell', 'tierabwehr_model_label': 'Tierabwehr Modell',
+    'pricing_factors_header': 'Preisfaktoren', 'pricing_factors_info': 'Info zu Preisfaktoren...',
+    'custom_surcharge_percent_label': 'Aufschlag (%)', 'custom_discount_percent_label': 'Rabatt (%)',
+    'overfactor_label': 'Überfaktor', 'overfactor_help': 'Hilfe zum Überfaktor...',
+    'investment_comparison_header': 'Kapitalanlagen-Vergleich', 'investment_comparison_info': 'Info zum Vergleich...',
+    'comp_interest_rate_label': 'Vergleichszins (% p.a.)', 'comp_laufzeit_info': 'Laufzeit Info...',
+    'comp_kest_label': 'Kapitalertragsteuer (%)',
+}
+
+# Rufe die Hauptfunktion mit dem test_texts_data auf
+collected_data = render_data_input(test_texts_data)
+
+st.write("---")
+st.subheader("Gesammelte Daten aus dem Testlauf:")
+try:
+    st.json(json.loads(json.dumps(collected_data, default=str)))
+except Exception as e:
+    st.error(f"Fehler bei der Anzeige der gesammelten Daten als JSON: {e}")
+    st.write(collected_data) # Fallback auf st.write
