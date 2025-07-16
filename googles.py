@@ -1,6 +1,6 @@
 from google import genai
 
-client = genai.Client(api_key="AIzaSyCwQ__0wgV4uumesECP7NbmEoxUXwP0p9o")
+client = genai.Client(api_key="")
 
 response = client.models.generate_content(
     model="gemini-2.5-flash", contents="Explain how AI works in a few words"
@@ -18,7 +18,7 @@ from google.genai import types
 
 def generate():
     client = genai.Client(
-        api_key=os.environ.get("AIzaSyCwQ__0wgV4uumesECP7NbmEoxUXwP0p9o"),
+        api_key=os.environ.get(""),
     )
 
     model = "gemini-2.5-pro"
