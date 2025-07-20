@@ -705,8 +705,51 @@ def create_offer_pdf(
     c.save()
     print(f"PDF erfolgreich erstellt: {output_filename}")
 
-def page_layout_handler(canvas_obj: canvas.Canvas, doc_template: SimpleDocTemplate, texts_ref: Dict[str, str], company_info_ref: Dict, company_logo_base64_ref: Optional[str], offer_number_ref: str, page_width_ref: float, page_height_ref: float, margin_left_ref: float, margin_right_ref: float, margin_top_ref: float, margin_bottom_ref: float, doc_width_ref: float, doc_height_ref: float, include_custom_footer_ref: bool = True, include_header_logo_ref: bool = True):
+def page_layout_handler(
+    canvas_obj: canvas.Canvas,
+    doc_template: SimpleDocTemplate,
+    texts_ref: Dict[str, str],
+    company_info_ref: Dict,
+    company_logo_base64_ref: Optional[str],
+    offer_number_ref: str,
+    page_width_ref: float,
+    page_height_ref: float,
+    margin_left_ref: float,
+    margin_right_ref: float,
+    margin_top_ref: float,
+    margin_bottom_ref: float,
+    doc_width_ref: float,
+    doc_height_ref: float,
+    include_custom_footer_ref: bool = True,
+    include_header_logo_ref: bool = True,
+    background_color_ref: Optional[str] = None,
+    background_image_b64_ref: Optional[str] = None,
+):
     canvas_obj.saveState()
+    if background_color_ref:
+        try:
+            canvas_obj.setFillColor(colors.HexColor(background_color_ref))
+            canvas_obj.rect(0, 0, page_width_ref, page_height_ref, stroke=0, fill=1)
+        except Exception:
+            pass
+    if background_image_b64_ref:
+        try:
+            img_bytes_bg = (
+                base64.b64decode(background_image_b64_ref.split(',', 1)[1])
+                if ',' in background_image_b64_ref
+                else base64.b64decode(background_image_b64_ref)
+            )
+            img_reader_bg = ImageReader(io.BytesIO(img_bytes_bg))
+            canvas_obj.drawImage(
+                img_reader_bg,
+                0,
+                0,
+                width=page_width_ref,
+                height=page_height_ref,
+                mask='auto',
+            )
+        except Exception:
+            pass
     current_chapter_title = getattr(canvas_obj, 'current_chapter_title_for_header', '')
     page_num = canvas_obj.getPageNumber()
 
@@ -1666,15 +1709,24 @@ def generate_offer_pdf(
     main_pdf_bytes: Optional[bytes] = None
     try:
         layout_callback_kwargs_build = {
-            'texts_ref': texts, 'company_info_ref': company_info,
+            'texts_ref': texts,
+            'company_info_ref': company_info,
             'company_logo_base64_ref': company_logo_base64 if include_company_logo_opt else None,
-            'offer_number_ref': offer_number_final, 'page_width_ref': doc.pagesize[0], 
-            'page_height_ref': doc.pagesize[1],'margin_left_ref': doc.leftMargin, 
-            'margin_right_ref': doc.rightMargin,'margin_top_ref': doc.topMargin, 
-            'margin_bottom_ref': doc.bottomMargin,'doc_width_ref': doc.width, 'doc_height_ref': doc.height,
+            'offer_number_ref': offer_number_final,
+            'page_width_ref': doc.pagesize[0],
+            'page_height_ref': doc.pagesize[1],
+            'margin_left_ref': doc.leftMargin,
+            'margin_right_ref': doc.rightMargin,
+            'margin_top_ref': doc.topMargin,
+            'margin_bottom_ref': doc.bottomMargin,
+            'doc_width_ref': doc.width,
+            'doc_height_ref': doc.height,
             # NEUE OPTIONEN (wie gewünscht)
             'include_custom_footer_ref': include_custom_footer_opt,
-            'include_header_logo_ref': include_header_logo_opt
+            'include_header_logo_ref': include_header_logo_opt,
+            # Hintergrundoptionen
+            'background_color_ref': inclusion_options.get('background_color_hex'),
+            'background_image_b64_ref': inclusion_options.get('background_image_base64'),
         }
         doc.build(story, canvasmaker=lambda *args, **kwargs_c: PageNumCanvas(*args, onPage_callback=page_layout_handler, callback_kwargs=layout_callback_kwargs_build, **kwargs_c))
         main_pdf_bytes = main_offer_buffer.getvalue()
