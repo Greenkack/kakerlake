@@ -2168,8 +2168,55 @@ def render_optimization_suggestions(integrator, calc_results: Dict[str, Any], pr
             with col2:
                 st.metric("Investition", opt['investment'])
             
-            with col3:
-                st.metric("ROI", opt['roi'])
+        with col3:
+            st.metric("ROI", opt['roi'])
+
+
+def render_technical_calculations(integrator, calc_results: Dict[str, Any], project_data: Dict[str, Any], texts: Dict[str, str]):
+    """Visualisiert technische Zusatzberechnungen"""
+
+    st.subheader("Technische Zusatzanalysen")
+
+    # Degradationsanalyse
+    with st.expander("Degradation", expanded=True):
+        deg_data = integrator.calculation_functions['degradation_analysis'](calc_results)
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=deg_data['years'], y=deg_data['power_kw'], mode='lines', name='Leistung'))
+        fig.update_layout(title="Leistungsentwicklung", xaxis_title="Jahr", yaxis_title="kW")
+        st.plotly_chart(fig, use_container_width=True)
+        calc_results['degradation_chart_bytes'] = _export_plotly_fig_to_bytes(fig, texts)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Restleistung", f"{deg_data['final_performance_percent']:.1f}%")
+        with col2:
+            st.metric("Energieverlust", f"{deg_data['total_energy_loss_kwh']:.0f} kWh")
+
+    # Batteriezyklen
+    with st.expander("Batteriezyklen", expanded=False):
+        batt_data = integrator.calculation_functions['battery_cycles'](calc_results)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=batt_data['years'], y=batt_data['capacity_percent'], mode='lines+markers', name='Kapazität'))
+        fig.update_layout(title="Batteriekapazität über Zeit", xaxis_title="Jahr", yaxis_title="Kapazität (%)")
+        st.plotly_chart(fig, use_container_width=True)
+        calc_results['battery_cycles_chart_bytes'] = _export_plotly_fig_to_bytes(fig, texts)
+
+        st.metric("Lebensdauer", f"{batt_data['expected_lifetime_years']:.1f} Jahre")
+
+    # Energieunabhängigkeit
+    with st.expander("Energieunabhängigkeit", expanded=False):
+        indep_data = integrator.calculation_functions['energy_independence'](calc_results)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=indep_data['years'], y=indep_data['self_consumption_rates'], name='Eigenverbrauch'))
+        fig.add_trace(go.Scatter(x=indep_data['years'], y=indep_data['grid_dependency_rates'], name='Netzabhängigkeit'))
+        fig.update_layout(title="Entwicklung der Autarkie", xaxis_title="Jahr", yaxis_title="%")
+        st.plotly_chart(fig, use_container_width=True)
+        calc_results['energy_independence_chart_bytes'] = _export_plotly_fig_to_bytes(fig, texts)
+
+        st.metric("Autarkie in Jahr 25", f"{indep_data['final_independence_rate']:.1f}%")
+
+    st.session_state['calculation_results'] = calc_results
 
 def render_financial_scenarios(integrator, calc_results: Dict[str, Any], project_data: Dict[str, Any], texts: Dict[str, str]):
     """Finanzielle Szenarien"""
