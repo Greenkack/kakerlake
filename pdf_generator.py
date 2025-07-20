@@ -1506,6 +1506,9 @@ def generate_offer_pdf(
                         'yearly_production_chart_bytes': {"title_key": "pdf_chart_label_pvvis_yearly", "default_title": "PV Visuals: Jahresproduktion"},
                         'break_even_chart_bytes': {"title_key": "pdf_chart_label_pvvis_breakeven", "default_title": "PV Visuals: Break-Even"},
                         'amortisation_chart_bytes': {"title_key": "pdf_chart_label_pvvis_amort", "default_title": "PV Visuals: Amortisation"},
+                        'degradation_chart_bytes': {"title_key": "pdf_chart_label_degradation", "default_title": "Moduldegradation"},
+                        'battery_cycles_chart_bytes': {"title_key": "pdf_chart_label_battery_cycles", "default_title": "Batteriezyklen"},
+                        'energy_independence_chart_bytes': {"title_key": "pdf_chart_label_energy_independence", "default_title": "Entwicklung Autarkie"},
                     }
                     charts_added_count = 0
                     selected_charts_for_pdf_opt = inclusion_options.get("selected_charts_for_pdf", [])

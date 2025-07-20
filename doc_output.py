@@ -347,6 +347,9 @@ def render_pdf_ui(
                     'yearly_production_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pvvis_yearly", "PV Visuals: Jahresproduktion"),
                     'break_even_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pvvis_breakeven", "PV Visuals: Break-Even"),
                     'amortisation_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pvvis_amort", "PV Visuals: Amortisation"),
+                    'degradation_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_degradation", "Moduldegradation"),
+                    'battery_cycles_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_battery_cycles", "Batteriezyklen"),
+                    'energy_independence_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_energy_independence", "Entwicklung Autarkie"),
                 }
                 available_chart_keys = [k for k in analysis_results.keys() if k.endswith('_chart_bytes') and analysis_results[k] is not None]
                 ordered_display_keys = [k_map for k_map in chart_key_to_friendly_name_map.keys() if k_map in available_chart_keys]
