@@ -43,7 +43,8 @@ THEME_MODERN_DARK = {
         "size_body": 10,
         "size_footer": 8,
     },
-    "logo_path": "assets/logos/logo_white.png", # Annahme: Es gibt verschiedene Logos
+    "logo_path": "assets/logos/logo_white.png",  # Annahme: Es gibt verschiedene Logos
+    "background_image": None,
 }
 
 
@@ -69,6 +70,7 @@ THEME_CLASSIC_LIGHT = {
         "size_footer": 9,
     },
     "logo_path": "assets/logos/logo_color.png",
+    "background_image": None,
 }
 
 THEME_ECO_GREEN = {
@@ -93,6 +95,7 @@ THEME_ECO_GREEN = {
         "size_footer": 8,
     },
     "logo_path": "assets/logos/logo_green.png",
+    "background_image": None,
 }
 
 # Neues modernes Theme mit frischen Farben
@@ -118,6 +121,7 @@ THEME_SOLAR_MODERN = {
         "size_footer": 8,
     },
     "logo_path": "assets/logos/logo_modern.png",
+    "background_image": None,
 }
 
 
