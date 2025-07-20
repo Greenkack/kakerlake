@@ -81,12 +81,20 @@ except Exception as e_pypdf_import:
 class PDFGenerator:
     """Kapselt die gesamte PDF-Erstellungslogik."""
 
-    def __init__(self, offer_data: Dict, module_order: List[Dict], theme_name: str, filename: str):
+    def __init__(
+        self,
+        offer_data: Dict,
+        module_order: List[Dict],
+        theme_name: str,
+        filename: str,
+        background_image: Optional[str] = None,
+    ):
         self.offer_data = offer_data
         self.module_order = module_order
         self.theme = get_theme(theme_name)
         self.filename = filename
         self.width, self.height = A4
+        self.background_image = background_image or self.theme.get("background_image")
         self.styles = getSampleStyleSheet()
         self.story = []
         
@@ -101,12 +109,27 @@ class PDFGenerator:
     def _header_footer(self, canvas, doc):
         """Erstellt die Kopf- und Fußzeile für jede Seite."""
         canvas.saveState()
+        self._draw_background(canvas)
         # Footer
         canvas.setFont(self.theme["fonts"]["family_main"], self.theme["fonts"]["size_footer"])
         canvas.setFillColor(HexColor(self.theme["colors"]["footer_text"]))
         footer_text = f"Angebot {self.offer_data.get('offer_id', '')} | Seite {doc.page}"
         canvas.drawRightString(self.width - 2*cm, 1.5*cm, footer_text)
         canvas.restoreState()
+
+    def _draw_background(self, canvas):
+        """Zeichnet Hintergrundfarbe oder -bild."""
+        if self.background_image:
+            try:
+                img_reader = ImageReader(self.background_image)
+                canvas.drawImage(img_reader, 0, 0, width=self.width, height=self.height)
+                return
+            except Exception as e:
+                print(f"Fehler beim Laden des Hintergrundbildes: {e}")
+
+        bg_color = self.theme["colors"].get("background", "#FFFFFF")
+        canvas.setFillColor(HexColor(bg_color))
+        canvas.rect(0, 0, self.width, self.height, stroke=0, fill=1)
 
     def create_pdf(self):
         """Hauptfunktion, die alle Module zusammensetzt und das PDF speichert."""
