@@ -95,12 +95,38 @@ THEME_ECO_GREEN = {
     "logo_path": "assets/logos/logo_green.png",
 }
 
+# Neues modernes Theme mit frischen Farben
+THEME_SOLAR_MODERN = {
+    "name": "Solar Modern",
+    "colors": {
+        "primary": "#1B365D",  # Dunkelblau
+        "secondary": "#2E8B57",  # Solargrün
+        "background": "#F8F9FA",  # Helles Grau
+        "text": "#333333",  # Dunkles Grau
+        "header_text": "#ffffff",
+        "table_header_bg": "#1B365D",
+        "table_row_bg_even": "#FFFFFF",
+        "table_row_bg_odd": "#F1F3F5",
+        "footer_text": "#6C757D",
+    },
+    "fonts": {
+        "family_main": FONT_FAMILY_SANS,
+        "family_bold": FONT_BOLD_SANS,
+        "size_h1": 22,
+        "size_h2": 17,
+        "size_body": 10,
+        "size_footer": 8,
+    },
+    "logo_path": "assets/logos/logo_modern.png",
+}
+
 
 # Eine Liste aller verfügbaren Themes für einfache Iteration in der UI
 AVAILABLE_THEMES = {
     "Modern Dark": THEME_MODERN_DARK,
     "Classic Light": THEME_CLASSIC_LIGHT,
     "Öko Grün": THEME_ECO_GREEN,
+    "Solar Modern": THEME_SOLAR_MODERN,
 }
 
 
