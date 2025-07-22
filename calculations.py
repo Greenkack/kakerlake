@@ -23,11 +23,11 @@ def Dummy_load_admin_setting_calc(key, default=None):
     if key == 'price_matrix_excel_bytes': return None
     if key == 'feed_in_tariffs':
         return {
-            "parts": [{"kwp_min": 0.0, "kwp_max": 10.0, "ct_per_kwh": 8.1},
-                      {"kwp_min": 10.01, "kwp_max": 40.0, "ct_per_kwh": 7.0},
-                      {"kwp_min": 40.01, "kwp_max": 1000.0, "ct_per_kwh": 5.7}],
-            "full": [{"kwp_min": 0.0, "kwp_max": 10.0, "ct_per_kwh": 12.9},
-                     {"kwp_min": 10.01, "kwp_max": 100.0, "ct_per_kwh": 10.8}]
+            "parts": [{"kwp_min": 0.0, "kwp_max": 10.0, "ct_per_kwh": 7.92},
+                      {"kwp_min": 10.01, "kwp_max": 40.0, "ct_per_kwh": 6.88},
+                      {"kwp_min": 40.01, "kwp_max": 100.0, "ct_per_kwh": 5.62}],
+            "full": [{"kwp_min": 0.0, "kwp_max": 10.0, "ct_per_kwh": 12.60},
+                     {"kwp_min": 10.01, "kwp_max": 100.0, "ct_per_kwh": 10.56}]
         }
     if key == 'global_constants':
         return {
@@ -707,10 +707,11 @@ class AdvancedCalculationsIntegrator:
                 'Ohne Förderung': [i * 1000 for i in range(1, 21)],
                 'Mit KfW-Förderung': [i * 1200 for i in range(1, 21)],
                 'Mit regionaler Förderung': [i * 1100 for i in range(1, 21)]
-            },            'comparison': [
-                {'Szenario': 'Ohne Förderung', 'NPV': 25000, 'IRR': 6.2, 'Amortisation': 12.5, 'Förderung': 0},
-                {'Szenario': 'Mit KfW-Förderung', 'NPV': 35000, 'IRR': 8.1, 'Amortisation': 10.2, 'Förderung': 5000},
-                {'Szenario': 'Mit regionaler Förderung', 'NPV': 30000, 'IRR': 7.3, 'Amortisation': 11.1, 'Förderung': 2500}
+            },
+            'comparison': [
+                {'Szenario': 'Ohne Förderung', 'NPV': 25000.0, 'IRR': 6.2, 'Amortisation': 12.5, 'Förderung': 0.0},
+                {'Szenario': 'Mit KfW-Förderung', 'NPV': 35000.0, 'IRR': 8.1, 'Amortisation': 10.2, 'Förderung': 5000.0},
+                {'Szenario': 'Mit regionaler Förderung', 'NPV': 30000.0, 'IRR': 7.3, 'Amortisation': 11.1, 'Förderung': 2500.0}
             ]
         }
     
@@ -818,17 +819,7 @@ class AdvancedCalculationsIntegrator:
         }
 
     def calculate_lcoe_advanced(self, lcoe_params: Dict[str, Any]) -> Dict[str, Any]:
-        """Erweiterte LCOE-Berechnung mit verschiedenen Szenarien"""
-        base_lcoe = lcoe_params.get('base_lcoe', 0.12)  # EUR/kWh
-        years = list(range(1, 26))
-          # Verschiedene Szenarien für LCOE-Entwicklung
-        scenarios = {
-            'optimistisch': [base_lcoe * (1 - 0.02) ** i for i in years],  # 2% jährliche Reduktion
-            'realistisch': [base_lcoe * (1 - 0.01) ** i for i in years],   # 1% jährliche Reduktion
-            'pessimistisch': [base_lcoe * (1 + 0.005) ** i for i in years]  # 0.5% jährlicher Anstieg
-        }
-        
-        # Erweiterte LCOE-Berechnungen
+        """LCOE-Berechnung (Levelized Cost of Energy)"""
         investment = lcoe_params.get('investment', 20000)
         annual_production = lcoe_params.get('annual_production', 10000)
         lifetime = lcoe_params.get('lifetime', 25)
@@ -836,319 +827,613 @@ class AdvancedCalculationsIntegrator:
         opex_rate = lcoe_params.get('opex_rate', 0.01)
         degradation_rate = lcoe_params.get('degradation_rate', 0.005)
         
-        # Diskontierte LCOE-Berechnung
-        total_discounted_production = 0
+        # Einfache LCOE
+        lcoe_simple = investment / (annual_production * lifetime)
+        
+        # Diskontierte LCOE mit Degradation
+        total_discounted_energy = 0
         total_discounted_costs = investment
+        yearly_lcoe = []
         
         for year in range(1, lifetime + 1):
-            # Jährliche Produktion mit Degradation
+            # Energieproduktion mit Degradation
             yearly_production = annual_production * (1 - degradation_rate) ** (year - 1)
+            discounted_production = yearly_production / (1 + discount_rate) ** year
+            total_discounted_energy += discounted_production
+            
             # Jährliche Betriebskosten
             yearly_opex = investment * opex_rate
+            discounted_opex = yearly_opex / (1 + discount_rate) ** year
+            total_discounted_costs += discounted_opex
             
-            # Diskontierung
-            discount_factor = (1 + discount_rate) ** year
-            total_discounted_production += yearly_production / discount_factor
-            total_discounted_costs += yearly_opex / discount_factor
+            # LCOE für dieses Jahr
+            year_lcoe = total_discounted_costs / total_discounted_energy if total_discounted_energy > 0 else 0
+            yearly_lcoe.append(year_lcoe)
         
-        lcoe_discounted = total_discounted_costs / total_discounted_production
-        grid_price = 0.30  # EUR/kWh
+        lcoe_discounted = total_discounted_costs / total_discounted_energy if total_discounted_energy > 0 else 0
+        
+        # Vergleich mit Netzstrom
+        grid_price = 0.32  # EUR/kWh
+        grid_comparison = lcoe_discounted / grid_price if grid_price > 0 else 0
+        savings_potential = grid_price - lcoe_discounted
         
         return {
-            'years': years,
-            'scenarios': scenarios,
-            'base_lcoe': base_lcoe,
-            'lcoe_simple': base_lcoe,  # Für analysis.py Kompatibilität
-            'lcoe_discounted': lcoe_discounted,  # Diskontierte LCOE
-            'grid_comparison': grid_price / lcoe_discounted,  # Verhältnis zu Netzstrom
-            'savings_potential': grid_price - lcoe_discounted,  # Ersparnis pro kWh
-            'yearly_lcoe': scenarios['realistisch'],  # Für analysis.py Kompatibilität
-            'average_lcoe_25y': sum(scenarios['realistisch']) / len(scenarios['realistisch']),
-            'cost_comparison': {
-                'grid_electricity': [0.30 * (1.03) ** i for i in years],  # 3% Strompreissteigerung
-                'pv_lcoe': scenarios['realistisch']
-            }
+            'lcoe_simple': lcoe_simple,
+            'lcoe_discounted': lcoe_discounted,
+            'yearly_lcoe': yearly_lcoe,
+            'grid_comparison': grid_comparison,
+            'savings_potential': max(0, savings_potential)
         }
 
     def calculate_npv_sensitivity(self, calc_results: Dict[str, Any], discount_rate: float) -> float:
-        """NPV-Berechnung mit verschiedenen Diskontsätzen"""
-        cash_flows = calc_results.get('annual_cash_flows', [1000] * 25)  # Fallback
-        initial_investment = calc_results.get('total_investment', 15000)
+        """NPV-Sensitivitätsanalyse"""
+        investment = calc_results.get('total_investment_netto', 20000)
+        annual_benefit = calc_results.get('annual_financial_benefit_year1', 1500)
+        lifetime = 25
         
-        npv = -initial_investment
-        for i, cash_flow in enumerate(cash_flows):
-            npv += cash_flow / ((1 + discount_rate) ** (i + 1))
+        # NPV berechnen
+        npv = -investment
+        for year in range(1, lifetime + 1):
+            discounted_benefit = annual_benefit / (1 + discount_rate) ** year
+            npv += discounted_benefit
         
         return npv
 
     def calculate_irr_advanced(self, calc_results: Dict[str, Any]) -> Dict[str, Any]:
-        """Erweiterte IRR-Berechnung mit Sensitivitätsanalyse"""
-        cash_flows = calc_results.get('annual_cash_flows', [1000] * 25)
-        initial_investment = calc_results.get('total_investment', 15000)
+        """Erweiterte IRR-Berechnung"""
+        investment = calc_results.get('total_investment_netto', 20000)
+        annual_benefit = calc_results.get('annual_financial_benefit_year1', 1500)
+        lifetime = 25
         
-        # Einfache IRR-Schätzung (vereinfacht)
-        total_returns = sum(cash_flows)
-        irr_estimate = (total_returns / initial_investment) ** (1/25) - 1
+        # Cash Flow generieren
+        cash_flows = [-investment] + [annual_benefit] * lifetime
         
-        # Verschiedene Szenarien
-        scenarios = {
-            'basis': irr_estimate,
-            'optimistisch': irr_estimate * 1.2,
-            'pessimistisch': irr_estimate * 0.8
-        }
+        # IRR iterativ berechnen
+        irr = 0.0
+        try:
+            # Vereinfachte IRR-Berechnung
+            for rate in np.arange(0.01, 0.20, 0.001):
+                npv = sum(cf / (1 + rate) ** i for i, cf in enumerate(cash_flows))
+                if abs(npv) < 100:  # Nahe null
+                    irr = rate
+                    break
+        except:
+            irr = 0.05  # Fallback
         
-        # Basis-Werte für analysis.py Kompatibilität
-        base_irr = irr_estimate * 100  # Convert to percentage
-        base_mirr = irr_estimate * 0.9 * 100  # MIRR ist normalerweise etwas niedriger
-        prof_index = total_returns / initial_investment if initial_investment > 0 else 1.0
+        # MIRR (vereinfacht)
+        finance_rate = 0.04
+        reinvest_rate = 0.03
+        mirr = ((annual_benefit * lifetime / investment) ** (1/lifetime)) - 1
+        
+        # Profitability Index
+        pi = sum(annual_benefit / (1 + 0.04) ** year for year in range(1, lifetime + 1)) / investment
         
         return {
-            'irr_scenarios': scenarios,
-            'base_irr': irr_estimate,
-            'irr': base_irr,  # Für analysis.py Kompatibilität
-            'mirr': base_mirr,  # Für analysis.py Kompatibilität
-            'profitability_index': prof_index,  # Für analysis.py Kompatibilität
-            'irr_sensitivity': {
-                'investment_plus_10': irr_estimate * 0.9,
-                'investment_minus_10': irr_estimate * 1.1,
-                'returns_plus_10': irr_estimate * 1.15,
-                'returns_minus_10': irr_estimate * 0.85
-            }
+            'irr': irr * 100,
+            'mirr': mirr * 100,
+            'profitability_index': pi
         }
 
     def calculate_detailed_energy_flows(self, calc_results: Dict[str, Any]) -> Dict[str, Any]:
-        """Detaillierte Energieflussanalyse"""
-        annual_production = calc_results.get('annual_pv_production_kwh', 8000)
-        annual_consumption = calc_results.get('annual_consumption_kwh', 5000)
+        """Detaillierte Energieflüsse für Sankey-Diagramm"""
+        pv_production = calc_results.get('annual_pv_production_kwh', 10000)
+        total_consumption = calc_results.get('total_consumption_kwh_yr', 4000)
+        direct_consumption = calc_results.get('annual_direct_self_consumption_kwh', 3000)
+        battery_charge = calc_results.get('annual_battery_charge_kwh', 1500)
+        battery_discharge = calc_results.get('annual_battery_discharge_kwh', 1200)
+        grid_feed_in = calc_results.get('annual_feed_in_kwh', 5500)
+        grid_purchase = calc_results.get('annual_grid_purchase_kwh', 1000)
         
-        # Monatliche Aufteilung (vereinfacht)
-        monthly_production = [annual_production / 12 * factor for factor in 
-                            [0.4, 0.6, 0.8, 1.0, 1.3, 1.4, 1.5, 1.3, 1.1, 0.8, 0.5, 0.3]]
-        monthly_consumption = [annual_consumption / 12] * 12
+        # Sankey-Daten
+        sources = [0, 0, 0, 4, 5, 6]  # PV -> Direkt, Batterie, Netz; Batterie -> Verbrauch; Netz -> Verbrauch
+        targets = [1, 2, 3, 6, 6, 6]  # -> Direktverbrauch, Batterieladung, Netzeinspeisung, Hausverbrauch
+        values = [direct_consumption, battery_charge, grid_feed_in, battery_discharge, grid_purchase, direct_consumption]
         
-        direct_consumption = []
-        grid_feed_in = []
-        grid_consumption = []
+        flow_names = [
+            'PV-Erzeugung',
+            'Direktverbrauch', 
+            'Batterieladung',
+            'Netzeinspeisung',
+            'Batterieentladung',
+            'Netzbezug',
+            'Hausverbrauch'
+        ]
         
-        for prod, cons in zip(monthly_production, monthly_consumption):
-            direct = min(prod, cons)
-            feed_in = max(0, prod - cons)
-            grid_cons = max(0, cons - prod)
-            
-            direct_consumption.append(direct)
-            grid_feed_in.append(feed_in)
-            grid_consumption.append(grid_cons)
-        
-        # Sankey-Diagramm Daten
-        total_direct = sum(direct_consumption)
-        total_feed_in = sum(grid_feed_in)
-        total_grid_cons = sum(grid_consumption)
-        battery_charging = annual_production * 0.1  # 10% für Batterieladung
-        battery_discharging = battery_charging * 0.9  # 90% Effizienz
+        flow_values = [pv_production, direct_consumption, battery_charge, grid_feed_in, battery_discharge, grid_purchase, total_consumption]
+        flow_percentages = [v/pv_production*100 if pv_production > 0 else 0 for v in flow_values]
         
         return {
-            'months': ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 
-                      'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
-            'monthly_production': monthly_production,
-            'monthly_consumption': monthly_consumption,
-            'direct_consumption': direct_consumption,
-            'grid_feed_in': grid_feed_in,
-            'grid_consumption': grid_consumption,
-            'self_consumption_rate': (total_direct / annual_production) * 100,
-            'autarky_rate': (total_direct / annual_consumption) * 100,
-            # Für Sankey-Diagramm (analysis.py Kompatibilität)
-            'sources': [0, 0, 0, 4, 5, 1, 2],  # Quell-Nodes
-            'targets': [1, 2, 3, 6, 6, 6, 6],  # Ziel-Nodes
-            'values': [total_direct, battery_charging, total_feed_in, battery_discharging, total_grid_cons, total_direct, battery_discharging],
-            'colors': ['rgba(255,0,0,0.8)', 'rgba(0,255,0,0.8)', 'rgba(0,0,255,0.8)', 'rgba(255,255,0,0.8)', 'rgba(255,0,255,0.8)', 'rgba(0,255,255,0.8)', 'rgba(128,128,128,0.8)'],
-            # Für Energiebilanz-Tabelle
-            'flow_names': ['PV-Produktion', 'Direktverbrauch', 'Netzeinspeisung', 'Netzbezug', 'Batterieladung', 'Batterieentladung'],
-            'flow_values': [annual_production, total_direct, total_feed_in, total_grid_cons, battery_charging, battery_discharging],
-            'flow_percentages': [100, (total_direct/annual_production)*100, (total_feed_in/annual_production)*100, 
-                               (total_grid_cons/annual_consumption)*100, (battery_charging/annual_production)*100, 
-                               (battery_discharging/annual_production)*100]
+            'sources': sources,
+            'targets': targets,
+            'values': values,
+            'colors': ['rgba(255,165,0,0.4)'] * len(values),
+            'flow_names': flow_names,
+            'flow_values': flow_values,
+            'flow_percentages': flow_percentages
         }
 
     def calculate_load_profile_analysis(self, calc_results: Dict[str, Any], project_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Lastprofilanalyse für optimierte Energienutzung"""
-        # Simulierte Lastprofile für verschiedene Haushaltstypen
-        hours = list(range(24))
-        
-        # Basis-Lastprofil (relativer Verbrauch pro Stunde)
-        base_profile = [0.4, 0.3, 0.3, 0.3, 0.4, 0.6, 0.8, 1.0, 0.9, 0.7, 0.6, 0.6,
-                       0.7, 0.8, 0.7, 0.8, 1.2, 1.5, 1.3, 1.1, 0.9, 0.8, 0.6, 0.5]
+        """Lastprofilanalyse"""
+        # Typisches Tageslastprofil
+        consumption_profile = [0.3, 0.25, 0.2, 0.2, 0.25, 0.4, 0.7, 0.9,
+                              1.0, 0.9, 0.8, 0.7, 0.8, 0.7, 0.6, 0.7,
+                              0.9, 1.2, 1.0, 0.8, 0.6, 0.5, 0.4, 0.35]
         
         # PV-Erzeugungsprofil
-        pv_profile = [0, 0, 0, 0, 0, 0.1, 0.3, 0.6, 0.8, 0.9, 1.0, 1.0,
-                     1.0, 1.0, 0.9, 0.8, 0.6, 0.3, 0.1, 0, 0, 0, 0, 0]
+        pv_generation_profile = [0, 0, 0, 0, 0, 0, 0.1, 0.3,
+                                0.6, 0.8, 0.9, 1.0, 1.0, 0.9, 0.8, 0.6,
+                                0.4, 0.2, 0.1, 0, 0, 0, 0, 0]
         
-        # Batterieprofil (Ladung/Entladung)
-        battery_profile = [0, 0, 0, 0, 0, 0.2, 0.5, 0.3, 0.1, 0, -0.1, -0.2,
-                          -0.1, 0, 0.1, 0.2, -0.3, -0.6, -0.4, -0.2, 0, 0, 0, 0]
+        # Batterieprofil (Ladung positiv, Entladung negativ)
+        battery_profile = []
+        for i in range(24):
+            if pv_generation_profile[i] > consumption_profile[i]:
+                battery_profile.append(min(0.5, pv_generation_profile[i] - consumption_profile[i]))
+            else:
+                battery_profile.append(-min(0.3, consumption_profile[i] - pv_generation_profile[i]))
         
-        annual_consumption = calc_results.get('annual_consumption_kwh', 5000)
-        daily_consumption = annual_consumption / 365
-        
-        hourly_consumption = [daily_consumption * factor / sum(base_profile) for factor in base_profile]
-        
-        annual_production = calc_results.get('annual_pv_production_kwh', 8000)
-        daily_production = annual_production / 365
-        hourly_production = [daily_production * factor for factor in pv_profile]
-        
-        # Berechnete Kennzahlen
-        peak_load = max(hourly_consumption)
-        system_kwp = calc_results.get('anlage_kwp', 10.0)
-        simultaneity_factor = peak_load / system_kwp if system_kwp > 0 else 0
-        
-        # Berechne Überschneidung zwischen PV und Verbrauch
-        overlap_hours = sum(1 for i in range(24) if hourly_production[i] > 0 and hourly_consumption[i] > 0)
-        load_coverage = (overlap_hours / 24) * 100
-        grid_relief = min(sum(hourly_production), sum(hourly_consumption)) / sum(hourly_consumption) * 100
+        peak_load = max(consumption_profile)
+        simultaneity_factor = peak_load / (calc_results.get('anlage_kwp', 10) / 10)
+        load_coverage = sum(min(pv_generation_profile[i], consumption_profile[i]) for i in range(24)) / sum(consumption_profile) * 100
+        grid_relief = sum(pv_generation_profile) / sum(consumption_profile) * 100
         
         return {
-            'hours': hours,
-            'hourly_consumption_profile': hourly_consumption,
-            'hourly_production_profile': hourly_production,
-            'consumption_profile': hourly_consumption,  # Alias für analysis.py
-            'pv_generation_profile': hourly_production,  # Alias für analysis.py  
-            'battery_profile': battery_profile,  # Für analysis.py
-            'overlap_hours': overlap_hours,
-            'peak_consumption_hour': hours[hourly_consumption.index(max(hourly_consumption))],
-            'peak_production_hour': hours[hourly_production.index(max(hourly_production))],
-            'optimization_potential': 25.5,  # Prozent Verbesserungspotenzial
-            'peak_load': peak_load,  # Für analysis.py
-            'simultaneity_factor': simultaneity_factor,  # Für analysis.py
-            'load_coverage': load_coverage,  # Für analysis.py
-            'grid_relief': grid_relief  # Für analysis.py
+            'consumption_profile': consumption_profile,
+            'pv_generation_profile': pv_generation_profile,
+            'battery_profile': battery_profile,
+            'peak_load': peak_load,
+            'simultaneity_factor': simultaneity_factor,
+            'load_coverage': min(100, load_coverage),
+            'grid_relief': min(100, grid_relief)
+        }
+
+    def calculate_shading_analysis(self, project_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Verschattungsanalyse"""
+        # Beispiel-Verschattungsmatrix (12 Monate x 13 Stunden)
+        shading_matrix = []
+        for month in range(12):
+            month_data = []
+            for hour in range(6, 19):  # 6:00 bis 18:00
+                # Grundverschattung
+                base_shading = 5  # 5% Grundverschattung
+                
+                # Morgens und abends mehr Verschattung
+                if hour < 9 or hour > 16:
+                    base_shading += 10
+                
+                # Winter mehr Verschattung
+                if month in [0, 1, 10, 11]:
+                    base_shading += 15
+                
+                month_data.append(min(base_shading, 50))
+            shading_matrix.append(month_data)
+        
+        annual_loss = np.mean(shading_matrix)
+        energy_loss_kwh = project_data.get('annual_production', 10000) * annual_loss / 100
+        
+        worst_month_idx = np.argmax([np.mean(month) for month in shading_matrix])
+        worst_month = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][worst_month_idx]
+        worst_month_loss = np.mean(shading_matrix[worst_month_idx])
+        
+        optimization_potential = energy_loss_kwh * 0.3  # 30% durch Optimierung möglich
+        
+        return {
+            'shading_matrix': shading_matrix,
+            'annual_shading_loss': annual_loss,
+            'energy_loss_kwh': energy_loss_kwh,
+            'worst_month': worst_month,
+            'worst_month_loss': worst_month_loss,
+            'optimization_potential': optimization_potential
+        }
+
+    def calculate_temperature_effects(self, calc_results: Dict[str, Any], project_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Temperatureffekte auf die PV-Anlage"""
+        # Typische Umgebungstemperaturen (monatlich)
+        ambient_temps = [2, 4, 8, 13, 18, 21, 23, 22, 18, 13, 7, 3]
+        
+        # Modultemperaturen (ca. 25°C höher bei Sonnenschein)
+        module_temps = [temp + 25 for temp in ambient_temps]
+        
+        # Temperaturkoeffizient für Silizium: -0.4%/°C
+        temp_coefficient = -0.004
+        reference_temp = 25  # °C
+        
+        power_loss_percent = []
+        for temp in module_temps:
+            loss = abs(temp_coefficient * (temp - reference_temp)) * 100
+            power_loss_percent.append(loss)
+        
+        avg_temp_loss = np.mean(power_loss_percent)
+        max_module_temp = max(module_temps)
+        max_temp_delta = max_module_temp - max(ambient_temps)
+        annual_energy_loss = calc_results.get('annual_pv_production_kwh', 10000) * avg_temp_loss / 100
+        
+        return {
+            'ambient_temperatures': ambient_temps,
+            'module_temperatures': module_temps,
+            'power_loss_percent': power_loss_percent,
+            'avg_temp_loss': avg_temp_loss,
+            'max_module_temp': max_module_temp,
+            'max_temp_delta': max_temp_delta,
+            'annual_energy_loss': annual_energy_loss
         }
 
     def calculate_inverter_efficiency(self, calc_results: Dict[str, Any], project_data: Dict[str, Any]) -> Dict[str, Any]:
         """Wechselrichter-Effizienzanalyse"""
-        system_kwp = calc_results.get('anlage_kwp', 10.0)
+        # Typische Wirkungsgradkurve
+        load_percentages = list(range(0, 101, 5))
+        efficiency_curve = []
         
-        # Verschiedene Lastbereiche und deren Effizienz
-        load_percentages = [10, 20, 30, 50, 75, 100]
-        efficiency_curve = [85, 92, 95, 97, 96, 94]  # Typische Effizienzkurve
-        
-        # Erweiterte Effizienzkurve für Plot (0-100% in 5%-Schritten)
-        extended_load_percentages = list(range(0, 101, 5))
-        extended_efficiency_curve = []
-        
-        for load in extended_load_percentages:
-            if load == 0:
+        for load in load_percentages:
+            if load < 5:
                 eff = 0
-            elif load <= 10:
-                eff = 85 * (load / 10)
-            elif load <= 20:
-                eff = 85 + (92 - 85) * ((load - 10) / 10)
-            elif load <= 30:
-                eff = 92 + (95 - 92) * ((load - 20) / 10)
-            elif load <= 50:
-                eff = 95 + (97 - 95) * ((load - 30) / 20)
-            elif load <= 75:
-                eff = 97 + (96 - 97) * ((load - 50) / 25)
-            elif load <= 100:
-                eff = 96 + (94 - 96) * ((load - 75) / 25)
+            elif load < 10:
+                eff = 85 + load * 1.5
+            elif load < 20:
+                eff = 95 + (load - 10) * 0.3
+            elif load < 100:
+                eff = 98 - (load - 20) * 0.025
             else:
-                eff = 94
-            extended_efficiency_curve.append(eff)
+                eff = 96
+            efficiency_curve.append(eff)
         
-        annual_production = calc_results.get('annual_pv_production_kwh', 8000)
-        efficiency_losses = annual_production * 0.03  # 3% Verluste durch Wechselrichter
-        loss_percentage = 3.0
+        # Häufige Betriebspunkte
+        operating_points = [20, 30, 50, 70, 100]
+        operating_efficiencies = [efficiency_curve[int(p/5)] for p in operating_points]
         
-        # Häufige Betriebspunkte (vereinfacht)
-        operating_points = [25, 50, 75]
-        operating_efficiencies = [93, 97, 96]
+        # Gewichtete Wirkungsgrade (korrigierte Indizes und Gewichte)
+        # Euro-Efficiency: 5%, 10%, 20%, 30%, 50%, 100%
+        euro_points = [efficiency_curve[1], efficiency_curve[2], efficiency_curve[4], efficiency_curve[6], efficiency_curve[10], efficiency_curve[20]]
+        euro_efficiency = np.average(euro_points, weights=[0.03, 0.06, 0.13, 0.1, 0.48, 0.2])
         
-        # Gewichtete Wirkungsgrade
-        euro_efficiency = 96.5  # Europäischer Wirkungsgrad
-        cec_efficiency = 96.0   # CEC-Wirkungsgrad
+        # CEC-Efficiency: 10%, 20%, 30%, 50%, 75%, 100%
+        cec_points = [efficiency_curve[2], efficiency_curve[4], efficiency_curve[6], efficiency_curve[10], efficiency_curve[15], efficiency_curve[20]]
+        cec_efficiency = np.average(cec_points, weights=[0.04, 0.05, 0.12, 0.21, 0.53, 0.05])
+        
+        # Verluste
+        annual_production = calc_results.get('annual_pv_production_kwh', 10000)
+        avg_efficiency = np.mean(efficiency_curve[4:21])  # 20-100% Auslastung
+        annual_losses = annual_production * (100 - avg_efficiency) / 100
+        loss_percentage = (100 - avg_efficiency)
+        
+        # Dimensionierung
+        dc_power = calc_results.get('anlage_kwp', 10)
+        ac_power = project_data.get('inverter_power_kw', dc_power * 0.9)
+        sizing_factor = (dc_power / ac_power * 100) if ac_power > 0 else 110
         
         return {
-            'load_percentages': load_percentages,
-            'efficiency_curve': extended_efficiency_curve,  # Erweiterte Kurve für Plot
-            'peak_efficiency': max(efficiency_curve),
-            'average_efficiency': sum(efficiency_curve) / len(efficiency_curve),
-            'annual_efficiency_losses_kwh': efficiency_losses,
-            'efficiency_optimization_potential': efficiency_losses * 0.2,  # 20% könnten optimiert werden
-            'recommended_inverter_size': system_kwp * 0.9,  # Empfohlene Wechselrichtergröße
-            # Für analysis.py Kompatibilität
+            'efficiency_curve': efficiency_curve,
             'operating_points': operating_points,
             'operating_efficiencies': operating_efficiencies,
             'euro_efficiency': euro_efficiency,
             'cec_efficiency': cec_efficiency,
-            'annual_losses': efficiency_losses,
+            'annual_losses': annual_losses,
             'loss_percentage': loss_percentage,
-            'sizing_factor': 90  # DC/AC Verhältnis in Prozent
+            'sizing_factor': sizing_factor
         }
 
-    def run_monte_carlo_simulation(self, calc_results: Dict[str, Any], project_data: Dict[str, Any], 
-                                 iterations: int = 1000) -> Dict[str, Any]:
-        """Monte-Carlo-Simulation für Risikoanalyse"""
-        import random
+    def run_monte_carlo_simulation(self, calc_results: Dict[str, Any], n_simulations: int, confidence_level: int) -> Dict[str, Any]:
+        """Monte-Carlo-Simulation für Risikobewertung"""
+        np.random.seed(42)  # Für reproduzierbare Ergebnisse
         
-        base_npv = calc_results.get('npv', 25000)
-        base_irr = calc_results.get('irr', 0.08)
+        base_investment = calc_results.get('total_investment_netto', 20000)
+        base_annual_benefit = calc_results.get('annual_financial_benefit_year1', 1500)
+        lifetime = 25
         
-        npv_results = []
-        irr_results = []
+        npv_distribution = []
         
-        for _ in range(iterations):
-            # Zufällige Variation verschiedener Parameter
-            production_factor = random.uniform(0.85, 1.15)  # ±15% Produktionsvariation
-            price_factor = random.uniform(0.9, 1.1)        # ±10% Preisvariation
-            degradation_factor = random.uniform(0.95, 1.05) # ±5% Degradationsvariation
+        for _ in range(n_simulations):
+            # Variationen der Parameter (normalverteilt)
+            investment = np.random.normal(base_investment, base_investment * 0.1)
+            annual_benefit = np.random.normal(base_annual_benefit, base_annual_benefit * 0.15)
+            discount_rate = np.random.normal(0.04, 0.01)
             
-            # Simulierte NPV und IRR basierend auf Variationen
-            sim_npv = base_npv * production_factor * price_factor * degradation_factor
-            sim_irr = base_irr * production_factor * price_factor * degradation_factor
+            # NPV berechnen
+            npv = -investment
+            for year in range(1, lifetime + 1):
+                npv += annual_benefit / (1 + discount_rate) ** year
             
-            npv_results.append(sim_npv)
-            irr_results.append(sim_irr)
+            npv_distribution.append(npv)
         
-        npv_results.sort()
-        irr_results.sort()
+        npv_distribution = np.array(npv_distribution)
+        
+        # Statistiken
+        npv_mean = np.mean(npv_distribution)
+        npv_std = np.std(npv_distribution)
+        
+        # Konfidenzintervall
+        alpha = (100 - confidence_level) / 2
+        npv_lower_bound = np.percentile(npv_distribution, alpha)
+        npv_upper_bound = np.percentile(npv_distribution, 100 - alpha)
+        
+        # Value at Risk
+        var_5 = np.percentile(npv_distribution, 5)
+        
+        # Erfolgswahrscheinlichkeit
+        success_probability = (npv_distribution > 0).sum() / n_simulations * 100
+        
+        # Sensitivitätsanalyse (vereinfacht)
+        sensitivity_analysis = [
+            {'parameter': 'Investitionskosten', 'impact': -0.8},
+            {'parameter': 'Jährlicher Nutzen', 'impact': 0.9},
+            {'parameter': 'Diskontierungsrate', 'impact': -0.4},
+            {'parameter': 'Strompreissteigerung', 'impact': 0.6},
+            {'parameter': 'Anlagenlebensdauer', 'impact': 0.3}
+        ]
         
         return {
-            'npv_statistics': {
-                'mean': sum(npv_results) / len(npv_results),
-                'median': npv_results[len(npv_results)//2],
-                'p5': npv_results[int(len(npv_results) * 0.05)],
-                'p95': npv_results[int(len(npv_results) * 0.95)],
-                'std_dev': (sum((x - sum(npv_results)/len(npv_results))**2 for x in npv_results) / len(npv_results))**0.5
+            'npv_distribution': npv_distribution.tolist(),
+            'npv_mean': npv_mean,
+            'npv_std': npv_std,
+            'npv_lower_bound': npv_lower_bound,
+            'npv_upper_bound': npv_upper_bound,
+            'var_5': var_5,
+            'success_probability': success_probability,
+            'sensitivity_analysis': sensitivity_analysis
+        }
+
+    def calculate_subsidy_scenarios(self, calc_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Förderszenarien berechnen"""
+        base_investment = calc_results.get('total_investment_netto', 20000)
+        annual_benefit = calc_results.get('annual_financial_benefit_year1', 1500)
+        years = 25
+        
+        # Verschiedene Förderszenarien
+        scenarios = {
+            'Jahr': list(range(1, years + 1)),
+            'Ohne Förderung': [],
+            'KfW-Kredit (1%)': [],
+            'Zuschuss 10%': [],
+            'Kombination': []
+        }
+        
+        # Cashflow für jedes Szenario berechnen
+        for year in range(1, years + 1):
+            # Ohne Förderung
+            if year == 1:
+                cf_none = -base_investment + annual_benefit
+            else:
+                cf_none = scenarios['Ohne Förderung'][-1] + annual_benefit
+            scenarios['Ohne Förderung'].append(cf_none)
+            
+            # KfW-Kredit (vereinfacht)
+            if year == 1:
+                cf_kfw = -base_investment * 0.2 + annual_benefit - base_investment * 0.8 * 0.01  # 80% Kredit, 1% Zinsen
+            else:
+                cf_kfw = scenarios['KfW-Kredit (1%)'][-1] + annual_benefit - base_investment * 0.8 * 0.01
+            scenarios['KfW-Kredit (1%)'].append(cf_kfw)
+            
+            # 10% Zuschuss
+            if year == 1:
+                cf_grant = -base_investment * 0.9 + annual_benefit
+            else:
+                cf_grant = scenarios['Zuschuss 10%'][-1] + annual_benefit
+            scenarios['Zuschuss 10%'].append(cf_grant)
+            
+            # Kombination
+            if year == 1:
+                cf_combo = -base_investment * 0.8 + annual_benefit - base_investment * 0.7 * 0.005  # 20% Zuschuss + günstiger Kredit
+            else:
+                cf_combo = scenarios['Kombination'][-1] + annual_benefit - base_investment * 0.7 * 0.005
+            scenarios['Kombination'].append(cf_combo)
+        
+        # Vergleichstabelle
+        comparison = [
+            {
+                'Szenario': 'Ohne Förderung',
+                'NPV': float(scenarios['Ohne Förderung'][-1]),
+                'IRR': 5.2,
+                'Amortisation': 13.3,
+                'Förderung': 0.0
             },
-            'irr_statistics': {
-                'mean': sum(irr_results) / len(irr_results),
-                'median': irr_results[len(irr_results)//2],
-                'p5': irr_results[int(len(irr_results) * 0.05)],
-                'p95': irr_results[int(len(irr_results) * 0.95)],
-                'std_dev': (sum((x - sum(irr_results)/len(irr_results))**2 for x in irr_results) / len(irr_results))**0.5
+            {
+                'Szenario': 'KfW-Kredit',
+                'NPV': float(scenarios['KfW-Kredit (1%)'][-1]),
+                'IRR': 7.1,
+                'Amortisation': 11.8,
+                'Förderung': float(base_investment * 0.8 * 0.03)  # Zinsvorteil
             },
-            'risk_metrics': {
-                'probability_positive_npv': sum(1 for x in npv_results if x > 0) / len(npv_results),
-                'probability_irr_above_5': sum(1 for x in irr_results if x > 0.05) / len(irr_results),
-                'value_at_risk_npv': npv_results[int(len(npv_results) * 0.05)]
+            {
+                'Szenario': 'Zuschuss 10%',
+                'NPV': float(scenarios['Zuschuss 10%'][-1]),
+                'IRR': 8.4,
+                'Amortisation': 10.2,
+                'Förderung': float(base_investment * 0.1)
+            },
+            {
+                'Szenario': 'Kombination',
+                'NPV': float(scenarios['Kombination'][-1]),
+                'IRR': 9.8,
+                'Amortisation': 8.9,
+                'Förderung': float(base_investment * 0.2 + base_investment * 0.7 * 0.025)  # Zuschuss + Zinsvorteil
             }
-        }
-
-    def calculate_optimization_impact(self, optimization: Dict[str, Any], calc_results: Dict[str, Any]) -> Dict[str, Any]:
-        """Berechnet den Einfluss von Optimierungsmaßnahmen"""
-        annual_benefit = optimization.get('annual_benefit', 0)
-        investment_cost = optimization.get('investment', 0)
-        
-        # Berechnung über 25 Jahre
-        total_benefit = annual_benefit * 25
-        roi = (total_benefit - investment_cost) / investment_cost if investment_cost > 0 else 0
-        payback_time = investment_cost / annual_benefit if annual_benefit > 0 else float('inf')
+        ]
         
         return {
-            'total_benefit_25y': total_benefit,
-            'roi_percent': roi * 100,
-            'payback_years': payback_time,
-            'npv_improvement': total_benefit - investment_cost,
-            'annual_roi': roi / 25 if roi != float('inf') else 0
+            'scenarios': scenarios,
+            'comparison': comparison
         }
+
+    def calculate_detailed_co2_analysis(self, calc_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Detaillierte CO2-Bilanz"""
+        annual_production = calc_results.get('annual_pv_production_kwh', 10000)
+        system_kwp = calc_results.get('anlage_kwp', 10)
+        years = 25
+        
+        # CO2-Emissionsfaktor Deutschland
+        co2_factor_kg_kwh = 0.474  # kg CO2/kWh
+        
+        # Jährliche CO2-Einsparung
+        annual_co2_savings = annual_production * co2_factor_kg_kwh / 1000  # Tonnen
+        
+        # Kumulative Einsparung
+        years_list = list(range(1, years + 1))
+        cumulative_savings = [annual_co2_savings * year for year in years_list]
+        
+        # CO2 aus Herstellung (ca. 50g CO2/Wp)
+        production_emissions = system_kwp * 1000 * 0.05  # Tonnen
+        
+        # CO2-Amortisation
+        carbon_payback_time = production_emissions / annual_co2_savings if annual_co2_savings > 0 else 99
+        
+        # Gesamte CO2-Einsparung
+        total_co2_savings = annual_co2_savings * years - production_emissions
+        
+        # Äquivalente
+        tree_equivalent = total_co2_savings * 47  # Ein Baum bindet ca. 22kg CO2/Jahr
+        car_km_equivalent = total_co2_savings * 1000 / 0.12  # 120g CO2/km für PKW
+        
+        # Weitere Umweltaspekte
+        primary_energy_saved = annual_production * years * 2.8  # kWh Primärenergie pro kWh Strom
+        water_saved = annual_production * years * 1.2  # Liter Wasser pro kWh
+        so2_avoided = total_co2_savings * 0.474 * 0.001  # kg
+        nox_avoided = total_co2_savings * 0.474 * 0.0008  # kg
+        particulates_avoided = total_co2_savings * 0.474 * 0.00005  # kg
+        
+        return {
+            'years': years_list,
+            'cumulative_savings': cumulative_savings,
+            'production_emissions': production_emissions,
+            'carbon_payback_time': carbon_payback_time,
+            'total_co2_savings': total_co2_savings,
+            'tree_equivalent': tree_equivalent,
+            'car_km_equivalent': car_km_equivalent,
+            'primary_energy_saved': primary_energy_saved,
+            'water_saved': water_saved,
+            'so2_avoided': so2_avoided,
+            'nox_avoided': nox_avoided,
+            'particulates_avoided': particulates_avoided
+        }
+
+    def generate_optimization_suggestions(self, calc_results: Dict[str, Any], project_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Optimierungsvorschläge generieren"""
+        
+        # Identifizierte Potenziale
+        optimization_potentials = [
+            {
+                'title': 'Batteriespeicher erweitern',
+                'description': 'Vergrößerung des Batteriespeichers für höheren Eigenverbrauch',
+                'category': 'Speicher',
+                'implementation_effort': 30,
+                'benefit_potential': 400,
+                'roi_improvement': 1.2,
+                'cost_estimate': 3000
+            },
+            {
+                'title': 'Optimierer installieren',
+                'description': 'Leistungsoptimierer für verschattete Module',
+                'category': 'Technik',
+                'implementation_effort': 50,
+                'benefit_potential': 600,
+                'roi_improvement': 2.1,
+                'cost_estimate': 2000
+            },
+            {
+                'title': 'Warmwasser-Integration',
+                'description': 'Elektrische Warmwasserbereitung für PV-Überschuss',
+                'category': 'Integration',
+                'implementation_effort': 40,
+                'benefit_potential': 300,
+                'roi_improvement': 0.8,
+                'cost_estimate': 1500
+            },
+            {
+                'title': 'Smart Home System',
+                'description': 'Intelligente Laststeuerung für optimalen Verbrauch',
+                'category': 'Automatisierung',
+                'implementation_effort': 60,
+                'benefit_potential': 250,
+                'roi_improvement': 0.6,
+                'cost_estimate': 2500
+            },
+            {
+                'title': 'Ladestation E-Auto',
+                'description': 'Elektroauto-Ladestation für PV-Strom',
+                'category': 'Mobilität',
+                'implementation_effort': 35,
+                'benefit_potential': 800,
+                'roi_improvement': 3.2,
+                'cost_estimate': 1200
+            }
+        ]
+        
+        # Top-Empfehlungen (sortiert nach ROI-Verbesserung)
+        top_recommendations = sorted(optimization_potentials, key=lambda x: x['roi_improvement'], reverse=True)
+        
+        # Zusätzliche Details für Top-Empfehlungen
+        for rec in top_recommendations:
+            rec['annual_benefit'] = rec['benefit_potential']
+            rec['investment'] = rec['cost_estimate']
+            rec['payback'] = rec['investment'] / rec['annual_benefit'] if rec['annual_benefit'] > 0 else 99
+            rec['difficulty'] = 'Einfach' if rec['implementation_effort'] < 40 else 'Mittel' if rec['implementation_effort'] < 60 else 'Komplex'
+        
+        # Systemoptimierung
+        system_optimization = {
+            'optimal_tilt': 30,  # Optimal für Deutschland
+            'optimal_azimuth': 0,  # Süd
+            'optimal_battery_size': 8.0,  # kWh
+            'optimal_dc_ac_ratio': 1.15
+        }
+        
+        return {
+            'optimization_potentials': optimization_potentials,
+            'top_recommendations': top_recommendations,
+            'system_optimization': system_optimization
+        }
+
+    def calculate_optimization_impact(self, calc_results: Dict[str, Any], new_params: Dict[str, Any]) -> Dict[str, Any]:
+        """Berechnet Auswirkungen von Optimierungen"""
+        
+        # Aktuelle Werte
+        current_yield = calc_results.get('annual_pv_production_kwh', 10000)
+        current_self_sufficiency = calc_results.get('self_supply_rate_percent', 65)
+        current_npv = calc_results.get('npv_25_years', 8000)
+        
+        # Neue Parameter
+        new_tilt = new_params.get('tilt', 30)
+        new_azimuth = new_params.get('azimuth', 0)
+        new_battery_size = new_params.get('battery_size', 6.0)
+        new_dc_ac_ratio = new_params.get('dc_ac_ratio', 1.1)
+        
+        # Auswirkungen berechnen (vereinfacht)
+        # Neigung und Ausrichtung
+        tilt_factor = 1.0 - abs(new_tilt - 30) * 0.01  # Optimal bei 30°
+        azimuth_factor = 1.0 - abs(new_azimuth) * 0.005  # Optimal bei 0° (Süd)
+        
+        # DC/AC Verhältnis
+        dc_ac_factor = 1.0 + (new_dc_ac_ratio - 1.1) * 0.1
+        
+        # Batteriegröße
+        battery_factor = min(1.2, 1.0 + (new_battery_size - 6.0) * 0.03)
+        
+        # Neue Werte
+        new_yield = current_yield * tilt_factor * azimuth_factor * dc_ac_factor
+        yield_increase = (new_yield / current_yield - 1) * 100
+        additional_kwh = new_yield - current_yield
+        
+        new_self_sufficiency = min(95, current_self_sufficiency * battery_factor)
+        self_sufficiency_delta = new_self_sufficiency - current_self_sufficiency
+        
+        # NPV-Änderung (grobe Schätzung)
+        additional_investment = (new_battery_size - 6.0) * 500  # 500€ pro kWh
+        additional_annual_benefit = additional_kwh * 0.25  # 25ct/kWh Nutzen
+        npv_delta = additional_annual_benefit * 15 - additional_investment  # Vereinfacht
+        roi_delta = (npv_delta / additional_investment * 100) if additional_investment > 0 else 0
+        
+        payback_change = (additional_investment / additional_annual_benefit) if additional_annual_benefit > 0 else 0
+        
+        return {
+            'yield_increase': yield_increase,
+            'additional_kwh': additional_kwh,
+            'new_self_sufficiency': new_self_sufficiency,
+            'self_sufficiency_delta': self_sufficiency_delta,
+            'npv_delta': npv_delta,
+            'roi_delta': roi_delta,
+            'additional_investment': additional_investment,
+            'payback_change': payback_change
+        }
+
+    # ...existing code...
 def format_kpi_value(value: Any, unit: str = "", na_text_key: str = "data_not_available_short", precision: int = 2, texts_dict: Optional[Dict[str,str]] = None) -> str:
     current_texts = texts_dict if texts_dict is not None else {}
     na_text = current_texts.get(na_text_key, "N/A")
@@ -1704,11 +1989,11 @@ def perform_calculations(
     # if app_debug_mode_is_enabled: print(f"CALC: subtotal_netto (base_matrix + total_additional): {subtotal_netto:.2f}") # Bereinigt
 
     one_time_bonus_eur = float(global_constants.get('one_time_bonus_eur', 0.0) or 0.0)
-    total_investment_netto = subtotal_netto - one_time_bonus_eur    # if one_time_bonus_eur > 0 and app_debug_mode_is_enabled: # Bereinigt
+    total_investment_netto = subtotal_netto - one_time_bonus_eur
+    # if one_time_bonus_eur > 0 and app_debug_mode_is_enabled: # Bereinigt
         # errors_list.append((texts.get("info_one_time_bonus_applied", "Einmaliger Bonus von {bonus:.2f} € wurde von Nettoinvestition abgezogen.") or "").format(bonus=one_time_bonus_eur))
 
     results['total_investment_netto'] = total_investment_netto
-    results['total_investment_cost_netto'] = total_investment_netto  # Alias für PDF-Kompatibilität
     results['vat_rate_percent'] = vat_rate_percent # MwSt.-Satz
     results['total_investment_brutto'] = total_investment_netto * (1 + vat_rate_percent / 100.0)
     # if app_debug_mode_is_enabled: print(f"CALC: Endgültige Kosten: base_matrix={results['base_matrix_price_netto']:.2f}, total_additional={total_additional_costs_netto:.2f}, subtotal_netto={subtotal_netto:.2f}, total_investment_netto={total_investment_netto:.2f}, c={results['total_investment_brutto']:.2f}") # Bereinigt
@@ -2013,18 +2298,13 @@ def perform_calculations(
     ]
     for chart_key_init_final in chart_data_keys_to_ensure:
         results.setdefault(chart_key_init_final, None)
+
+
     # Finale Kennzahlen für die Darstellung
     results['self_supply_rate_percent'] = (eigenverbrauch_pro_jahr_kwh / annual_consumption_kwh_yr * 100) if annual_consumption_kwh_yr > 0 else 0.0
     results['grid_consumption_rate_percent'] = 100.0 - results['self_supply_rate_percent'] # Anteil Netzbezug am Gesamtverbrauch
     results['direktverbrauch_anteil_pv_produktion_pct'] = (sum(monthly_direct_self_consumption_kwh) / annual_pv_production_kwh * 100) if annual_pv_production_kwh > 0 else 0.0
     results['speichernutzung_anteil_pv_produktion_pct'] = (sum(monthly_storage_discharge_for_sc_kwh) / annual_pv_production_kwh * 100) if annual_pv_production_kwh > 0 else 0.0 # Anteil Speichernutzung an PV-Produktion
-
-    # Zusätzliche KPIs für Dashboard
-    results['eigenverbrauch_anteil_an_produktion_percent'] = results['direktverbrauch_anteil_pv_produktion_pct']  # Alias für UI
-    results['einspeisung_anteil_an_produktion_percent'] = (netzeinspeisung_kwh / annual_pv_production_kwh * 100) if annual_pv_production_kwh > 0 else 0.0
-    results['grid_purchase_rate_percent'] = results['grid_consumption_rate_percent']  # Alias für UI
-    results['autarky_rate_percent'] = results['self_supply_rate_percent']  # Alias für UI
-    results['annual_feedin_revenue_euro'] = annual_feed_in_revenue_year1 if 'annual_feed_in_revenue_year1' in locals() else (netzeinspeisung_kwh * results.get('einspeiseverguetung_eur_per_kwh', 0.08))
 
     # Speicherbezogene Kennzahlen
     if include_storage and selected_storage_capacity_kwh > 0:
@@ -2288,7 +2568,6 @@ def calculate_offer_details(customer_id: Optional[int] = None, project_data: Opt
                 'annual_consumption_kwh': 4000,
                 'storage_kwh': 10.0,
                 'location': {'latitude': 50.0, 'longitude': 10.0}
-
             }
         
         # Basis-Berechnungen durchführen
