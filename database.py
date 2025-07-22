@@ -7,7 +7,7 @@ from typing import List, Dict, Any, Optional, Union
 from datetime import datetime
 import io
 
-DB_SCHEMA_VERSION = 13
+DB_SCHEMA_VERSION = 14
 print(f"DATABASE.PY TOP LEVEL: DB_SCHEMA_VERSION ist auf {DB_SCHEMA_VERSION} gesetzt.")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -25,13 +25,13 @@ INITIAL_ADMIN_SETTINGS: Dict[str, Any] = {
     "price_matrix_csv_data": None,
     "feed_in_tariffs": {
         "parts": [
-            {"kwp_min": 0.0, "kwp_max": 10.0, "ct_per_kwh": 8.1},
-            {"kwp_min": 10.01, "kwp_max": 40.0, "ct_per_kwh": 7.0},
-            {"kwp_min": 40.01, "kwp_max": 1000.0, "ct_per_kwh": 5.7}
+            {"kwp_min": 0.0, "kwp_max": 10.0, "ct_per_kwh": 7.94},
+            {"kwp_min": 10.01, "kwp_max": 40.0, "ct_per_kwh": 6.88},
+            {"kwp_min": 40.01, "kwp_max": 100.0, "ct_per_kwh": 5.62}
         ],
         "full": [
-            {"kwp_min": 0.0, "kwp_max": 10.0, "ct_per_kwh": 12.9},
-            {"kwp_min": 10.01, "kwp_max": 100.0, "ct_per_kwh": 10.8}
+            {"kwp_min": 0.0, "kwp_max": 10.0, "ct_per_kwh": 12.60},
+            {"kwp_min": 10.01, "kwp_max": 100.0, "ct_per_kwh": 10.56}
         ]
     },
     "global_constants": {
@@ -618,6 +618,44 @@ def _create_pdf_templates_table_v13(conn: sqlite3.Connection):
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_pdf_templates_type ON pdf_templates (template_type);")
     print("DB Schema v13: Tabelle 'pdf_templates' OK.")
 
+def _create_company_templates_tables_v14(conn: sqlite3.Connection):
+    """Erstellt Tabellen für firmenspezifische Angebotsvorlagen"""
+    cursor = conn.cursor()
+    
+    # Tabelle für firmenspezifische Textvorlagen
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS company_text_templates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            content TEXT,
+            template_type TEXT NOT NULL DEFAULT 'offer_text',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+        );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_company_text_templates_company_id ON company_text_templates (company_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_company_text_templates_type ON company_text_templates (template_type);")
+    
+    # Tabelle für firmenspezifische Bildvorlagen
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS company_image_templates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            template_type TEXT NOT NULL DEFAULT 'title_image',
+            file_path TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+        );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_company_image_templates_company_id ON company_image_templates (company_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_company_image_templates_type ON company_image_templates (template_type);")
+    
+    print("DB Schema v14: Tabellen für firmenspezifische Vorlagen erstellt.")
+
 def _ensure_column_exists(conn: sqlite3.Connection, table_name: str, column_name: str, column_type_for_alter: str, 
                           is_not_null_with_default_for_alter: bool = False, default_value_for_alter: str = "''"):
     cursor = conn.cursor()
@@ -728,6 +766,12 @@ def init_db():
             cursor.execute("UPDATE admin_settings SET value = '13' WHERE key = 'schema_version';")
             conn.commit()
             current_db_version = 13; print("DB: Schema v13 angewendet.")
+
+        if current_db_version < 14:
+            _create_company_templates_tables_v14(conn)
+            cursor.execute("UPDATE admin_settings SET value = '14' WHERE key = 'schema_version';")
+            conn.commit()
+            current_db_version = 14; print("DB: Schema v14 angewendet (Firmenspezifische Angebotsvorlagen).")
 
         if current_db_version == DB_SCHEMA_VERSION: print("DB: Schema ist aktuell.")
         else: print(f"DB WARNUNG: Diskrepanz user_version ({current_db_version}) vs Code ({DB_SCHEMA_VERSION}).")
@@ -1118,6 +1162,254 @@ def add_company_document(company_id: int, display_name: str, document_type: str,
         conn.commit(); return cursor.lastrowid
     except IOError as e_io: print(f"DB: IOError beim Schreiben der Dokumentdatei {absolute_path_on_disk}: {e_io}"); return None
     except sqlite3.Error as e_sql: print(f"DB: SQLite Fehler add_company_document: {e_sql}"); conn.rollback(); return None
+    finally:
+        if conn: conn.close()
+
+# === NEUE FUNKTIONEN FÜR FIRMENSPEZIFISCHE ANGEBOTSVORLAGEN ===
+
+def add_company_text_template(company_id: int, name: str, content: str, template_type: str = "offer_text") -> Optional[int]:
+    """Fügt eine firmenspezifische Textvorlage hinzu"""
+    conn = get_db_connection()
+    if not conn: return None
+    if not name or not name.strip():
+        print("DB FEHLER: name für add_company_text_template darf nicht leer sein.")
+        return None
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO company_text_templates (company_id, name, content, template_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """, (company_id, name.strip(), content or "", template_type))
+        conn.commit()
+        return cursor.lastrowid
+    except sqlite3.Error as e_sql:
+        print(f"DB: SQLite Fehler add_company_text_template: {e_sql}")
+        conn.rollback()
+        return None
+    finally:
+        if conn: conn.close()
+
+def add_company_image_template(company_id: int, name: str, image_data: bytes, template_type: str = "title_image", original_filename: Optional[str] = None) -> Optional[int]:
+    """Fügt eine firmenspezifische Bildvorlage hinzu"""
+    conn = get_db_connection()
+    if not conn: return None
+    if not name or not name.strip():
+        print("DB FEHLER: name für add_company_image_template darf nicht leer sein.")
+        return None
+    
+    # Verzeichnis für firmenspezifische Bilder erstellen
+    company_images_dir = os.path.join(COMPANY_DOCS_BASE_DIR, str(company_id), "images")
+    if not os.path.exists(company_images_dir):
+        try: 
+            os.makedirs(company_images_dir)
+        except OSError as e_mkdir: 
+            print(f"DB: FEHLER Erstellen Verzeichnis {company_images_dir}: {e_mkdir}")
+            return None
+    
+    # Dateiname generieren
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    if original_filename:
+        safe_filename_base = "".join(c if c.isalnum() else "_" for c in os.path.splitext(original_filename)[0])
+        file_extension = os.path.splitext(original_filename)[1]
+    else:
+        safe_filename_base = "image"
+        file_extension = ".png"  # Default
+    
+    final_safe_filename = f"{safe_filename_base}_{timestamp}{file_extension}"
+    relative_path_for_db = os.path.join(str(company_id), "images", final_safe_filename)
+    absolute_path_on_disk = os.path.join(company_images_dir, final_safe_filename)
+    
+    try:
+        # Bild auf Festplatte speichern
+        with open(absolute_path_on_disk, "wb") as f:
+            f.write(image_data)
+        
+        # Datenbankeneintrag
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO company_image_templates (company_id, name, template_type, file_path, created_at, updated_at)
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """, (company_id, name.strip(), template_type, relative_path_for_db))
+        conn.commit()
+        return cursor.lastrowid
+    except IOError as e_io:
+        print(f"DB: IOError beim Schreiben der Bilddatei {absolute_path_on_disk}: {e_io}")
+        return None
+    except sqlite3.Error as e_sql:
+        print(f"DB: SQLite Fehler add_company_image_template: {e_sql}")
+        conn.rollback()
+        return None
+    finally:
+        if conn: conn.close()
+
+def list_company_text_templates(company_id: int, template_type: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Listet alle firmenspezifischen Textvorlagen auf"""
+    conn = get_db_connection()
+    if not conn: return []
+    try:
+        cursor = conn.cursor()
+        if template_type:
+            cursor.execute("""
+                SELECT id, company_id, name, content, template_type, created_at, updated_at 
+                FROM company_text_templates 
+                WHERE company_id = ? AND template_type = ?
+                ORDER BY name COLLATE NOCASE
+            """, (company_id, template_type))
+        else:
+            cursor.execute("""
+                SELECT id, company_id, name, content, template_type, created_at, updated_at 
+                FROM company_text_templates 
+                WHERE company_id = ?
+                ORDER BY template_type, name COLLATE NOCASE
+            """, (company_id,))
+        
+        return [dict(row) for row in cursor.fetchall()]
+    except Exception as e:
+        print(f"DB Fehler list_company_text_templates: {e}")
+        return []
+    finally:
+        if conn: conn.close()
+
+def list_company_image_templates(company_id: int, template_type: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Listet alle firmenspezifischen Bildvorlagen auf"""
+    conn = get_db_connection()
+    if not conn: return []
+    try:
+        cursor = conn.cursor()
+        if template_type:
+            cursor.execute("""
+                SELECT id, company_id, name, template_type, file_path, created_at, updated_at 
+                FROM company_image_templates 
+                WHERE company_id = ? AND template_type = ?
+                ORDER BY name COLLATE NOCASE
+            """, (company_id, template_type))
+        else:
+            cursor.execute("""
+                SELECT id, company_id, name, template_type, file_path, created_at, updated_at 
+                FROM company_image_templates 
+                WHERE company_id = ?
+                ORDER BY template_type, name COLLATE NOCASE
+            """, (company_id,))
+        
+        results = []
+        for row in cursor.fetchall():
+            template_dict = dict(row)
+            # Vollständigen Pfad hinzufügen
+            template_dict['absolute_file_path'] = os.path.join(COMPANY_DOCS_BASE_DIR, template_dict['file_path'])
+            results.append(template_dict)
+        return results
+    except Exception as e:
+        print(f"DB Fehler list_company_image_templates: {e}")
+        return []
+    finally:
+        if conn: conn.close()
+
+def get_company_image_template_data(template_id: int) -> Optional[bytes]:
+    """Lädt die Bilddaten einer firmenspezifischen Vorlage"""
+    conn = get_db_connection()
+    if not conn: return None
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT file_path FROM company_image_templates WHERE id = ?", (template_id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+        
+        file_path = os.path.join(COMPANY_DOCS_BASE_DIR, row['file_path'])
+        if os.path.exists(file_path):
+            with open(file_path, "rb") as f:
+                return f.read()
+        else:
+            print(f"DB WARNUNG: Bilddatei nicht gefunden: {file_path}")
+            return None
+    except Exception as e:
+        print(f"DB Fehler get_company_image_template_data: {e}")
+        return None
+    finally:
+        if conn: conn.close()
+
+def delete_company_text_template(template_id: int) -> bool:
+    """Löscht eine firmenspezifische Textvorlage"""
+    conn = get_db_connection()
+    if not conn: return False
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM company_text_templates WHERE id = ?", (template_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"DB Fehler delete_company_text_template: {e}")
+        conn.rollback()
+        return False
+    finally:
+        if conn: conn.close()
+
+def delete_company_image_template(template_id: int) -> bool:
+    """Löscht eine firmenspezifische Bildvorlage (inkl. Datei)"""
+    conn = get_db_connection()
+    if not conn: return False
+    try:
+        cursor = conn.cursor()
+        # Dateipfad abrufen
+        cursor.execute("SELECT file_path FROM company_image_templates WHERE id = ?", (template_id,))
+        row = cursor.fetchone()
+        if row:
+            file_path = os.path.join(COMPANY_DOCS_BASE_DIR, row['file_path'])
+            # Datei löschen
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except OSError as e_os:
+                    print(f"DB Fehler beim Löschen der Bilddatei {file_path}: {e_os}")
+        
+        # Datenbankeintrag löschen
+        cursor.execute("DELETE FROM company_image_templates WHERE id = ?", (template_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"DB Fehler delete_company_image_template: {e}")
+        conn.rollback()
+        return False
+    finally:
+        if conn: conn.close()
+
+def update_company_text_template(template_id: int, name: str, content: str) -> bool:
+    """Aktualisiert eine firmenspezifische Textvorlage"""
+    conn = get_db_connection()
+    if not conn: return False
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE company_text_templates 
+            SET name = ?, content = ?, updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+        """, (name.strip() if name else "", content or "", template_id))
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"DB Fehler update_company_text_template: {e}")
+        conn.rollback()
+        return False
+    finally:
+        if conn: conn.close()
+
+def update_company_image_template(template_id: int, name: str) -> bool:
+    """Aktualisiert den Namen einer firmenspezifischen Bildvorlage"""
+    conn = get_db_connection()
+    if not conn: return False
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE company_image_templates 
+            SET name = ?, updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+        """, (name.strip() if name else "", template_id))
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"DB Fehler update_company_image_template: {e}")
+        conn.rollback()
+        return False
     finally:
         if conn: conn.close()
 
