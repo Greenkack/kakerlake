@@ -321,85 +321,105 @@ def render_company_crud_tab(
             
             current_company_id_for_docs_crud = st.session_state.editing_company_id 
             st.markdown("---")
-            st.subheader(get_text_local("admin_company_documents_header", "Dokumente für diese Firma verwalten"))
             
-            DOCUMENT_TYPES_AVAILABLE_CRUD = ["AGB", "Datenschutz", "Vollmacht", "SEPA-Mandat", "Freistellungsbescheinigung", "Sonstiges"] 
+            # =================================================================
+            # NEUE TABS FÜR FIRMENSPEZIFISCHE ANGEBOTSVORLAGEN
+            # =================================================================
             
-            form_key_doc_upload_crud = f"company_document_upload_form_crud_{current_company_id_for_docs_crud}_v16_admin_definitiv"
-            with st.form(key=form_key_doc_upload_crud, clear_on_submit=True):
-                st.markdown("**"+get_text_local("admin_upload_new_document_header","Neues Dokument hochladen:")+"**")
-                doc_display_name_upload_crud = st.text_input(
-                    get_text_local("admin_doc_display_name_label", "Anzeigename des Dokuments (z.B. AGB Stand 01/2024)"), 
-                    key=f"doc_disp_name_upload_crud_{current_company_id_for_docs_crud}_v16_admin_definitiv"
-                )
-                doc_type_upload_crud = st.selectbox(
-                    get_text_local("admin_doc_type_label", "Dokumententyp"), 
-                    options=DOCUMENT_TYPES_AVAILABLE_CRUD, 
-                    key=f"doc_type_upload_crud_{current_company_id_for_docs_crud}_v16_admin_definitiv"
-                )
-                uploaded_pdf_file_doc_crud = st.file_uploader(
-                    get_text_local("admin_doc_pdf_upload_label", "PDF-Dokument auswählen (max. 5MB)"), 
-                    type=["pdf"], 
-                    key=f"doc_pdf_upload_crud_{current_company_id_for_docs_crud}_v16_admin_definitiv"
-                )
-                submitted_doc_upload_btn_crud = st.form_submit_button(get_text_local("admin_doc_upload_button", "Dokument hochladen & speichern"))
+            company_tabs = st.tabs([
+                "📄 Dokumente",
+                "📝 Textvorlagen", 
+                "🖼️ Bildvorlagen"
+            ])
+            
+            # Tab 1: Dokumente (bisherige Funktionalität)
+            with company_tabs[0]:
+                st.subheader(get_text_local("admin_company_documents_header", "Dokumente für diese Firma verwalten"))
                 
-                if submitted_doc_upload_btn_crud:
-                    doc_display_name_val_crud = str(doc_display_name_upload_crud).strip() if doc_display_name_upload_crud else ""
-                    if not doc_display_name_val_crud:
-                        st.error(get_text_local("admin_error_doc_display_name_required","Bitte einen Anzeigenamen für das Dokument eingeben."))
-                    elif not uploaded_pdf_file_doc_crud:
-                        st.error(get_text_local("admin_error_doc_file_required","Bitte eine PDF-Datei für das Dokument auswählen."))
-                    elif uploaded_pdf_file_doc_crud.size > 5 * 1024 * 1024: 
-                        st.error(get_text_local("admin_error_doc_file_too_large","Dokument-Datei ist zu groß (max. 5MB)."))
-                    else:
-                        file_bytes_doc_crud = uploaded_pdf_file_doc_crud.getvalue()
-                        original_filename_doc_crud = uploaded_pdf_file_doc_crud.name
-                        doc_id_db_crud = db_add_company_document_func(
-                            current_company_id_for_docs_crud,
-                            doc_display_name_val_crud,
-                            doc_type_upload_crud,
-                            original_filename_doc_crud,
-                            file_bytes_doc_crud
-                        )
-                        if doc_id_db_crud:
-                            st.success(get_text_local("admin_success_doc_uploaded_param","Dokument '{doc_name}' erfolgreich hochgeladen.").format(doc_name=doc_display_name_val_crud))
-                            st.session_state.selected_page_key_sui = "admin" 
-                            st.rerun() 
+                DOCUMENT_TYPES_AVAILABLE_CRUD = ["AGB", "Datenschutz", "Vollmacht", "SEPA-Mandat", "Freistellungsbescheinigung", "Sonstiges"] 
+                
+                form_key_doc_upload_crud = f"company_document_upload_form_crud_{current_company_id_for_docs_crud}_v16_admin_definitiv"
+                with st.form(key=form_key_doc_upload_crud, clear_on_submit=True):
+                    st.markdown("**"+get_text_local("admin_upload_new_document_header","Neues Dokument hochladen:")+"**")
+                    doc_display_name_upload_crud = st.text_input(
+                        get_text_local("admin_doc_display_name_label", "Anzeigename des Dokuments (z.B. AGB Stand 01/2024)"), 
+                        key=f"doc_disp_name_upload_crud_{current_company_id_for_docs_crud}_v16_admin_definitiv"
+                    )
+                    doc_type_upload_crud = st.selectbox(
+                        get_text_local("admin_doc_type_label", "Dokumententyp"), 
+                        options=DOCUMENT_TYPES_AVAILABLE_CRUD, 
+                        key=f"doc_type_upload_crud_{current_company_id_for_docs_crud}_v16_admin_definitiv"
+                    )
+                    uploaded_pdf_file_doc_crud = st.file_uploader(
+                        get_text_local("admin_doc_pdf_upload_label", "PDF-Dokument auswählen (max. 5MB)"), 
+                        type=["pdf"], 
+                        key=f"doc_pdf_upload_crud_{current_company_id_for_docs_crud}_v16_admin_definitiv"
+                    )
+                    submitted_doc_upload_btn_crud = st.form_submit_button(get_text_local("admin_doc_upload_button", "Dokument hochladen & speichern"))
+                    
+                    if submitted_doc_upload_btn_crud:
+                        doc_display_name_val_crud = str(doc_display_name_upload_crud).strip() if doc_display_name_upload_crud else ""
+                        if not doc_display_name_val_crud:
+                            st.error(get_text_local("admin_error_doc_display_name_required","Bitte einen Anzeigenamen für das Dokument eingeben."))
+                        elif not uploaded_pdf_file_doc_crud:
+                            st.error(get_text_local("admin_error_doc_file_required","Bitte eine PDF-Datei für das Dokument auswählen."))
+                        elif uploaded_pdf_file_doc_crud.size > 5 * 1024 * 1024: 
+                            st.error(get_text_local("admin_error_doc_file_too_large","Dokument-Datei ist zu groß (max. 5MB)."))
                         else:
-                            st.error(get_text_local("admin_error_doc_saving_to_db","Fehler beim Speichern des Dokuments in der Datenbank."))
-
-            company_documents_list_crud = db_list_company_documents_func(current_company_id_for_docs_crud, None) 
-            if company_documents_list_crud:
-                st.markdown("**"+get_text_local("admin_existing_documents_header","Vorhandene Dokumente:")+"**")
-                for doc_item_crud in company_documents_list_crud:
-                    doc_id_list_crud = doc_item_crud['id']
-                    cols_doc_display_crud = st.columns([3, 2, 3, 1])
-                    cols_doc_display_crud[0].markdown(f"**{doc_item_crud.get('display_name')}**")
-                    cols_doc_display_crud[1].caption(f"Typ: {doc_item_crud.get('document_type')}")
-                    cols_doc_display_crud[2].caption(f"Datei: {doc_item_crud.get('file_name')}")
-                    
-                    delete_doc_btn_key_list_crud = f"delete_company_doc_btn_crud_{doc_id_list_crud}_v16_admin_definitiv"
-                    confirm_delete_doc_session_key_crud = f"confirm_delete_company_doc_sess_crud_{doc_id_list_crud}_v16_admin_definitiv"
-                    
-                    if cols_doc_display_crud[3].button("🗑️", key=delete_doc_btn_key_list_crud, help="Dokument löschen"):
-                        if st.session_state.get(confirm_delete_doc_session_key_crud, False): 
-                            if db_delete_company_document_func(doc_id_list_crud):
-                                st.success(get_text_local("admin_success_doc_deleted_param","Dokument '{doc_name}' gelöscht.").format(doc_name=doc_item_crud.get('display_name')))
-                                # if confirm_delete_doc_session_key_crud in st.session_state:
-                                #     del st.session_state[confirm_delete_doc_session_key_crud] # Auskommentiert für Robustheit
+                            file_bytes_doc_crud = uploaded_pdf_file_doc_crud.getvalue()
+                            original_filename_doc_crud = uploaded_pdf_file_doc_crud.name
+                            doc_id_db_crud = db_add_company_document_func(
+                                current_company_id_for_docs_crud,
+                                doc_display_name_val_crud,
+                                doc_type_upload_crud,
+                                original_filename_doc_crud,
+                                file_bytes_doc_crud
+                            )
+                            if doc_id_db_crud:
+                                st.success(get_text_local("admin_success_doc_uploaded_param","Dokument '{doc_name}' erfolgreich hochgeladen.").format(doc_name=doc_display_name_val_crud))
                                 st.session_state.selected_page_key_sui = "admin" 
-                                st.rerun()
+                                st.rerun() 
                             else:
-                                st.error(get_text_local("admin_error_deleting_doc_param","Fehler beim Löschen des Dokuments '{doc_name}'.").format(doc_name=doc_item_crud.get('display_name')))
-                        else: 
-                            st.session_state[confirm_delete_doc_session_key_crud] = True
-                            st.warning(get_text_local("admin_warning_confirm_delete_doc_param","Sicher, dass Dokument '{doc_name}' gelöscht werden soll? Erneut 'Löschen' klicken.").format(doc_name=doc_item_crud.get('display_name')))
-                            st.session_state.selected_page_key_sui = "admin" 
-                            st.rerun() 
-                st.markdown("---")
-            else:
-                st.caption(get_text_local("admin_no_documents_for_company_yet","Noch keine Dokumente für diese Firma hochgeladen."))
+                                st.error(get_text_local("admin_error_doc_saving_to_db","Fehler beim Speichern des Dokuments in der Datenbank."))
+
+                company_documents_list_crud = db_list_company_documents_func(current_company_id_for_docs_crud, None) 
+                if company_documents_list_crud:
+                    st.markdown("**"+get_text_local("admin_existing_documents_header","Vorhandene Dokumente:")+"**")
+                    for doc_item_crud in company_documents_list_crud:
+                        doc_id_list_crud = doc_item_crud['id']
+                        cols_doc_display_crud = st.columns([3, 2, 3, 1])
+                        cols_doc_display_crud[0].markdown(f"**{doc_item_crud.get('display_name')}**")
+                        cols_doc_display_crud[1].caption(f"Typ: {doc_item_crud.get('document_type')}")
+                        cols_doc_display_crud[2].caption(f"Datei: {doc_item_crud.get('file_name')}")
+                        
+                        delete_doc_btn_key_list_crud = f"delete_company_doc_btn_crud_{doc_id_list_crud}_v16_admin_definitiv"
+                        confirm_delete_doc_session_key_crud = f"confirm_delete_company_doc_sess_crud_{doc_id_list_crud}_v16_admin_definitiv"
+                        
+                        if cols_doc_display_crud[3].button("🗑️", key=delete_doc_btn_key_list_crud, help="Dokument löschen"):
+                            if st.session_state.get(confirm_delete_doc_session_key_crud, False): 
+                                if db_delete_company_document_func(doc_id_list_crud):
+                                    st.success(get_text_local("admin_success_doc_deleted_param","Dokument '{doc_name}' gelöscht.").format(doc_name=doc_item_crud.get('display_name')))
+                                    # if confirm_delete_doc_session_key_crud in st.session_state:
+                                    #     del st.session_state[confirm_delete_doc_session_key_crud] # Auskommentiert für Robustheit
+                                    st.session_state.selected_page_key_sui = "admin" 
+                                    st.rerun()
+                                else:
+                                    st.error(get_text_local("admin_error_deleting_doc_param","Fehler beim Löschen des Dokuments '{doc_name}'.").format(doc_name=doc_item_crud.get('display_name')))
+                            else: 
+                                st.session_state[confirm_delete_doc_session_key_crud] = True
+                                st.warning(get_text_local("admin_warning_confirm_delete_doc_param","Sicher, dass Dokument '{doc_name}' gelöscht werden soll? Erneut 'Löschen' klicken.").format(doc_name=doc_item_crud.get('display_name')))
+                                st.session_state.selected_page_key_sui = "admin" 
+                                st.rerun() 
+            
+            # Tab 2: Textvorlagen
+            with company_tabs[1]:
+                render_company_text_templates_tab(current_company_id_for_docs_crud)
+            
+            # Tab 3: Bildvorlagen  
+            with company_tabs[2]:
+                render_company_image_templates_tab(current_company_id_for_docs_crud)
+                
+            st.markdown("---")
     
     st.markdown("---")
     st.subheader(get_text_local("admin_existing_companies_header", "Vorhandene Firmen"))
@@ -1445,3 +1465,238 @@ def render_admin_panel(
 #                           Die Funktion `parse_module_price_matrix_excel` wurde als lokale Funktion belassen, da sie spezifisch für das Admin-Panel sein könnte.
 #                           Die Zuweisung von `_parse_price_matrix_excel_func` in `render_admin_panel` wurde beibehalten, um die Übergabe einer externen Funktion zu ermöglichen.
 #                           In `render_company_crud_tab`, `render_product_management` etc. wird `get_text_local` verwendet.
+# 2025-06-21, Gemini Ultra: Firmenspezifische Angebotsvorlagen implementiert - Textvorlagen und Bildvorlagen für Firmen hinzugefügt.
+
+# === NEUE FUNKTIONEN FÜR FIRMENSPEZIFISCHE ANGEBOTSVORLAGEN ===
+
+def render_company_text_templates_tab(company_id: int):
+    """Rendert die Verwaltung für firmenspezifische Textvorlagen"""
+    st.markdown("### 📝 Firmenspezifische Textvorlagen")
+    st.caption("Erstellen Sie individuelle Textbausteine für Angebote dieser Firma.")
+    
+    # Textvorlage hinzufügen
+    with st.expander("➕ Neue Textvorlage erstellen", expanded=False):
+        with st.form(f"add_text_template_{company_id}", clear_on_submit=True):
+            template_name = st.text_input(
+                "Name der Vorlage",
+                placeholder="z.B. Willkommenstext, Beratungstext, Abschlusstext"
+            )
+            
+            template_type = st.selectbox(
+                "Vorlagentyp",
+                options=["offer_text", "cover_letter", "title_text", "footer_text", "custom"],
+                format_func=lambda x: {
+                    "offer_text": "Angebotstext",
+                    "cover_letter": "Anschreiben",
+                    "title_text": "Titel/Überschrift",
+                    "footer_text": "Fußzeile",
+                    "custom": "Benutzerdefiniert"
+                }.get(x, x)
+            )
+            
+            template_content = st.text_area(
+                "Inhalt der Textvorlage",
+                height=150,
+                placeholder="Geben Sie hier den Text ein. Sie können Platzhalter wie {customer_name}, {company_name} verwenden."
+            )
+            
+            if st.form_submit_button("Textvorlage speichern", type="primary"):
+                if not template_name.strip():
+                    st.error("Bitte geben Sie einen Namen für die Vorlage ein.")
+                elif not template_content.strip():
+                    st.error("Bitte geben Sie einen Inhalt für die Vorlage ein.")
+                else:
+                    try:
+                        from database import add_company_text_template
+                        template_id = add_company_text_template(
+                            company_id=company_id,
+                            name=template_name.strip(),
+                            content=template_content.strip(),
+                            template_type=template_type
+                        )
+                        if template_id:
+                            st.success(f"✅ Textvorlage '{template_name}' erfolgreich erstellt!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Fehler beim Speichern der Textvorlage.")
+                    except ImportError:
+                        st.error("❌ Datenbankfunktionen nicht verfügbar.")
+    
+    # Vorhandene Textvorlagen auflisten
+    try:
+        from database import list_company_text_templates, delete_company_text_template, update_company_text_template
+        
+        text_templates = list_company_text_templates(company_id)
+        
+        if text_templates:
+            st.markdown("### 📋 Vorhandene Textvorlagen")
+            
+            for template in text_templates:
+                with st.expander(f"📝 {template['name']} ({template['template_type']})", expanded=False):
+                    col1, col2 = st.columns([3, 1])
+                    
+                    with col1:
+                        # Bearbeitung
+                        with st.form(f"edit_text_template_{template['id']}"):
+                            new_name = st.text_input(
+                                "Name",
+                                value=template['name'],
+                                key=f"text_name_{template['id']}"
+                            )
+                            new_content = st.text_area(
+                                "Inhalt",
+                                value=template['content'] or "",
+                                height=100,
+                                key=f"text_content_{template['id']}"
+                            )
+                            
+                            col_save, col_del = st.columns(2)
+                            
+                            with col_save:
+                                if st.form_submit_button("💾 Speichern"):
+                                    if update_company_text_template(template['id'], new_name, new_content):
+                                        st.success("Textvorlage aktualisiert!")
+                                        st.rerun()
+                                    else:
+                                        st.error("Fehler beim Aktualisieren.")
+                            
+                            with col_del:
+                                if st.form_submit_button("🗑️ Löschen", type="secondary"):
+                                    if delete_company_text_template(template['id']):
+                                        st.success("Textvorlage gelöscht!")
+                                        st.rerun()
+                                    else:
+                                        st.error("Fehler beim Löschen.")
+                    
+                    with col2:
+                        st.markdown("**Vorschau:**")
+                        preview_text = (template['content'] or "")[:200]
+                        if len(template['content'] or "") > 200:
+                            preview_text += "..."
+                        st.caption(preview_text)
+        else:
+            st.info("📝 Noch keine Textvorlagen für diese Firma erstellt.")
+            
+    except ImportError:
+        st.error("❌ Datenbankfunktionen für Textvorlagen nicht verfügbar.")
+
+def render_company_image_templates_tab(company_id: int):
+    """Rendert die Verwaltung für firmenspezifische Bildvorlagen"""
+    st.markdown("### 🖼️ Firmenspezifische Bildvorlagen")
+    st.caption("Laden Sie individuelle Bilder für Angebote dieser Firma hoch (Logos, Referenzbilder, etc.).")
+    
+    # Bildvorlage hinzufügen
+    with st.expander("➕ Neue Bildvorlage hochladen", expanded=False):
+        with st.form(f"add_image_template_{company_id}", clear_on_submit=True):
+            template_name = st.text_input(
+                "Name der Bildvorlage",
+                placeholder="z.B. Firmenlogo groß, Referenzbild Projekt A, Titellogo"
+            )
+            
+            template_type = st.selectbox(
+                "Bildtyp",
+                options=["title_image", "logo", "reference", "background", "custom"],
+                format_func=lambda x: {
+                    "title_image": "Titelbild",
+                    "logo": "Logo/Emblem",
+                    "reference": "Referenzbild",
+                    "background": "Hintergrund",
+                    "custom": "Benutzerdefiniert"
+                }.get(x, x)
+            )
+            
+            uploaded_image = st.file_uploader(
+                "Bild auswählen",
+                type=["png", "jpg", "jpeg", "svg"],
+                help="Unterstützte Formate: PNG, JPG, JPEG, SVG. Empfohlene Größe: 1920x1080 für Titelbilder."
+            )
+            
+            if uploaded_image:
+                st.image(uploaded_image, caption="Vorschau", width=300)
+            
+            if st.form_submit_button("Bildvorlage hochladen", type="primary"):
+                if not template_name.strip():
+                    st.error("Bitte geben Sie einen Namen für die Bildvorlage ein.")
+                elif not uploaded_image:
+                    st.error("Bitte wählen Sie ein Bild aus.")
+                else:
+                    try:
+                        from database import add_company_image_template
+                        
+                        image_bytes = uploaded_image.getvalue()
+                        template_id = add_company_image_template(
+                            company_id=company_id,
+                            name=template_name.strip(),
+                            image_data=image_bytes,
+                            template_type=template_type,
+                            original_filename=uploaded_image.name
+                        )
+                        if template_id:
+                            st.success(f"✅ Bildvorlage '{template_name}' erfolgreich hochgeladen!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Fehler beim Speichern der Bildvorlage.")
+                    except ImportError:
+                        st.error("❌ Datenbankfunktionen nicht verfügbar.")
+    
+    # Vorhandene Bildvorlagen auflisten
+    try:
+        from database import list_company_image_templates, delete_company_image_template, update_company_image_template, get_company_image_template_data
+        import base64
+        
+        image_templates = list_company_image_templates(company_id)
+        
+        if image_templates:
+            st.markdown("### 🖼️ Vorhandene Bildvorlagen")
+            
+            # Galerie-Ansicht
+            cols_per_row = 3
+            for i in range(0, len(image_templates), cols_per_row):
+                cols = st.columns(cols_per_row)
+                
+                for j, template in enumerate(image_templates[i:i+cols_per_row]):
+                    with cols[j]:
+                        st.markdown(f"**{template['name']}**")
+                        st.caption(f"Typ: {template['template_type']}")
+                        
+                        # Bild anzeigen
+                        try:
+                            image_data = get_company_image_template_data(template['id'])
+                            if image_data:
+                                st.image(image_data, width=200)
+                            else:
+                                st.error("Bild nicht gefunden")
+                        except Exception as e:
+                            st.error(f"Fehler beim Laden: {str(e)}")
+                        
+                        # Bearbeitung und Löschung
+                        with st.expander("⚙️ Bearbeiten"):
+                            with st.form(f"edit_image_template_{template['id']}"):
+                                new_name = st.text_input(
+                                    "Name ändern",
+                                    value=template['name'],
+                                    key=f"img_name_{template['id']}"
+                                )
+                                
+                                col_save, col_del = st.columns(2)
+                                
+                                with col_save:
+                                    if st.form_submit_button("💾", help="Speichern"):
+                                        if update_company_image_template(template['id'], new_name):
+                                            st.success("Name aktualisiert!")
+                                            st.rerun()
+                                        else:
+                                            st.error("Fehler beim Aktualisieren.")
+                                
+                                with col_del:
+                                    if st.form_submit_button("🗑️", help="Löschen", type="secondary"):
+                                        if delete_company_image_template(template['id']):
+                                            st.success("Bildvorlage gelöscht!")
+                                            st.rerun()
+                                        else:
+                                            st.error("Fehler beim Löschen.")
+        else:
+            st.info("🖼️ Noch keine Bildvorlagen für diese Firma hochgeladen.")
+            
+    except ImportError:
+        st.error("❌ Datenbankfunktionen für Bildvorlagen nicht verfügbar.")
