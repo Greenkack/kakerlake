@@ -271,6 +271,24 @@ def render_pdf_ui(
             st.session_state.selected_cover_letter_text_content_doc_output = cover_letter_options.get(selected_cover_letter_name, "")
         st.markdown("---")
 
+        # === OPTIONALE MODERNE DESIGN-FEATURES INTEGRATION ===
+        modern_design_config = None
+        try:
+            from doc_output_modern_patch import render_modern_pdf_ui_enhancement
+            modern_design_config = render_modern_pdf_ui_enhancement(
+                texts, project_data, analysis_results, 
+                load_admin_setting_func, save_admin_setting_func,
+                list_products_func, get_product_by_id_func,
+                get_active_company_details_func, db_list_company_documents_func
+            )
+            if modern_design_config:
+                st.session_state.pdf_modern_design_config = modern_design_config
+        except ImportError:
+            pass  # Moderne Features nicht verfügbar
+        except Exception as e:
+            st.warning(f"Moderne Design-Features konnten nicht geladen werden: {e}")
+        # === ENDE MODERNE DESIGN-FEATURES ===
+
         st.markdown("**" + get_text_pdf_ui(texts, "pdf_content_selection_info", "Inhalte für das PDF auswählen") + "**")
         col_pdf_content1, col_pdf_content2, col_pdf_content3 = st.columns(3)
 
@@ -347,9 +365,6 @@ def render_pdf_ui(
                     'yearly_production_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pvvis_yearly", "PV Visuals: Jahresproduktion"),
                     'break_even_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pvvis_breakeven", "PV Visuals: Break-Even"),
                     'amortisation_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pvvis_amort", "PV Visuals: Amortisation"),
-                    'degradation_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_degradation", "Moduldegradation"),
-                    'battery_cycles_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_battery_cycles", "Batteriezyklen"),
-                    'energy_independence_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_energy_independence", "Entwicklung Autarkie"),
                 }
                 available_chart_keys = [k for k in analysis_results.keys() if k.endswith('_chart_bytes') and analysis_results[k] is not None]
                 ordered_display_keys = [k_map for k_map in chart_key_to_friendly_name_map.keys() if k_map in available_chart_keys]
@@ -426,19 +441,69 @@ def render_pdf_ui(
             with st.spinner(get_text_pdf_ui(texts, 'pdf_generation_spinner', 'PDF wird generiert, bitte warten...')):
                 final_inclusion_options_to_pass = st.session_state.pdf_inclusion_options.copy()
                 final_sections_to_include_to_pass = st.session_state.pdf_selected_main_sections[:]
-                pdf_bytes = _generate_offer_pdf_safe(
-                    project_data=project_data, analysis_results=analysis_results,
-                    company_info=company_info_for_pdf, company_logo_base64=company_logo_b64_for_pdf,
-                    selected_title_image_b64=st.session_state.selected_title_image_b64_data_doc_output,
-                    selected_offer_title_text=st.session_state.selected_offer_title_text_content_doc_output,
-                    selected_cover_letter_text=st.session_state.selected_cover_letter_text_content_doc_output,
-                    sections_to_include=final_sections_to_include_to_pass,
-                    inclusion_options=final_inclusion_options_to_pass,
-                    load_admin_setting_func=load_admin_setting_func, save_admin_setting_func=save_admin_setting_func,
-                    list_products_func=list_products_func, get_product_by_id_func=get_product_by_id_func,
-                    db_list_company_documents_func=db_list_company_documents_func,
-                    active_company_id=active_company_id_for_docs, texts=texts
-                )
+                
+                # === MODERNE DESIGN-FEATURES INTEGRATION ===
+                # Füge moderne Design-Konfiguration zu den Angebotsdaten hinzu
+                enhanced_project_data = project_data.copy()
+                if hasattr(st.session_state, 'pdf_modern_design_config') and st.session_state.pdf_modern_design_config:
+                    enhanced_project_data['modern_design_config'] = st.session_state.pdf_modern_design_config
+                    st.info("🎨 Moderne Design-Features werden angewendet...")
+                
+                # Versuche erweiterte PDF-Generierung mit modernem Design
+                pdf_bytes = None
+                try:
+                    from doc_output_modern_patch import enhance_pdf_generation_with_modern_design
+                    
+                    # Erstelle offer_data Dictionary für erweiterte Generierung
+                    offer_data_enhanced = {
+                        'project_data': enhanced_project_data,
+                        'analysis_results': analysis_results,
+                        'company_info': company_info_for_pdf,
+                        'company_logo_base64': company_logo_b64_for_pdf,
+                        'selected_title_image_b64': st.session_state.selected_title_image_b64_data_doc_output,
+                        'selected_offer_title_text': st.session_state.selected_offer_title_text_content_doc_output,
+                        'selected_cover_letter_text': st.session_state.selected_cover_letter_text_content_doc_output,
+                        'sections_to_include': final_sections_to_include_to_pass,
+                        'inclusion_options': final_inclusion_options_to_pass,
+                        'active_company_id': active_company_id_for_docs
+                    }
+                    
+                    # Erweiterte PDF-Generierung versuchen
+                    pdf_bytes = enhance_pdf_generation_with_modern_design(
+                        offer_data=offer_data_enhanced,
+                        texts=texts,
+                        template_name="Professional",
+                        modern_design_config=st.session_state.get('pdf_modern_design_config'),
+                        load_admin_setting_func=load_admin_setting_func,
+                        save_admin_setting_func=save_admin_setting_func,
+                        list_products_func=list_products_func,
+                        get_product_by_id_func=get_product_by_id_func,
+                        db_list_company_documents_func=db_list_company_documents_func
+                    )
+                    
+                    if pdf_bytes:
+                        st.success("✅ PDF mit modernen Design-Features erstellt!")
+                    
+                except ImportError:
+                    pass  # Fallback auf Standard-Generierung
+                except Exception as e:
+                    st.warning(f"Erweiterte PDF-Generierung fehlgeschlagen: {e}. Verwende Standard-Generierung.")
+                
+                # Fallback auf Standard-PDF-Generierung falls erweiterte Generierung fehlgeschlagen
+                if pdf_bytes is None:
+                    pdf_bytes = _generate_offer_pdf_safe(
+                        project_data=enhanced_project_data, analysis_results=analysis_results,
+                        company_info=company_info_for_pdf, company_logo_base64=company_logo_b64_for_pdf,
+                        selected_title_image_b64=st.session_state.selected_title_image_b64_data_doc_output,
+                        selected_offer_title_text=st.session_state.selected_offer_title_text_content_doc_output,
+                        selected_cover_letter_text=st.session_state.selected_cover_letter_text_content_doc_output,
+                        sections_to_include=final_sections_to_include_to_pass,
+                        inclusion_options=final_inclusion_options_to_pass,
+                        load_admin_setting_func=load_admin_setting_func, save_admin_setting_func=save_admin_setting_func,
+                        list_products_func=list_products_func, get_product_by_id_func=get_product_by_id_func,
+                        db_list_company_documents_func=db_list_company_documents_func,
+                        active_company_id=active_company_id_for_docs, texts=texts
+                    )
             st.session_state.generated_pdf_bytes_for_download_v1 = pdf_bytes
         except Exception as e_gen_final_outer:
             st.error(f"{get_text_pdf_ui(texts, 'pdf_generation_exception_outer', 'Kritischer Fehler im PDF-Prozess (pdf_ui.py):')} {e_gen_final_outer}")
