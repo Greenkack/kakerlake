@@ -269,6 +269,30 @@ def render_pdf_ui(
             selected_cover_letter_name = st.selectbox(get_text_pdf_ui(texts, "pdf_select_cover_letter", "Anschreiben auswählen"), options=cover_letter_keys, index=idx_cover_letter, key="pdf_cover_letter_select_v12_form")
             st.session_state.selected_cover_letter_name_doc_output = selected_cover_letter_name
             st.session_state.selected_cover_letter_text_content_doc_output = cover_letter_options.get(selected_cover_letter_name, "")
+            
+            # Template-Vorschau hinzufügen (aus Multi-Generator)
+            with st.expander("👁️ Template-Vorschau", expanded=False):
+                preview_cols = st.columns(3)
+                with preview_cols[0]:
+                    if st.session_state.selected_title_image_b64_data_doc_output:
+                        st.success("✅ Titelbild ausgewählt")
+                    else:
+                        st.info("ℹ️ Kein Titelbild")
+                
+                with preview_cols[1]:
+                    if st.session_state.selected_offer_title_text_content_doc_output:
+                        st.text_area("Titel-Vorschau:", value=st.session_state.selected_offer_title_text_content_doc_output, height=60, disabled=True)
+                    else:
+                        st.info("Standard-Titel wird verwendet")
+                
+                with preview_cols[2]:
+                    if st.session_state.selected_cover_letter_text_content_doc_output:
+                        preview_text = st.session_state.selected_cover_letter_text_content_doc_output
+                        if len(preview_text) > 200:
+                            preview_text = preview_text[:200] + "..."
+                        st.text_area("Anschreiben-Vorschau:", value=preview_text, height=100, disabled=True)
+                    else:
+                        st.info("Standard-Anschreiben wird verwendet")
         st.markdown("---")
 
         # === OPTIONALE MODERNE DESIGN-FEATURES INTEGRATION ===
@@ -334,6 +358,26 @@ def render_pdf_ui(
                 if st.checkbox(section_label_from_map, value=is_section_checked_by_default_col2, key=f"pdf_section_cb_{section_key}_v12_form"):
                     if section_key not in temp_selected_main_sections_ui_col2: temp_selected_main_sections_ui_col2.append(section_key)
             st.session_state.pdf_selected_main_sections = temp_selected_main_sections_ui_col2
+            
+            # Erweiterte Sektions-Vorschau (aus Multi-Generator)
+            if len(temp_selected_main_sections_ui_col2) == 0:
+                st.warning("⚠️ Mindestens eine Sektion muss ausgewählt sein!")
+            else:
+                st.success(f"✅ {len(temp_selected_main_sections_ui_col2)} Sektionen ausgewählt")
+                
+            # Quick-Select Buttons für häufige Kombinationen
+            with st.expander("🚀 Schnellauswahl", expanded=False):
+                if st.button("📊 Basis-Angebot", help="Grundlegende Sektionen für ein einfaches Angebot"):
+                    st.session_state.pdf_selected_main_sections = ["ProjectOverview", "TechnicalComponents", "CostDetails", "Economics"]
+                    st.rerun()
+                
+                if st.button("🎯 Vollständiges Angebot", help="Alle verfügbaren Sektionen"):
+                    st.session_state.pdf_selected_main_sections = list(default_pdf_sections_map.keys())
+                    st.rerun()
+                
+                if st.button("📈 Nur Wirtschaftlichkeit", help="Fokus auf finanzielle Aspekte"):
+                    st.session_state.pdf_selected_main_sections = ["ProjectOverview", "CostDetails", "Economics", "SimulationDetails"]
+                    st.rerun()
 
         with col_pdf_content3:
             st.markdown("**" + get_text_pdf_ui(texts, "pdf_options_column_charts", "Diagramme & Visualisierungen") + "**")
@@ -380,25 +424,201 @@ def render_pdf_ui(
             else:
                 st.caption(get_text_pdf_ui(texts, "pdf_no_charts_to_select", "Keine Diagrammdaten für PDF-Auswahl."))
             st.session_state.pdf_inclusion_options["selected_charts_for_pdf"] = selected_chart_keys_for_pdf_ui_col3
+            
+            # Erweiterte Diagramm-Optionen (aus Multi-Generator)
+            if len(selected_chart_keys_for_pdf_ui_col3) > 0:
+                st.success(f"✅ {len(selected_chart_keys_for_pdf_ui_col3)} Diagramme ausgewählt")
+            else:
+                st.info("ℹ️ Keine Diagramme ausgewählt")
+                
+            # Quick-Select für Diagramme
+            with st.expander("🚀 Diagramm-Schnellauswahl", expanded=False):
+                basic_charts = ['monthly_prod_cons_chart_bytes', 'cost_projection_chart_bytes', 'cumulative_cashflow_chart_bytes']
+                advanced_charts = [k for k in ordered_display_keys if 'switcher' in k][:5]  # Top 5 3D-Charts
+                
+                if st.button("📊 Basis-Diagramme", help="Wichtigste 2D-Diagramme für Standardangebote"):
+                    st.session_state.pdf_inclusion_options["selected_charts_for_pdf"] = [k for k in basic_charts if k in available_chart_keys]
+                    st.rerun()
+                
+                if st.button("🎯 Erweiterte Visualisierungen", help="Auswahl der besten 3D-Visualisierungen"):
+                    st.session_state.pdf_inclusion_options["selected_charts_for_pdf"] = [k for k in advanced_charts if k in available_chart_keys]
+                    st.rerun()
+                
+                if st.button("🎨 Alle verfügbaren", help="Alle vorhandenen Diagramme auswählen"):
+                    st.session_state.pdf_inclusion_options["selected_charts_for_pdf"] = available_chart_keys
+                    st.rerun()
+                
+                if st.button("🚫 Keine Diagramme", help="Alle Diagramme abwählen"):
+                    st.session_state.pdf_inclusion_options["selected_charts_for_pdf"] = []
+                    st.rerun()
 
         st.markdown("---")
-        
-        # PDF-Datenstatus anzeigen
-        if show_pdf_status:
-            st.markdown("### 📊 PDF-Datenstatus")
-            validation_result = display_compact_pdf_data_status(
-                project_data=project_data,
-                analysis_results=analysis_results,
-                company_info=company_info_for_pdf,
-                texts=texts
-            )
-            st.markdown("---")
         
         submitted_generate_pdf = st.form_submit_button(
             f"**{get_text_pdf_ui(texts, 'pdf_generate_button', 'Angebots-PDF erstellen')}**",
             type="primary",
             disabled=submit_button_disabled
         )
+
+    # === ERWEITERTE PROFESSIONAL PDF FEATURES AUSSERHALB DER FORM ===
+    # (Aus dem Professional PDF Bereich migriert)  
+    st.markdown("### 📋 Erweiterte PDF-Abschnitte")
+    
+    # Session State für erweiterte Features initialisieren
+    if 'pdf_extended_features' not in st.session_state:
+        st.session_state.pdf_extended_features = {
+            'executive_summary': True,
+            'enhanced_charts': True,
+            'product_showcase': True,
+            'environmental_section': True,
+            'technical_details': True,
+            'financial_breakdown': True,
+            'page_numbers': True,
+            'background_type': 'none',
+            'wow_features': {
+                'shadows': False,
+                'gradients': True,
+                'rounded_corners': True,
+                'cinematic_transitions': False,
+                'interactive_widgets': False,
+                'ai_layout_optimization': False
+            }
+        }
+    
+    extended_features = st.session_state.pdf_extended_features
+    
+    # Status-Anzeige für Professional PDF Features
+    active_professional_features = []
+    for feature_name, is_active in extended_features.items():
+        if feature_name != 'wow_features' and is_active:
+            active_professional_features.append(feature_name)
+    
+    active_wow_features = [name for name, active in extended_features.get('wow_features', {}).items() if active]
+    
+    # Anzeige der aktivierten Features
+    if active_professional_features or active_wow_features:
+        col_status1, col_status2 = st.columns(2)
+        with col_status1:
+            if active_professional_features:
+                st.success(f"📋 **{len(active_professional_features)} Professional Features aktiv**")
+            else:
+                st.info("📋 Keine Professional Features aktiv")
+        with col_status2:
+            if active_wow_features:
+                st.success(f"🚀 **{len(active_wow_features)} WOW Features aktiv**")
+            else:
+                st.info("🚀 Keine WOW Features aktiv")
+    
+    with st.expander("📋 Professional PDF-Features", expanded=False):
+            prof_col1, prof_col2 = st.columns(2)
+            
+            with prof_col1:
+                st.markdown("**📊 Erweiterte Inhalte:**")
+                extended_features['executive_summary'] = st.checkbox(
+                    "📋 Executive Summary",
+                    value=extended_features.get('executive_summary', True),
+                    help="Professionelle Executive Summary-Seite am Anfang"
+                )
+                
+                extended_features['enhanced_charts'] = st.checkbox(
+                    "📊 Erweiterte Diagramme",
+                    value=extended_features.get('enhanced_charts', True),
+                    help="Moderne Chart-Designs mit besserer Visualisierung"
+                )
+                
+                extended_features['product_showcase'] = st.checkbox(
+                    "🛠️ Moderne Produktpräsentation",
+                    value=extended_features.get('product_showcase', True),
+                    help="Erweiterte Produktdarstellung mit Bildern und Spezifikationen"
+                )
+                
+                extended_features['environmental_section'] = st.checkbox(
+                    "🌍 Umwelt & Nachhaltigkeit",
+                    value=extended_features.get('environmental_section', True),
+                    help="CO₂-Einsparungen und Umwelt-Impact Sektion"
+                )
+            
+            with prof_col2:
+                st.markdown("**⚡ Layout & Design:**")
+                extended_features['technical_details'] = st.checkbox(
+                    "⚡ Erweiterte technische Details",
+                    value=extended_features.get('technical_details', True),
+                    help="Detaillierte technische Spezifikationen mit modernem Layout"
+                )
+                
+                extended_features['financial_breakdown'] = st.checkbox(
+                    "💰 Detaillierte Finanzanalyse",
+                    value=extended_features.get('financial_breakdown', True),
+                    help="Erweiterte Finanzaufschlüsselung mit professionellen Tabellen"
+                )
+                
+                extended_features['page_numbers'] = st.checkbox(
+                    "📄 Seitenzahlen",
+                    value=extended_features.get('page_numbers', True),
+                    help="Professionelle Seitennummerierung"
+                )
+                
+                # Hintergrund-Einstellungen
+                st.markdown("**🎨 Hintergrund:**")
+                extended_features['background_type'] = st.selectbox(
+                    "Hintergrund-Typ:",
+                    ["none", "solid", "gradient", "watermark"],
+                    index=["none", "solid", "gradient", "watermark"].index(extended_features.get('background_type', 'none')),
+                    format_func=lambda x: {
+                        "none": "Kein Hintergrund",
+                        "solid": "Einfarbig", 
+                        "gradient": "Farbverlauf",
+                        "watermark": "Wasserzeichen"
+                    }[x]
+                )
+        
+    # WOW Features (experimentell)
+    with st.expander("🚀 Erweiterte Features (Experimental)", expanded=False):
+        st.markdown("**🌟 Visuelle Verbesserungen:**")
+        
+        wow_col1, wow_col2 = st.columns(2)
+        with wow_col1:
+            extended_features['wow_features']['shadows'] = st.checkbox(
+                "🌟 Schatten-Effekte",
+                value=extended_features['wow_features'].get('shadows', False),
+                help="Fügt professionelle Schatten-Effekte hinzu"
+            )
+            extended_features['wow_features']['gradients'] = st.checkbox(
+                "🌈 Gradient-Effekte",
+                value=extended_features['wow_features'].get('gradients', True),
+                help="Moderne Farbverläufe für bessere Visualisierung"
+            )
+            extended_features['wow_features']['rounded_corners'] = st.checkbox(
+                "🔘 Abgerundete Ecken",
+                value=extended_features['wow_features'].get('rounded_corners', True),
+                help="Moderne abgerundete Ecken für bessere Optik"
+            )
+        
+        with wow_col2:
+            extended_features['wow_features']['cinematic_transitions'] = st.checkbox(
+                "🎬 Kinematische Übergänge",
+                value=extended_features['wow_features'].get('cinematic_transitions', False),
+                help="Professionelle Seitenübergänge (experimentell)"
+            )
+            extended_features['wow_features']['interactive_widgets'] = st.checkbox(
+                "🔗 Interaktive Widgets",
+                value=extended_features['wow_features'].get('interactive_widgets', False),
+                help="Interaktive PDF-Elemente (experimentell)"
+            )
+            extended_features['wow_features']['ai_layout_optimization'] = st.checkbox(
+                "🤖 AI Layout-Optimierung",
+                value=extended_features['wow_features'].get('ai_layout_optimization', False),
+                help="Automatische Layout-Optimierung (experimentell)"
+            )
+        
+        # Aktivierte Features Anzeige
+        active_wow_features = [name for name, active in extended_features['wow_features'].items() if active]
+        if active_wow_features:
+            st.success(f"✅ **{len(active_wow_features)} experimentelle Features aktiv:** {', '.join(active_wow_features)}")
+        else:
+            st.info("💡 Keine experimentellen Features ausgewählt")
+
+    # PDF-Generierung verarbeiten
 
     if submitted_generate_pdf and not st.session_state.pdf_generating_lock_v1:
         st.session_state.pdf_generating_lock_v1 = True 
@@ -441,6 +661,26 @@ def render_pdf_ui(
             with st.spinner(get_text_pdf_ui(texts, 'pdf_generation_spinner', 'PDF wird generiert, bitte warten...')):
                 final_inclusion_options_to_pass = st.session_state.pdf_inclusion_options.copy()
                 final_sections_to_include_to_pass = st.session_state.pdf_selected_main_sections[:]
+                
+                # === ERWEITERTE PROFESSIONAL PDF FEATURES INTEGRATION ===
+                # Füge Professional PDF Features zu inclusion_options hinzu
+                extended_features = st.session_state.get('pdf_extended_features', {})
+                final_inclusion_options_to_pass.update({
+                    'executive_summary': extended_features.get('executive_summary', True),
+                    'enhanced_charts': extended_features.get('enhanced_charts', True),
+                    'product_showcase': extended_features.get('product_showcase', True),
+                    'environmental_section': extended_features.get('environmental_section', True),
+                    'technical_details': extended_features.get('technical_details', True),
+                    'financial_breakdown': extended_features.get('financial_breakdown', True),
+                    'page_numbers': extended_features.get('page_numbers', True),
+                    'background_type': extended_features.get('background_type', 'none'),
+                    'wow_features': extended_features.get('wow_features', {})
+                })
+                
+                # Professional PDF Features Aktivierungsinfo
+                active_prof_features = [name for name, active in extended_features.items() if active and name != 'wow_features']
+                if len(active_prof_features) > 5:  # Wenn viele Features aktiv sind
+                    st.info(f"🚀 Professional PDF Mode: {len(active_prof_features)} erweiterte Features aktiv")
                 
                 # === MODERNE DESIGN-FEATURES INTEGRATION ===
                 # Füge moderne Design-Konfiguration zu den Angebotsdaten hinzu
