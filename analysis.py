@@ -3973,6 +3973,8 @@ def render_financing_analysis(results: Dict[str, Any], texts: Dict[str, str], vi
             # Tilgungsplan anzeigen
             if st.checkbox("Tilgungsplan anzeigen", key='show_amortization_schedule'):
                 tilgungsplan_df = pd.DataFrame(loan_result['tilgungsplan'])
+                # Jahr-Spalte hinzufügen (berechnet aus Monat)
+                tilgungsplan_df['jahr'] = ((tilgungsplan_df['monat'] - 1) // 12) + 1
                 st.dataframe(
                     tilgungsplan_df.head(24),  # Erste 2 Jahre anzeigen
                     use_container_width=True,
