@@ -11,11 +11,12 @@ from typing import Dict, Any, List, Optional, Tuple
 import colorsys
 from dataclasses import dataclass
 import json
+from datetime import datetime
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle, StyleSheet1
 from reportlab.lib.units import cm, mm
-from reportlab.platypus import TableStyle
+from reportlab.platypus import TableStyle, Table
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -35,10 +36,90 @@ DEFAULT_SECONDARY_COLOR_HEX = "#EFEFEF"
 DEFAULT_TEXT_COLOR_HEX = "#2C2C2C"   
 DEFAULT_SEPARATOR_LINE_COLOR_HEX = "#B0B0B0"
 
+# --- AVAILABLE_THEMES für Import-Kompatibilität ---
+AVAILABLE_THEMES = {
+    'modern_blue': {
+        'name': 'Modern Blau',
+        'colors': {
+            'primary': '#1E3A8A',
+            'secondary': '#3B82F6',
+            'accent': '#60A5FA',
+            'background': '#F3F4F6',
+            'text': '#1F2937',
+            'success': '#10B981',
+            'warning': '#F59E0B',
+            'error': '#EF4444'
+        }
+    },
+    'elegant_dark': {
+        'name': 'Elegant Dunkel',
+        'colors': {
+            'primary': '#1F2937',
+            'secondary': '#374151',
+            'accent': '#6366F1',
+            'background': '#111827',
+            'text': '#F9FAFB',
+            'success': '#34D399',
+            'warning': '#FBBF24',
+            'error': '#F87171'
+        }
+    },
+    'eco_green': {
+        'name': 'Öko Grün',
+        'colors': {
+            'primary': '#059669',
+            'secondary': '#10B981',
+            'accent': '#34D399',
+            'background': '#ECFDF5',
+            'text': '#064E3B',
+            'success': '#10B981',
+            'warning': '#F59E0B',
+            'error': '#DC2626'
+        }
+    },
+    'corporate_gray': {
+        'name': 'Corporate Grau',
+        'colors': {
+            'primary': '#374151',
+            'secondary': '#6B7280',
+            'accent': '#3B82F6',
+            'background': '#F9FAFB',
+            'text': '#111827',
+            'success': '#059669',
+            'warning': '#D97706',
+            'error': '#DC2626'
+        }
+    },
+    'solar_orange': {
+        'name': 'Solar Orange',
+        'colors': {
+            'primary': '#EA580C',
+            'secondary': '#F97316',
+            'accent': '#FB923C',
+            'background': '#FFF7ED',
+            'text': '#7C2D12',
+            'success': '#16A34A',
+            'warning': '#F59E0B',
+            'error': '#DC2626'
+        }
+    }
+}
+
 def get_color_palette(primary_hex: str = DEFAULT_PRIMARY_COLOR_HEX,
                       secondary_hex: str = DEFAULT_SECONDARY_COLOR_HEX,
                       text_hex: str = DEFAULT_TEXT_COLOR_HEX,
-                      separator_hex: str = DEFAULT_SEPARATOR_LINE_COLOR_HEX) -> Dict[str, colors.Color]: # Hier war der NameError
+                      separator_hex: str = DEFAULT_SEPARATOR_LINE_COLOR_HEX) -> Dict[str, colors.Color]:
+    """Gibt ein Dictionary mit den Farbobjekten zurück."""
+    return {
+        "primary": colors.HexColor(primary_hex),
+        "secondary": colors.HexColor(secondary_hex),
+        "text": colors.HexColor(text_hex),
+        "separator": colors.HexColor(separator_hex),
+        "white": colors.white,
+        "black": colors.black,
+        "grey": colors.grey,
+        "darkgrey": colors.darkgrey,
+    } # Hier war der NameError
     """Gibt ein Dictionary mit den Farbobjekten zurück."""
     return {
         "primary": colors.HexColor(primary_hex),
@@ -79,8 +160,91 @@ class ColorScheme:
             'warning': self.warning,
             'error': self.error
         }
+class ColorScheme:
+    """Farbschema für PDF-Themes"""
+    primary: str
+    secondary: str
+    accent: str
+    background: str
+    text: str
+    success: str
+    warning: str
+    error: str
+    
+    def to_dict(self) -> Dict[str, str]:
+        return {
+            'primary': self.primary,
+            'secondary': self.secondary,
+            'accent': self.accent,
+            'background': self.background,
+            'text': self.text,
+            'success': self.success,
+            'warning': self.warning,
+            'error': self.error
+        }
 
 class PDFVisualEnhancer:
+    """Erweiterte Visualisierungskomponente für PDFs"""
+    
+    def __init__(self):
+        self.chart_themes = {
+            'modern': {
+                'style': 'seaborn-v0_8-darkgrid',
+                'colors': ['#1E3A8A', '#3B82F6', '#60A5FA', '#93C5FD', '#DBEAFE'],
+                'font_family': 'sans-serif'
+            },
+            'elegant': {
+                'style': 'seaborn-v0_8-whitegrid',
+                'colors': ['#1F2937', '#374151', '#6B7280', '#9CA3AF', '#E5E7EB'],
+                'font_family': 'serif'
+            },
+            'eco': {
+                'style': 'seaborn-v0_8-white',
+                'colors': ['#059669', '#10B981', '#34D399', '#6EE7B7', '#A7F3D0'],
+                'font_family': 'sans-serif'
+            },
+            'vibrant': {
+                'style': 'seaborn-v0_8-dark',
+                'colors': ['#EA580C', '#F97316', '#FB923C', '#FDBA74', '#FED7AA'],
+                'font_family': 'sans-serif'
+            }
+        }
+        
+        self.shape_library = {
+            'rounded_rect': self._draw_rounded_rect,
+            'hexagon': self._draw_hexagon,
+            'circle': self._draw_circle,
+            'diamond': self._draw_diamond,
+            'arrow': self._draw_arrow
+        }
+    
+    def _draw_rounded_rect(self, x, y, width, height, radius=0.1):
+        """Zeichnet ein abgerundetes Rechteck"""
+        return FancyBboxPatch((x, y), width, height,
+                             boxstyle=f"round,pad={radius}",
+                             facecolor='lightblue',
+                             edgecolor='darkblue',
+                             linewidth=2)
+    
+    def _draw_hexagon(self, x, y, size):
+        """Zeichnet ein Hexagon"""
+        angles = np.linspace(0, 2 * np.pi, 7)
+        points = [(x + size * np.cos(a), y + size * np.sin(a)) for a in angles]
+        return plt.Polygon(points, facecolor='lightgreen', edgecolor='darkgreen')
+    
+    def _draw_circle(self, x, y, radius):
+        """Zeichnet einen Kreis"""
+        return Circle((x, y), radius, facecolor='lightcoral', edgecolor='darkred')
+    
+    def _draw_diamond(self, x, y, size):
+        """Zeichnet einen Diamanten"""
+        points = [(x, y + size), (x + size, y), (x, y - size), (x - size, y)]
+        return plt.Polygon(points, facecolor='lightyellow', edgecolor='gold')
+    
+    def _draw_arrow(self, x1, y1, x2, y2):
+        """Zeichnet einen Pfeil"""
+        return plt.annotate('', xy=(x2, y2), xytext=(x1, y1),
+                          arrowprops=dict(arrowstyle='->', lw=2))
     """Erweiterte Visualisierungskomponente für PDFs"""
     
     def __init__(self):
@@ -344,8 +508,32 @@ class PDFThemeManager:
         **kwargs
     ) -> bytes:
         """Erstellt ein erweitertes Diagramm"""
+        # Chart themes für PDFThemeManager
+        chart_themes = {
+            'modern': {
+                'style': 'seaborn-v0_8-darkgrid',
+                'colors': ['#1E3A8A', '#3B82F6', '#60A5FA', '#93C5FD', '#DBEAFE'],
+                'font_family': 'sans-serif'
+            },
+            'elegant': {
+                'style': 'seaborn-v0_8-whitegrid',
+                'colors': ['#1F2937', '#374151', '#6B7280', '#9CA3AF', '#E5E7EB'],
+                'font_family': 'serif'
+            },
+            'eco': {
+                'style': 'seaborn-v0_8-white',
+                'colors': ['#059669', '#10B981', '#34D399', '#6EE7B7', '#A7F3D0'],
+                'font_family': 'sans-serif'
+            },
+            'vibrant': {
+                'style': 'seaborn-v0_8-dark',
+                'colors': ['#EA580C', '#F97316', '#FB923C', '#FDBA74', '#FED7AA'],
+                'font_family': 'sans-serif'
+            }
+        }
+        
         # Theme anwenden
-        theme_config = self.chart_themes.get(theme, self.chart_themes['modern'])
+        theme_config = chart_themes.get(theme, chart_themes['modern'])
         plt.style.use(theme_config['style'])
         
         fig, ax = plt.subplots(figsize=size)
@@ -541,6 +729,105 @@ class PDFThemeManager:
                                facecolor='white', alpha=0.8),
                        fontsize=8)
         
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+    
+    def _create_metric_card(self, ax, value, label, theme_config):
+        """Erstellt eine Metrik-Karte"""
+        ax.axis('off')
+        
+        # Hintergrund
+        rect = Rectangle((0.1, 0.1), 0.8, 0.8, 
+                        facecolor=theme_config['colors'][1], 
+                        alpha=0.3, edgecolor='white', linewidth=2)
+        ax.add_patch(rect)
+        
+        # Wert
+        ax.text(0.5, 0.6, f'{value:.1f}', ha='center', va='center',
+               fontsize=24, fontweight='bold', color=theme_config['colors'][0])
+        
+        # Label
+        ax.text(0.5, 0.3, label, ha='center', va='center',
+               fontsize=10, fontweight='bold')
+        
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+    
+    def _create_progress_ring(self, ax, value, label, theme_config):
+        """Erstellt einen Fortschrittsring"""
+        ax.axis('off')
+        
+        # Hintergrundring
+        circle_bg = Circle((0.5, 0.5), 0.4, facecolor='none', 
+                          edgecolor=theme_config['colors'][4], linewidth=8)
+        ax.add_patch(circle_bg)
+        
+        # Fortschrittsring
+        theta1, theta2 = 0, value / 100 * 360
+        arc = plt.matplotlib.patches.Wedge((0.5, 0.5), 0.4, theta1, theta2,
+                                         width=0.08, 
+                                         facecolor=theme_config['colors'][2])
+        ax.add_patch(arc)
+        
+        # Text
+        ax.text(0.5, 0.5, f'{value:.0f}%', ha='center', va='center',
+               fontsize=16, fontweight='bold')
+        ax.text(0.5, 0.2, label, ha='center', va='center',
+               fontsize=10)
+        
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+    
+    def _create_savings_timeline(self, ax, yearly_savings, theme_config):
+        """Erstellt eine Einsparungs-Timeline"""
+        if not yearly_savings:
+            yearly_savings = [2000, 2100, 2200, 2400, 2600, 2800]
+        
+        years = list(range(1, len(yearly_savings) + 1))
+        
+        # Balkendiagramm
+        bars = ax.bar(years, yearly_savings, color=theme_config['colors'][0], alpha=0.7)
+        
+        # Styling
+        ax.set_xlabel('Jahr', fontweight='bold')
+        ax.set_ylabel('Ersparnis (€)', fontweight='bold')
+        ax.grid(True, alpha=0.3, axis='y')
+        
+        # Werte auf Balken
+        for bar, value in zip(bars, yearly_savings):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height + 50,
+                   f'{value:.0f}€', ha='center', va='bottom', fontsize=8)
+    
+    def _create_summary_box(self, ax, data, theme_config):
+        """Erstellt eine Zusammenfassungsbox"""
+        ax.axis('off')
+        
+        # Hintergrund
+        rect = Rectangle((0.05, 0.05), 0.9, 0.9, 
+                        facecolor=theme_config['colors'][0], 
+                        alpha=0.1, edgecolor=theme_config['colors'][0], linewidth=2)
+        ax.add_patch(rect)
+        
+        # Zusammenfassung Text
+        summary_items = [
+            f"ROI: {data.get('roi_percent', 0):.1f}%",
+            f"CO₂: {data.get('co2_saved', 0):.1f}t",
+            f"Autarkie: {data.get('autarkie', 0):.0f}%",
+            f"Amortisation: {data.get('amortization_years', 8)} Jahre"
+        ]
+        
+        for i, item in enumerate(summary_items):
+            ax.text(0.1, 0.8 - i * 0.15, item, ha='left', va='center',
+                   fontsize=10, fontweight='bold')
+        
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+    
+    def _create_standard_chart(self, ax, chart_type, data, theme_config, **kwargs):
+        """Erstellt ein Standard-Diagramm als Fallback"""
+        ax.text(0.5, 0.5, f'Standard Chart: {chart_type}', 
+               ha='center', va='center', fontsize=14)
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
     
