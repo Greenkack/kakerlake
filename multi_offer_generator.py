@@ -12,8 +12,30 @@ import streamlit as st
 import zipfile
 import io
 import re
-from typing import Dict, List, Any
+import pandas as pd
+import json
+import random
+from typing import Dict, List, Any, Callable, Optional
 import traceback
+
+try:
+    from reportlab.platypus import Table, TableStyle, Paragraph
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib import colors
+except ImportError:
+    # Erstelle Dummy-Klassen, wenn ReportLab nicht installiert ist
+    class Table: 
+        def __init__(self, *args, **kwargs): pass
+        def setStyle(self, *args, **kwargs): pass
+    
+    class TableStyle: 
+        def __init__(self, *args, **kwargs): pass
+        def add(self, *args, **kwargs): pass
+    
+    class Paragraph: 
+        def __init__(self, *args, **kwargs): pass
+    
+    def getSampleStyleSheet(): return {}
 
 try:
     from tqdm import tqdm
@@ -56,7 +78,7 @@ class MultiCompanyOfferGenerator:
         self.customer_data = {}
         self.selected_companies = []
         self.offer_settings = {}
-        self.products = self.load_all_products()
+        self.products = self._load_all_products()
 
     def initialize_session_state(self):
         """Initialisiert Session State"""
@@ -67,34 +89,66 @@ class MultiCompanyOfferGenerator:
         if "multi_offer_settings" not in st.session_state:
             st.session_state.multi_offer_settings = {
                 "module_quantity": 20,
-                "include_storage": True,
+                "include_storage": False,
             }
 
-    def load_all_products(self) -> Dict[str, List[Dict[str, Any]]]:
+    def _load_all_products(self) -> Dict[str, List[Dict[str, Any]]]:
         """Lädt alle Produkte und kategorisiert sie."""
         try:
-            all_products = list_products() if callable(list_products) else []
-            categorized = {"module": [], "inverter": [], "storage": []}
+            from product_db import list_products  # Lokaler Import
+            all_products = list_products()
+            categorized = {"module": [], "inverter": [], "storage": [], "other": []}
             for p in all_products:
                 cat = p.get("category", "Sonstiges").lower()
-                if "modul" in cat:
-                    categorized["module"].append(p)
-                elif "wechselrichter" in cat:
-                    categorized["inverter"].append(p)
-                elif "speicher" in cat or "battery" in cat:
-                    categorized["storage"].append(p)
+                if "modul" in cat: categorized["module"].append(p)
+                elif "wechselrichter" in cat: categorized["inverter"].append(p)
+                elif "speicher" in cat or "battery" in cat: categorized["storage"].append(p)
+                else: categorized["other"].append(p)
             return categorized
         except Exception as e:
             st.warning(f"Konnte Produkte nicht laden: {e}")
-            return {"module": [], "inverter": [], "storage": []}
+            return {"module": [], "inverter": [], "storage": [], "other": []}
 
-    def get_available_companies(self) -> List[Dict[str, Any]]:
-        """Lädt verfügbare Firmen"""
+    def _get_available_companies(self) -> List[Dict[str, Any]]:
+        """Lädt verfügbare Firmen."""
         try:
-            return list_companies() if callable(list_companies) else []
+            from database import list_companies  # Lokaler Import
+            return list_companies()
         except Exception as e:
             st.warning(f"Konnte Firmen nicht laden: {e}")
             return []
+    
+    def get_available_companies(self) -> List[Dict[str, Any]]:
+        """Öffentliche Methode zum Laden verfügbarer Firmen."""
+        return self._get_available_companies()
+            
+    def _generate_single_company_pdf(self, offer_data: Dict, company_info: Dict, company_index: int) -> Optional[bytes]:
+        """Wrapper, der den finalen `generate_offer_pdf` für eine Firma aufruft."""
+        try:
+            from pdf_generator import generate_offer_pdf # Lokaler Import
+            from database import load_admin_setting, save_admin_setting, list_company_documents
+            from product_db import list_products, get_product_by_id
+
+            # Annahme: UI-Einstellungen werden im session_state gehalten
+            settings = st.session_state.get("multi_offer_settings", {})
+            
+            # Hier müssen alle Parameter für generate_offer_pdf bereitgestellt werden
+            # Dies ist eine vereinfachte Version. Sie müssen dies an Ihre finale Funktionssignatur anpassen.
+            pdf_bytes = generate_offer_pdf(
+                project_data=offer_data.get('project_data', {}),
+                analysis_results=offer_data.get('analysis_results', {}),
+                company_info=company_info,
+                texts=self.texts,
+                theme_name=settings.get('theme_name', 'Blau Elegant'),
+                inclusion_options=settings.get('inclusion_options', {}),
+                section_order=settings.get('section_order', []),
+                # ... weitere Parameter ...
+            )
+            return pdf_bytes
+        except Exception as e:
+            st.error(f"Fehler bei PDF-Generierung für {company_info.get('name', 'Unbekannt')}: {e}")
+            traceback.print_exc()
+            return None
 
     def render_customer_input(self):
         """Übernimmt Kundendaten aus der Projekt-/Bedarfsanalyse"""
@@ -168,7 +222,7 @@ class MultiCompanyOfferGenerator:
         """Schritt 2: Firmenauswahl - Vollständig flexibel für 2-20+ Firmen"""
         st.subheader("Schritt 2: Firmen für Angebote auswählen")
         
-        all_companies = self.get_available_companies()
+        all_companies = self._get_available_companies()
         if not all_companies:
             st.warning("Keine Firmen in der Datenbank gefunden. Bitte im Admin-Panel anlegen.")
             return False
@@ -253,7 +307,7 @@ class MultiCompanyOfferGenerator:
         )
         settings["include_storage"] = cols[1].checkbox(
             "Batteriespeicher ins Angebot aufnehmen?",
-            value=settings.get("include_storage", True),
+            value=settings.get("include_storage", False),
         )
           # NEUE FEATURE: Automatische Preisstaffelung
         st.markdown("### 🎯 Automatische Produktrotation & Preisstaffelung")
@@ -438,6 +492,112 @@ class MultiCompanyOfferGenerator:
         
         st.markdown("---")
         
+        # NEUE FEATURE: Template-Auswahl wie bei Einzel-PDF
+        st.markdown("### 🎨 Vorlagen & Design-Auswahl")
+        
+        # Template-Optionen initialisieren falls nicht vorhanden
+        if "template_options" not in settings:
+            settings["template_options"] = {
+                "selected_title_image_b64": None,
+                "selected_offer_title_text": "Ihr individuelles Solaranlagen-Angebot",
+                "selected_cover_letter_text": "Sehr geehrte Damen und Herren,\n\nvielen Dank für Ihr Interesse an nachhaltiger Solarenergie."
+            }
+        
+        template_options = settings["template_options"]
+        
+        # Template-Auswahl in 3 Spalten (wie in doc_output.py)
+        with st.expander("🎨 Vorlagen für alle Angebote auswählen", expanded=False):
+            try:
+                from database import load_admin_setting
+                title_image_templates = load_admin_setting('pdf_title_image_templates', [])
+                offer_title_templates = load_admin_setting('pdf_offer_title_templates', [])
+                cover_letter_templates = load_admin_setting('pdf_cover_letter_templates', [])
+                
+                if not isinstance(title_image_templates, list): title_image_templates = []
+                if not isinstance(offer_title_templates, list): offer_title_templates = []
+                if not isinstance(cover_letter_templates, list): cover_letter_templates = []
+                
+                template_cols = st.columns(3)
+                
+                with template_cols[0]:
+                    st.markdown("**📷 Titelbild auswählen:**")
+                    title_image_options = {t.get('name', f"Bild {i+1}"): t.get('data') for i, t in enumerate(title_image_templates) if isinstance(t,dict) and t.get('name')}
+                    if not title_image_options: 
+                        title_image_options = {"Kein Titelbild verfügbar": None}
+                    
+                    # Aktuellen Index finden
+                    current_title_name = next((name for name, data in title_image_options.items() if data == template_options.get("selected_title_image_b64")), list(title_image_options.keys())[0])
+                    current_title_index = list(title_image_options.keys()).index(current_title_name) if current_title_name in title_image_options else 0
+                    
+                    selected_title_image_name = st.selectbox(
+                        "Titelbild für alle PDFs:", 
+                        options=list(title_image_options.keys()),
+                        index=current_title_index,
+                        key="multi_title_image_select",
+                        help="Dieses Titelbild wird in allen generierten PDFs verwendet"
+                    )
+                    template_options["selected_title_image_b64"] = title_image_options.get(selected_title_image_name)
+                
+                with template_cols[1]:
+                    st.markdown("**📝 Angebotstitel auswählen:**")
+                    offer_title_options = {t.get('name', f"Titel {i+1}"): t.get('content') for i, t in enumerate(offer_title_templates) if isinstance(t,dict) and t.get('name')}
+                    if not offer_title_options: 
+                        offer_title_options = {"Standard Titel": "Ihr individuelles Solaranlagen-Angebot"}
+                    
+                    # Aktuellen Index finden
+                    current_title_text = template_options.get("selected_offer_title_text", "")
+                    current_offer_name = next((name for name, content in offer_title_options.items() if content == current_title_text), list(offer_title_options.keys())[0])
+                    current_offer_index = list(offer_title_options.keys()).index(current_offer_name) if current_offer_name in offer_title_options else 0
+                    
+                    selected_offer_title_name = st.selectbox(
+                        "Angebotstitel für alle PDFs:", 
+                        options=list(offer_title_options.keys()),
+                        index=current_offer_index,
+                        key="multi_offer_title_select",
+                        help="Dieser Titel wird in allen generierten PDFs verwendet"
+                    )
+                    template_options["selected_offer_title_text"] = offer_title_options.get(selected_offer_title_name, "")
+                    
+                    # Vorschau des Titels anzeigen
+                    if template_options["selected_offer_title_text"]:
+                        st.text_area("Titel-Vorschau:", value=template_options["selected_offer_title_text"], height=60, disabled=True)
+                
+                with template_cols[2]:
+                    st.markdown("**📄 Anschreiben auswählen:**")
+                    cover_letter_options = {t.get('name', f"Anschreiben {i+1}"): t.get('content') for i, t in enumerate(cover_letter_templates) if isinstance(t,dict) and t.get('name')}
+                    if not cover_letter_options: 
+                        cover_letter_options = {"Standard Anschreiben": "Sehr geehrte Damen und Herren,\n\nvielen Dank für Ihr Interesse an nachhaltiger Solarenergie."}
+                    
+                    # Aktuellen Index finden
+                    current_letter_text = template_options.get("selected_cover_letter_text", "")
+                    current_letter_name = next((name for name, content in cover_letter_options.items() if content == current_letter_text), list(cover_letter_options.keys())[0])
+                    current_letter_index = list(cover_letter_options.keys()).index(current_letter_name) if current_letter_name in cover_letter_options else 0
+                    
+                    selected_cover_letter_name = st.selectbox(
+                        "Anschreiben für alle PDFs:", 
+                        options=list(cover_letter_options.keys()),
+                        index=current_letter_index,
+                        key="multi_cover_letter_select",
+                        help="Dieses Anschreiben wird in allen generierten PDFs verwendet"
+                    )
+                    template_options["selected_cover_letter_text"] = cover_letter_options.get(selected_cover_letter_name, "")
+                    
+                    # Vorschau des Anschreibens anzeigen
+                    if template_options["selected_cover_letter_text"]:
+                        st.text_area("Anschreiben-Vorschau:", value=template_options["selected_cover_letter_text"][:200] + "..." if len(template_options["selected_cover_letter_text"]) > 200 else template_options["selected_cover_letter_text"], height=100, disabled=True)
+                
+                # Status-Anzeige für Template-Auswahl
+                st.info(f"✅ Templates ausgewählt: Titelbild ({'✓' if template_options['selected_title_image_b64'] else '✗'}), Titel ({'✓' if template_options['selected_offer_title_text'] else '✗'}), Anschreiben ({'✓' if template_options['selected_cover_letter_text'] else '✗'})")
+                        
+            except Exception as e:
+                st.warning(f"Template-Laden fehlgeschlagen: {e}")
+                # Fallback-Werte setzen
+                template_options["selected_title_image_b64"] = None
+                template_options["selected_offer_title_text"] = "Ihr individuelles Solaranlagen-Angebot"
+                template_options["selected_cover_letter_text"] = "Sehr geehrte Damen und Herren,\n\nvielen Dank für Ihr Interesse an nachhaltiger Solarenergie."
+        
+        st.markdown("---")
+        
         # NEUE FEATURE: Erweiterte PDF-Optionen wie bei Einzel-PDF
         st.markdown("### 🎨 PDF-Darstellungsoptionen")
         
@@ -530,28 +690,7 @@ class MultiCompanyOfferGenerator:
     def generate_multi_offers(self):
         """Generiert PDFs für alle ausgewählten Firmen"""
         st.subheader("Schritt 4: PDF-Angebote generieren")
-        if not self.render_customer_input():
-            st.error("Bitte zuerst Kundendaten eingeben oder Projekt-/Bedarfsanalyse durchführen.")
-            return
         
-        if not self.render_company_selection():
-            st.error("Bitte mindestens 2 Firmen auswählen.")
-            return
-        
-        if not self.render_offer_configuration():
-            st.error("Bitte Angebotskonfiguration abschließen.")
-            return
-        
-        # Sicherstellen, dass alle erforderlichen Daten vorhanden sind
-        if not st.session_state.multi_offer_customer_data:
-            st.error("Kundendaten fehlen!")
-            return
-        
-        if not st.session_state.multi_offer_selected_companies:
-            st.error("Keine Firmen ausgewählt!")
-            return
-        
-        # Start der PDF-Generierung
         customer_data = st.session_state.multi_offer_customer_data
         selected_companies = st.session_state.multi_offer_selected_companies
         settings = st.session_state.multi_offer_settings
@@ -589,18 +728,6 @@ class MultiCompanyOfferGenerator:
                         pdf_content = self._generate_company_pdf(offer_data, company, i)
                         
                         if pdf_content:
-                            # Sicherstellen, dass das PDF-Verzeichnis existiert
-                            if not os.path.exists(PDF_OUTPUT_DIRECTORY):
-                                os.makedirs(PDF_OUTPUT_DIRECTORY)
-                            
-                            # PDF speichern
-                            pdf_filename = f"Angebot_{company_name}_{customer_data.get('last_name', 'Kunde')}.pdf"
-                            pdf_path = os.path.join(PDF_OUTPUT_DIRECTORY, pdf_filename)
-                            
-                            with open(pdf_path, "wb") as f:
-                                f.write(pdf_content)
-                            
-                            # PDF in Liste für ZIP-Download aufnehmen
                             generated_pdfs.append({
                                 "company_name": company_name,
                                 "pdf_content": pdf_content,
@@ -971,42 +1098,49 @@ class MultiCompanyOfferGenerator:
                 ])
                 
                 # Charts basierend auf Benutzereinstellungen filtern
-                charts_to_include = available_charts if pdf_options.get("include_charts", True) else []
-                if not pdf_options.get("include_visualizations", True):
+                charts_to_include = available_charts if pdf_options.get("include_charts", False) else []
+                if not pdf_options.get("include_visualizations", False):
                     # Technische Visualisierungen entfernen
                     charts_to_include = [c for c in charts_to_include if not any(
                         vis_key in c for vis_key in ['daily_production', 'weekly_production', 'yearly_production']
                     )]
                 
+                # Erstelle section_order_df aus selected_sections
+                import pandas as pd
+                section_order_df = pd.DataFrame({
+                    "Aktiv": [True] * len(selected_sections),
+                    "Sektion": selected_sections
+                })
+                
+                # NEUE FEATURE: Template-Parameter aus Benutzereinstellungen verwenden
+                template_options = base_settings.get("template_options", {})
+                
                 pdf_content = generate_offer_pdf(
                     project_data=pdf_project_data,  # Korrekt strukturierte Daten
                     analysis_results=calc_results,
                     company_info=company,
-                    company_logo_base64=company.get("logo_base64"),
-                    selected_title_image_b64=None,
-                    selected_offer_title_text=f"Ihr individuelles Solaranlagen-Angebot von {company.get('name', 'Unser Unternehmen')}",
-                    selected_cover_letter_text="Sehr geehrte Damen und Herren,\n\nvielen Dank für Ihr Interesse an nachhaltiger Solarenergie.",
-                    sections_to_include=selected_sections,  # Benutzerdef. Sektionen
+                    company_logo_base64=company.get('logo_base64'),  # Firmen-spezifisches Logo
+                    selected_title_image_b64=template_options.get("selected_title_image_b64"),  # Template-Titelbild
+                    selected_offer_title_text=template_options.get("selected_offer_title_text", f"Ihr individuelles Solaranlagen-Angebot von {company.get('name', 'Unser Unternehmen')}"),  # Template-Titel
+                    selected_cover_letter_text=template_options.get("selected_cover_letter_text", "Sehr geehrte Damen und Herren,\n\nvielen Dank für Ihr Interesse an nachhaltiger Solarenergie."),  # Template-Anschreiben
+                    sections_to_include=selected_sections,  # Benutzer-definierte Sektionen
                     inclusion_options={
                         "include_company_logo": pdf_options.get("include_company_logo", True),
                         "include_product_images": pdf_options.get("include_product_images", True),
                         "include_all_documents": pdf_options.get("include_all_documents", False),
-                        "company_document_ids_to_include": [],
-                        "selected_charts_for_pdf": charts_to_include,  # Gefilterte Charts
+                        "company_document_ids_to_include": [],  # TODO: Firmen-spezifische Dokumente
+                        "selected_charts_for_pdf": charts_to_include,
                         "include_optional_component_details": pdf_options.get("include_optional_component_details", True),
-                        # Templates hinzufügen
-                        "selected_title_image_template": selected_title_image,
-                        "selected_offer_title_template": selected_offer_title,
-                        "selected_cover_letter_template": selected_cover_letter,
-                        "use_templates": True
+                        "include_custom_footer": True,  # Standard Footer
+                        "include_header_logo": True,  # Header Logo
                     },
-                    texts=st.session_state.get("TEXTS", {}),
+                    load_admin_setting_func=load_admin_setting if callable(load_admin_setting) else lambda k, d: d,
+                    save_admin_setting_func=save_admin_setting if callable(save_admin_setting) else lambda k, v: True,
                     list_products_func=list_products if callable(list_products) else lambda: [],
                     get_product_by_id_func=get_product_by_id if callable(get_product_by_id) else lambda x: {},
-                    load_admin_setting_func=load_admin_setting if callable(load_admin_setting) else lambda k, d=None: d,
-                    save_admin_setting_func=save_admin_setting if callable(save_admin_setting) else lambda k, v: None,
                     db_list_company_documents_func=list_company_documents if callable(list_company_documents) else lambda cid, dtype=None: [],
-                    active_company_id=company.get("id", 1)
+                    active_company_id=company.get("id", 1),
+                    texts=st.session_state.get("TEXTS", {})
                 )
                 return pdf_content
             else:
