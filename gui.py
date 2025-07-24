@@ -12,6 +12,7 @@ import streamlit as st
 import sys
 import os
 import json
+from datetime import datetime
 
 # --- BESTEHENDE STRUKTUR ---
 EXTRA = os.path.join(sys.prefix, "extras")
@@ -77,6 +78,7 @@ options_module: Optional[Any] = None
 pv_visuals_module: Optional[Any] = None
 ai_companion_module: Optional[Any] = None
 multi_offer_module: Optional[Any] = None
+pdf_preview_module: Optional[Any] = None
 heatpump_ui_module: Optional[Any] = None
 crm_dashboard_ui_module: Optional[Any] = None
 crm_pipeline_ui_module: Optional[Any] = None
@@ -278,8 +280,12 @@ def main():
     elif selected_page_key == "doc_output":
         st.header(get_text_gui("menu_item_doc_output"))
         
-        # Tabs für PDF-Ausgabe erstellen
-        tab_single_pdf, tab_multi_offers = st.tabs(["📄 Einzelangebot PDF", "🏢 Multi-Firmen-Angebote"])
+        # Tabs für PDF-Ausgabe erstellen - VEREINFACHT (Professional PDF Features sind jetzt in Standard PDF integriert)
+        tab_single_pdf, tab_pdf_preview, tab_multi_offers = st.tabs([
+            "📄 PDF-Ausgabe", 
+            "👁️ PDF-Vorschau", 
+            "🏢 Multi-Firmen-Angebote"
+        ])
         
         with tab_single_pdf:
             if doc_output_module and database_module and product_db_module and callable(getattr(doc_output_module, 'render_pdf_ui', None)):
@@ -308,6 +314,171 @@ def main():
                             st.text_area("Traceback PDF UI:", traceback.format_exc(), height=200)
             else:
                 st.warning(get_text_gui("module_unavailable_details", "PDF-Ausgabemodul oder dessen Abhängigkeiten sind nicht verfügbar."))
+        
+        # === PDF-VORSCHAU TAB ===
+        with tab_pdf_preview:
+            st.subheader("👁️ Live PDF-Vorschau & Bearbeitung")
+            
+            # PDF-Vorschau Modul importieren und verwenden
+            try:
+                from pdf_preview import render_pdf_preview_interface, PDF_PREVIEW_AVAILABLE
+                
+                if not PDF_PREVIEW_AVAILABLE:
+                    st.error("❌ PDF-Vorschau nicht verfügbar")
+                    st.info("💡 Installieren Sie PyMuPDF für die Vorschau-Funktion: `pip install pymupdf`")
+                    
+                    # Fallback: Basis-PDF-Generierung ohne Vorschau
+                    st.markdown("---")
+                    st.markdown("### 📄 Basis-PDF-Generierung (Fallback)")
+                    
+                    project_data_fallback = st.session_state.get('project_data', {})
+                    calc_results_fallback = st.session_state.get("calculation_results", {})
+                    
+                    if not project_data_fallback or not calc_results_fallback:
+                        st.info("ℹ️ Bitte führen Sie zuerst eine Projektanalyse durch.")
+                    else:
+                        if st.button("📥 Standard-PDF generieren"):
+                            with st.spinner("Generiere PDF..."):
+                                # Standard PDF-Generierung
+                                if doc_output_module and callable(getattr(doc_output_module, 'generate_simple_pdf', None)):
+                                    try:
+                                        pdf_bytes = doc_output_module.generate_simple_pdf(
+                                            project_data_fallback, 
+                                            calc_results_fallback
+                                        )
+                                        if pdf_bytes:
+                                            customer_name = project_data_fallback.get('customer_data', {}).get('last_name', 'Unbekannt')
+                                            filename = f"Angebot_{customer_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                                            
+                                            st.download_button(
+                                                label="📥 PDF herunterladen",
+                                                data=pdf_bytes,
+                                                file_name=filename,
+                                                mime="application/pdf"
+                                            )
+                                        else:
+                                            st.error("❌ Fehler bei der PDF-Generierung")
+                                    except Exception as e:
+                                        st.error(f"❌ Fehler: {e}")
+                                else:
+                                    st.error("❌ PDF-Generator nicht verfügbar")
+                else:
+                    # HAUPT-PDF-VORSCHAU-FUNKTIONALITÄT
+                    project_data_preview = st.session_state.get('project_data', {})
+                    calc_results_preview = st.session_state.get("calculation_results", {})
+                    
+                    if not project_data_preview or not calc_results_preview:
+                        st.info("ℹ️ Bitte führen Sie zuerst eine Projektanalyse durch, um die PDF-Vorschau zu nutzen.")
+                        st.markdown("### 🚀 Was bietet die PDF-Vorschau?")
+                        
+                        col_feature1, col_feature2 = st.columns(2)
+                        with col_feature1:
+                            st.markdown("""
+                            **📱 Live-Vorschau Modi:**
+                            - 🏃‍♂️ Schnellvorschau (erste Seiten)
+                            - 📄 Vollständige Vorschau
+                            - 📖 Seitenweise Navigation
+                            
+                            **⚙️ Interaktive Features:**
+                            - 🔄 Automatische Aktualisierung
+                            - 🔍 Zoom-Funktionen
+                            - 💾 Cache für schnellere Vorschau
+                            """)
+                        with col_feature2:
+                            st.markdown("""
+                            **🎨 Bearbeitungsoptionen:**
+                            - 📝 Template-Auswahl
+                            - 🖼️ Logo & Bilder anpassen
+                            - 🎯 Sektionen ein-/ausblenden
+                            
+                            **📊 Integration:**
+                            - 🏢 Firmenspezifische Vorlagen
+                            - 📈 Live-Diagramm-Updates
+                            - 📋 Dokument-Management
+                            """)
+                        
+                        # Demo-Vorschau (statisch)
+                        st.markdown("---")
+                        st.markdown("### 👀 Vorschau-Demo")
+                        
+                        demo_image_placeholder = st.empty()
+                        with demo_image_placeholder:
+                            st.info("🖼️ Hier würde Ihre PDF-Vorschau erscheinen...")
+                            
+                            # Einfacher Platzhalter für die Vorschau
+                            st.markdown("""
+                            ```
+                            ┌─────────────────────────────────────┐
+                            │  🏢 [Ihr Firmenlogo]               │
+                            │                                     │
+                            │  📋 Photovoltaik-Angebot          │
+                            │                                     │
+                            │  👤 Kunde: [Kundenname]           │
+                            │  📅 Datum: [Heute]                │
+                            │                                     │
+                            │  ☀️ Anlagenleistung: XX kWp       │
+                            │  💰 Investition: XX.XXX €         │
+                            │  📊 Ertrag: XX.XXX kWh/Jahr       │
+                            │                                     │
+                            │  📈 [Diagramme und Tabellen]      │
+                            │                                     │
+                            └─────────────────────────────────────┘
+                            ```
+                            """)
+                    else:
+                        # PDF-Vorschau mit echten Daten
+                        try:
+                            active_company = None
+                            if database_module and callable(getattr(database_module, 'get_active_company', None)):
+                                active_company = database_module.get_active_company()
+                            
+                            if not active_company:
+                                st.warning("⚠️ Keine aktive Firma gefunden. Bitte wählen Sie eine Firma im Admin-Panel.")
+                                active_company = {"id": 1, "name": "Standard-Firma"}
+                            
+                            # PDF-Vorschau Interface aufrufen
+                            render_pdf_preview_interface(
+                                project_data=project_data_preview,
+                                analysis_results=calc_results_preview,
+                                company_info=active_company,
+                                texts=TEXTS,
+                                load_admin_setting_func=getattr(database_module, 'load_admin_setting', None),
+                                save_admin_setting_func=getattr(database_module, 'save_admin_setting', None),
+                                list_products_func=getattr(product_db_module, 'list_products', None),
+                                get_product_by_id_func=getattr(product_db_module, 'get_product_by_id', None),
+                                db_list_company_documents_func=getattr(database_module, 'list_company_documents', None),
+                                active_company_id=active_company.get('id')
+                            )
+                            
+                        except Exception as e_preview:
+                            st.error(f"❌ Fehler bei der PDF-Vorschau: {e_preview}")
+                            st.markdown("### 🔧 Fehlerbehebung:")
+                            st.markdown("""
+                            1. **Überprüfen Sie die Module:** Stellen Sie sicher, dass alle PDF-Module geladen sind
+                            2. **Projektdaten:** Führen Sie eine vollständige Projektanalyse durch
+                            3. **Firmeneinstellungen:** Wählen Sie eine aktive Firma im Admin-Panel
+                            4. **Abhängigkeiten:** Installieren Sie `pip install pymupdf pillow`
+                            """)
+                            
+                            if st.checkbox("🔍 Detaillierte Fehlermeldung anzeigen", key="preview_debug"):
+                                st.code(traceback.format_exc())
+                            
+            except ImportError as e_import:
+                st.error(f"❌ PDF-Vorschau-Modul konnte nicht importiert werden: {e_import}")
+                st.info("💡 Überprüfen Sie, ob `pdf_preview.py` vorhanden ist und alle Abhängigkeiten installiert sind.")
+                
+                # Installations-Hilfe
+                st.markdown("### 📦 Installation der Abhängigkeiten:")
+                st.code("""
+                pip install pymupdf
+                pip install pillow
+                pip install reportlab
+                """)
+                
+            except Exception as e_general:
+                st.error(f"❌ Unerwarteter Fehler im PDF-Vorschau-Tab: {e_general}")
+                if st.checkbox("🔍 Debug-Informationen anzeigen", key="preview_general_debug"):
+                    st.code(traceback.format_exc())
         
         with tab_multi_offers:
             st.subheader("🏢 Multi-Firmen-Angebotsgenerator")
@@ -407,6 +578,7 @@ if __name__ == "__main__":
         pv_visuals_module = import_module_with_fallback("pv_visuals", import_errors)
         ai_companion_module = import_module_with_fallback("ai_companion", import_errors)
         multi_offer_module = import_module_with_fallback("multi_offer_generator", import_errors)
+        pdf_preview_module = import_module_with_fallback("pdf_preview", import_errors)
         crm_calendar_ui_module = import_module_with_fallback("crm_calendar_ui", import_errors)
         crm_pipeline_ui_module = import_module_with_fallback("crm_pipeline_ui", import_errors)
         crm_dashboard_ui_module = import_module_with_fallback("crm_dashboard_ui", import_errors)
