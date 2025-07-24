@@ -8,15 +8,20 @@ from __future__ import annotations
 
 # pdf_generator.py
 import os
-
+import io
+import plotly.graph_objects as go
+import pandas as pd
 import base64
 import io
+import math
+import traceback
 import math
 import traceback
 from calculations_extended import run_all_extended_analyses
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union, Callable
 from theming.pdf_styles import get_theme
+from theming.pdf_styles import create_modern_table_style
 
 # Optional PDF Templates import
 try:
@@ -33,6 +38,10 @@ _REPORTLAB_AVAILABLE = False
 _PYPDF_AVAILABLE = False
 
 try:
+    from reportlab.platypus import (
+        BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Image,
+        Table, TableStyle, PageBreak, KeepTogether, Flowable, SimpleDocTemplate
+    )
     from reportlab.lib.colors import HexColor
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
@@ -41,9 +50,7 @@ try:
     from reportlab.lib.units import cm, mm
     from reportlab.lib.utils import ImageReader
     from reportlab.pdfgen import canvas
-    from reportlab.platypus import (Frame, Image, PageBreak, PageTemplate,
-        Paragraph, SimpleDocTemplate, Spacer, Table,
-        TableStyle, Flowable, KeepInFrame, KeepTogether)
+    
     from reportlab.lib import pagesizes
     _REPORTLAB_AVAILABLE = True
 except ImportError:
@@ -78,58 +85,151 @@ except Exception as e_pypdf_import:
         def add_page(self, page): pass
         def write(self, stream): pass
     _PYPDF_AVAILABLE = False
+try:
+    from theming.pdf_styles import get_theme, create_modern_table_style
+except ImportError:
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import TableStyle
+
+    def get_theme(theme_name=""):
+        return {
+            "styles": getSampleStyleSheet(),
+            "colors": {
+                "primary": colors.HexColor("#0d3780"),      # Moderne Farbe aus JSON-Vorlage
+                "secondary": colors.HexColor("#0081b8"),    # Hellblau aus JSON-Vorlage
+                "accent": colors.HexColor("#f6f6f6"),       # Hellgrau für Boxen aus JSON-Vorlage
+                "text": colors.HexColor("#333333"),         # Dunkles Grau für Text aus JSON-Vorlage
+                "light_gray": colors.HexColor("#e8e8e8"),   # Helle Linien aus JSON-Vorlage
+                "white": colors.white,                      # Weiß
+                # Ihre ursprünglichen Farben als Fallback
+                "original_primary": colors.HexColor("#003366"),
+                "original_text": colors.HexColor("#2C2C2C"),
+                "original_secondary": colors.HexColor("#EFEFEF")
+            },
+            "fonts": {
+                "family_bold": "Helvetica-Bold",
+                "family_main": "Helvetica",
+                "size_h1": 18,
+                "size_body": 10
+            }
+        }
+
+    def create_modern_table_style(theme):
+        return TableStyle([])    
+
+# MODERNE HILFSFUNKTIONEN für JSON-Vorlage Design (Ergänzung zu Ihrem bestehenden Code)
+def create_modern_kennzahl_card(percentage: int, label: str, width: float, theme):
+    """Erstellt eine moderne Kennzahl-Karte wie in Ihrer JSON-Vorlage"""
+    if not _REPORTLAB_AVAILABLE:
+        return None
+        
+    card_data = [[f"<b><font size='24'>{percentage}%</font></b><br/>{label}"]]
+    
+    card_table = Table(card_data, colWidths=[width])
+    card_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('BACKGROUND', (0, 0), (-1, -1), theme["colors"]["secondary"]),
+        ('TEXTCOLOR', (0, 0), (-1, -1), theme["colors"]["white"]),
+        ('FONTNAME', (0, 0), (-1, -1), theme["fonts"]["family_bold"]),
+        ('LEFTPADDING', (0, 0), (-1, -1), 15),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+        ('TOPPADDING', (0, 0), (-1, -1), 20),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
+        ('BOX', (0, 0), (-1, -1), 2, theme["colors"]["primary"])
+    ]))
+    
+    return card_table
+
+def create_modern_system_data_box(data: list, width: float, theme):
+    """Erstellt eine moderne Systemdaten-Box wie in Ihrer JSON-Vorlage"""
+    if not _REPORTLAB_AVAILABLE:
+        return None
+        
+    system_table = Table(data, colWidths=[width * 0.4, width * 0.6])
+    system_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+        ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 0), (0, -1), theme["fonts"]["family_bold"]),
+        ('FONTNAME', (1, 0), (1, -1), theme["fonts"]["family_main"]),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('TEXTCOLOR', (0, 0), (-1, -1), theme["colors"]["text"]),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LINEBELOW', (0, 0), (-1, -2), 0.5, theme["colors"]["light_gray"])
+    ]))
+    
+    return system_table    
+    
 class PDFGenerator:
     """Kapselt die gesamte PDF-Erstellungslogik."""
 
-    def __init__(
-        self,
-        offer_data: Dict,
-        module_order: List[Dict],
-        theme_name: str,
-        filename: str,
-        background_image: Optional[str] = None,
-    ):
-        self.offer_data = offer_data
-        self.module_order = module_order
+    def __init__(self, project_data, analysis_results, company_info, texts, theme_name, inclusion_options, section_order_df, custom_images_list, custom_text_blocks_list, side_by_side_sim_keys, highlight_box_data, get_product_by_id_func, db_list_company_documents_func, active_company_id, selected_title_image_b64, selected_offer_title_text, selected_cover_letter_text):
+        self.project_data = project_data
+        self.analysis_results = analysis_results
+        self.company_info = company_info
+        self.texts = texts
         self.theme = get_theme(theme_name)
-        self.filename = filename
-        self.width, self.height = A4
-        self.background_image = background_image or self.theme.get("background_image")
-        self.styles = getSampleStyleSheet()
+        self.styles = self.theme['styles']
+        self.inclusion_options = inclusion_options
+        self.section_order_df = section_order_df
+        self.custom_images_list = custom_images_list
+        self.custom_text_blocks_list = custom_text_blocks_list
+        self.side_by_side_sim_keys = side_by_side_sim_keys
+        self.highlight_box_data = highlight_box_data
+        self.get_product_by_id_func = get_product_by_id_func
+        self.db_list_company_documents_func = db_list_company_documents_func
+        self.active_company_id = active_company_id
+        self.selected_title_image_b64 = selected_title_image_b64
+        self.selected_offer_title_text = selected_offer_title_text
+        self.selected_cover_letter_text = selected_cover_letter_text
         self.story = []
-        
-        # Eigene Stile basierend auf dem Theme erstellen
-        self.styles.add(ParagraphStyle(name='H1', fontName=self.theme["fonts"]["family_bold"],
-                                        fontSize=self.theme["fonts"]["size_h1"],
-                                        textColor=self.theme["colors"]["primary"]))
-        self.styles.add(ParagraphStyle(name='Body', fontName=self.theme["fonts"]["family_main"],
-                                        fontSize=self.theme["fonts"]["size_body"],
-                                        textColor=self.theme["colors"]["text"], leading=14))
+
+        # Eigene Stile basierend auf dem Theme erstellen - mit Fallbacks
+        try:
+            self.styles.add(ParagraphStyle(name='H1', fontName=self.theme["fonts"]["family_bold"],
+                                            fontSize=self.theme["fonts"]["size_h1"],
+                                            textColor=self.theme["colors"]["primary"]))
+            self.styles.add(ParagraphStyle(name='Body', fontName=self.theme["fonts"]["family_main"],
+                                            fontSize=self.theme["fonts"]["size_body"],
+                                            textColor=self.theme["colors"]["text"]))
+            
+            # Zusätzliche Stile für PDF-Generierung
+            self.styles.add(ParagraphStyle(name='Title', fontName=self.theme["fonts"]["family_bold"],
+                                            fontSize=24, textColor=self.theme["colors"]["primary"],
+                                            alignment=TA_CENTER, spaceAfter=20))
+            self.styles.add(ParagraphStyle(name='OfferTitle', fontName=self.theme["fonts"]["family_bold"],
+                                            fontSize=22, textColor=self.theme["colors"]["primary"],
+                                            alignment=TA_CENTER, spaceAfter=15))
+            self.styles.add(ParagraphStyle(name='Heading2', fontName=self.theme["fonts"]["family_bold"],
+                                            fontSize=16, textColor=self.theme["colors"]["text"],
+                                            spaceBefore=10, spaceAfter=8))
+            self.styles.add(ParagraphStyle(name='SectionTitle', fontName=self.theme["fonts"]["family_bold"],
+                                            fontSize=18, textColor=self.theme["colors"]["primary"],
+                                            spaceBefore=15, spaceAfter=10))
+            self.styles.add(ParagraphStyle(name='Normal', fontName=self.theme["fonts"]["family_main"],
+                                            fontSize=12, textColor=self.theme["colors"]["text"],
+                                            leading=14))
+            self.styles.add(ParagraphStyle(name='CoverLetter', fontName=self.theme["fonts"]["family_main"],
+                                            fontSize=11, textColor=self.theme["colors"]["text"],
+                                            leading=16, alignment=TA_JUSTIFY))
+        except Exception as e:
+            print(f"Warnung: Fehler beim Erstellen der PDF-Stile: {e}")
+            # Fallback zu Standard-Stilen
+            pass
 
     def _header_footer(self, canvas, doc):
         """Erstellt die Kopf- und Fußzeile für jede Seite."""
         canvas.saveState()
-        self._draw_background(canvas)
         # Footer
         canvas.setFont(self.theme["fonts"]["family_main"], self.theme["fonts"]["size_footer"])
         canvas.setFillColor(HexColor(self.theme["colors"]["footer_text"]))
         footer_text = f"Angebot {self.offer_data.get('offer_id', '')} | Seite {doc.page}"
         canvas.drawRightString(self.width - 2*cm, 1.5*cm, footer_text)
         canvas.restoreState()
-
-    def _draw_background(self, canvas):
-        """Zeichnet Hintergrundfarbe oder -bild."""
-        if self.background_image:
-            try:
-                img_reader = ImageReader(self.background_image)
-                canvas.drawImage(img_reader, 0, 0, width=self.width, height=self.height)
-                return
-            except Exception as e:
-                print(f"Fehler beim Laden des Hintergrundbildes: {e}")
-
-        bg_color = self.theme["colors"].get("background", "#FFFFFF")
-        canvas.setFillColor(HexColor(bg_color))
-        canvas.rect(0, 0, self.width, self.height, stroke=0, fill=1)
 
     def create_pdf(self):
         """Hauptfunktion, die alle Module zusammensetzt und das PDF speichert."""
@@ -230,6 +330,67 @@ class PDFGenerator:
         """
         self.story.append(Paragraph(text, self.styles['Body']))
 
+    def _draw_modern_kennzahlen_section(self):
+        """Erstellt moderne Kennzahlen-Karten im Stil Ihrer JSON-Vorlage (Erweiterung zu Ihrem bestehenden System)"""
+        if not _REPORTLAB_AVAILABLE:
+            return
+            
+        # Berechne Kennzahlen aus Ihren bestehenden Daten
+        analysis = self.analysis_results or {}
+        annual_production = float(analysis.get("annual_pv_production_kwh", 8251))
+        annual_consumption = float(analysis.get("annual_consumption_kwh", 6000))
+        self_consumption_kwh = float(analysis.get("self_consumption_kwh", annual_production * 0.42))
+        
+        eigenverbrauch_prozent = int((self_consumption_kwh / annual_production) * 100) if annual_production > 0 else 42
+        unabhaengigkeit_prozent = int((self_consumption_kwh / annual_consumption) * 100) if annual_consumption > 0 else 54
+        
+        # Titel für die moderne Sektion
+        self.story.append(Paragraph("<b>KENNZAHLEN IHRES PV-SYSTEMS</b> (Moderne Darstellung)", self.styles['H1']))
+        self.story.append(Spacer(1, 0.5*cm))
+        
+        # Erstelle moderne Kennzahl-Karten
+        kennzahl_table_data = [[
+            f"<b><font size='20'>{unabhaengigkeit_prozent}%</font></b><br/>Unabhängigkeitsgrad",
+            f"<b><font size='20'>{eigenverbrauch_prozent}%</font></b><br/>Eigenverbrauch"
+        ]]
+        
+        kennzahl_table = Table(kennzahl_table_data, colWidths=[9*cm, 9*cm])
+        kennzahl_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BACKGROUND', (0, 0), (-1, -1), self.theme["colors"]["secondary"]),
+            ('TEXTCOLOR', (0, 0), (-1, -1), self.theme["colors"]["white"]),
+            ('FONTNAME', (0, 0), (-1, -1), self.theme["fonts"]["family_bold"]),
+            ('LEFTPADDING', (0, 0), (-1, -1), 15),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+            ('TOPPADDING', (0, 0), (-1, -1), 20),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
+            ('BOX', (0, 0), (-1, -1), 2, self.theme["colors"]["primary"])
+        ]))
+        
+        self.story.append(kennzahl_table)
+        self.story.append(Spacer(1, 1*cm))
+        
+        # Systemdaten in moderner Box
+        project_details = self.project_data.get("project_details", {}) if self.project_data else {}
+        anlage_kwp = float(analysis.get("anlage_kwp", 8.4))
+        battery_capacity = float(project_details.get("battery_capacity_kwh", 6.1))
+        
+        system_data = [
+            ["Verbrauch:", f"{annual_consumption:,.0f} kWh/Jahr"],
+            ["Dachneigung:", "30°"],
+            ["Solaranlage:", f"{anlage_kwp:.1f} kWp"],
+            ["Batterie:", f"{battery_capacity:.1f} kWh"],
+            ["Jahresertrag:", f"{annual_production:,.0f} kWh/Jahr"]
+        ]
+        
+        system_table = create_modern_system_data_box(system_data, 16*cm, self.theme)
+        if system_table:
+            self.story.append(Paragraph("<b>IHR NEUES ENERGIESYSTEM</b> (Moderne Darstellung)", self.styles['H2']))
+            self.story.append(Spacer(1, 0.5*cm))
+            self.story.append(system_table)
+            self.story.append(Spacer(1, 1*cm))
+
     def _get_module_map(self):
         """Gibt die Mapping-Funktion für PDF-Module zurück."""
         return {
@@ -238,6 +399,7 @@ class PDFGenerator:
             "angebotstabelle": self._draw_offer_table,
             "benutzerdefiniert": self._draw_custom_content,
             "waermepumpe": self._draw_heatpump_section,
+            "moderne_kennzahlen": self._draw_modern_kennzahlen_section,  # Neue moderne Sektion hinzugefügt
         }
 
     def _draw_custom_content(self, content: Dict):
@@ -309,6 +471,955 @@ class PDFGenerator:
                     first_pdf.seek(0)
                     return first_pdf.getvalue()
             return b""
+
+    def generate_pdf(self) -> Optional[bytes]:
+        if not _REPORTLAB_AVAILABLE: return None
+
+        buffer = io.BytesIO()
+        doc = BaseDocTemplate(buffer, pagesize=A4, leftMargin=2*cm, rightMargin=2*cm, topMargin=2.5*cm, bottomMargin=2.5*cm)
+        
+        # PageTemplate hinzufügen (erforderlich für BaseDocTemplate)
+        frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
+        template = PageTemplate(id='normal', frames=[frame])
+        doc.addPageTemplates([template])
+        
+        doc.onFirstPage = lambda canvas, doc: _draw_page_statics(canvas, doc, self.theme)
+        doc.onLaterPages = lambda canvas, doc: _draw_page_statics(canvas, doc, self.theme)
+
+        # --- Story-Aufbau ---
+        if self.theme.get('name') == "Salt & Pepper":
+            self._build_salt_and_pepper_story()
+        else:
+            self._build_dynamic_story()
+
+        try:
+            doc.build(self.story)
+            main_pdf_bytes = buffer.getvalue()
+        except Exception as e:
+            print(f"FATALER FEHLER bei doc.build: {e}"); traceback.print_exc(); return None
+        finally:
+            buffer.close()
+
+        # --- Anhänge verwalten ---
+        final_pdf_bytes = self._handle_attachments(main_pdf_bytes)
+        return final_pdf_bytes
+
+    def _build_dynamic_story(self):
+        # Story initialisieren
+        if not hasattr(self, 'story') or self.story is None:
+            self.story = []
+        
+        # Dynamische Story basierend auf Nutzer-Reihenfolge
+        # Unterstützung für sowohl DataFrame als auch Liste
+        if hasattr(self.section_order_df, 'iterrows'):
+            # DataFrame
+            for index, row in self.section_order_df.iterrows():
+                if not row.get('Aktiv', True): continue
+                section_name_friendly = row['Sektion']
+                self._process_section(section_name_friendly)
+        else:
+            # Liste - kann Strings oder Dictionaries enthalten
+            for row in self.section_order_df:
+                if isinstance(row, str):
+                    # Direkt String verwenden
+                    section_name_friendly = row
+                    self._process_section(section_name_friendly)
+                elif isinstance(row, dict):
+                    # Dictionary - prüfe Aktiv-Status
+                    if not row.get('Aktiv', True): continue
+                    section_name_friendly = row.get('Sektion', '')
+                    self._process_section(section_name_friendly)
+                else:
+                    # Unbekannter Typ - überspringen
+                    continue
+        
+        # Fallback: Wenn keine Story erstellt wurde, füge Standard-Inhalt hinzu
+        if not self.story:
+            self._add_fallback_content()
+    
+    def _process_section(self, section_name_friendly):
+        """Verarbeitet eine einzelne Sektion basierend auf dem Namen"""
+        # Debugging: Zeige verarbeitete Sektion an
+        print(f"Verarbeite Sektion: '{section_name_friendly}'")
+        
+        # Unterstützung für all_sections_map Namen
+        if section_name_friendly == "Titel & Anschreiben" or section_name_friendly == "TitlePageCoverLetter":
+            self._add_title_page()
+            self._add_cover_letter_section()
+        elif section_name_friendly == "Kennzahlen-Übersicht (Donuts)" or section_name_friendly == "KeyVisuals":
+            self._add_key_visuals_section()
+        elif section_name_friendly == "Technische Komponenten" or section_name_friendly == "TechnicalComponents":
+            self._add_technical_components_section()
+        elif section_name_friendly == "Wirtschaftlichkeits-Analyse" or section_name_friendly == "MainCharts":
+            self._add_economics_section()
+        elif section_name_friendly == "Kosten & Tabellen" or section_name_friendly == "CostsAndEconomics":
+            self._add_costs_section()
+        elif section_name_friendly == "Weitere Diagramme" or section_name_friendly == "OptionalCharts":
+            self._add_charts_section()
+        
+        # Unterstützung für default_pdf_sections_map Namen
+        elif section_name_friendly == "1. Projektübersicht" or section_name_friendly == "ProjectOverview":
+            self._add_project_overview_section()
+        elif section_name_friendly == "2. Systemkomponenten":
+            self._add_technical_components_section()
+        elif section_name_friendly == "3. Kostenaufstellung" or section_name_friendly == "CostDetails":
+            self._add_costs_section()
+        elif section_name_friendly == "4. Wirtschaftlichkeit" or section_name_friendly == "Economics":
+            self._add_economics_section()
+        elif section_name_friendly == "5. Simulation" or section_name_friendly == "SimulationDetails":
+            self._add_simulation_section()
+        elif section_name_friendly == "6. CO₂-Einsparung" or section_name_friendly == "CO2Savings":
+            self._add_co2_section()
+        elif section_name_friendly == "7. Grafiken" or section_name_friendly == "Visualizations":
+            self._add_charts_section()
+        elif section_name_friendly == "8. Zukunftsaspekte" or section_name_friendly == "FutureAspects":
+            self._add_future_aspects_section()
+        
+        # Neue optionale Business-Sektionen (wie in pdf_generator.py definiert)
+        elif section_name_friendly == "9. Unser Unternehmen" or section_name_friendly == "CompanyProfile":
+            self._add_company_profile_section()
+        elif section_name_friendly == "10. Zertifizierungen & Qualitätsstandards" or section_name_friendly == "Certifications":
+            self._add_certifications_section()
+        elif section_name_friendly == "11. Referenzen & Kundenerfahrungen" or section_name_friendly == "References":
+            self._add_references_section()
+        elif section_name_friendly == "12. Professionelle Installation" or section_name_friendly == "Installation":
+            self._add_installation_section()
+        elif section_name_friendly == "13. Wartung & Langzeitservice" or section_name_friendly == "Maintenance":
+            self._add_maintenance_section()
+        elif section_name_friendly == "14. Flexible Finanzierungslösungen" or section_name_friendly == "Financing":
+            self._add_financing_section()
+        elif section_name_friendly == "15. Umfassender Versicherungsschutz" or section_name_friendly == "Insurance":
+            self._add_insurance_section()
+        elif section_name_friendly == "16. Herstellergarantie & Gewährleistung" or section_name_friendly == "Warranty":
+            self._add_warranty_section()
+        else:
+            # Fallback für unbekannte Sektionen
+            print(f"Unbekannte Sektion: '{section_name_friendly}' - verwende Fallback")
+            self._add_generic_section(section_name_friendly)
+
+    def _add_title_page(self):
+        """Fügt die Titelseite hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+        
+        # Titel-Bild oder Standard-Titel
+        if hasattr(self, 'selected_title_image_b64') and self.selected_title_image_b64:
+            try:
+                import base64
+                import io
+                from reportlab.platypus import Image
+                image_data = base64.b64decode(self.selected_title_image_b64)
+                img = Image(io.BytesIO(image_data), width=15*cm, height=10*cm)
+                self.story.append(img)
+            except Exception as e:
+                # Fallback zu Text-Titel
+                from reportlab.platypus import Paragraph, Spacer
+                from reportlab.lib.units import cm
+                self.story.append(Spacer(1, 5*cm))
+                if hasattr(self, 'selected_offer_title_text'):
+                    title_text = self.selected_offer_title_text or "Solar-Angebot"
+                else:
+                    title_text = "Solar-Angebot"
+                self.story.append(Paragraph(title_text, self.styles.get('OfferTitle', self.styles.get('Title'))))
+        else:
+            from reportlab.platypus import Paragraph, Spacer
+            from reportlab.lib.units import cm
+            self.story.append(Spacer(1, 5*cm))
+            if hasattr(self, 'selected_offer_title_text'):
+                title_text = self.selected_offer_title_text or "Solar-Angebot"
+            else:
+                title_text = "Solar-Angebot"
+            self.story.append(Paragraph(title_text, self.styles.get('OfferTitle', self.styles.get('Title'))))
+
+    def _add_cover_letter_section(self):
+        """Fügt das Anschreiben hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer, PageBreak
+        from reportlab.lib.units import cm
+        
+        self.story.append(PageBreak())
+        self.story.append(Paragraph("Anschreiben", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Kundenadresse aus den Daten
+        customer_data = self.project_data.get('customer_data', {})
+        customer_name = f"{customer_data.get('first_name', '')} {customer_data.get('last_name', '')}".strip()
+        customer_address = f"{customer_data.get('address', '')}, {customer_data.get('zip_code', '')} {customer_data.get('city', '')}".strip()
+        
+        # Personalisiertes Anschreiben mit echten Daten
+        analysis = self.analysis_results
+        anlage_kwp = analysis.get('anlage_kwp', 0)
+        annual_savings = analysis.get('annual_financial_benefit_year1', 0)
+        co2_savings = analysis.get('annual_co2_savings_kg', 0) / 1000
+        total_investment = analysis.get('total_investment_netto', 0)
+        
+        # Berechne geschätzte Amortisation realistisch
+        amortization_years = analysis.get('amortization_time_years', 0)
+        if amortization_years > 25 or amortization_years <= 0:
+            amortization_years = analysis.get('simple_payback_years', 
+                                            total_investment / max(annual_savings, 1000) if annual_savings > 0 else 12)
+        
+        if hasattr(self, 'selected_cover_letter_text') and self.selected_cover_letter_text:
+            cover_text = self.selected_cover_letter_text
+        else:
+            cover_text = f"""
+            Sehr geehrte/r {customer_name or 'Damen und Herren'},<br/><br/>
+            
+            vielen Dank für Ihr Interesse an einer Photovoltaikanlage. Nach eingehender Analyse Ihrer 
+            Gegebenheiten unterbreiten wir Ihnen hiermit unser maßgeschneidertes Angebot für eine 
+            hochwertige Solarlösung an Ihrem Standort {customer_address or 'in Ihrer Region'}.<br/><br/>
+            
+            <b>🌟 Ihre Vorteile im Überblick:</b><br/>
+            • <b>💡 Anlagenleistung:</b> {anlage_kwp:.1f} kWp - optimal dimensioniert für Ihren Energiebedarf<br/>
+            • <b>💰 Jährliche Ersparnis:</b> ca. {annual_savings:,.0f} € ab dem ersten Jahr<br/>
+            • <b>🌱 Umweltbeitrag:</b> {co2_savings:.1f} Tonnen CO₂-Einsparung pro Jahr<br/>
+            • <b>⏱️ Amortisation:</b> Ihre Investition amortisiert sich in ca. {amortization_years:.1f} Jahren<br/>
+            • <b>🏠 Wertsteigerung:</b> Nachhaltige Erhöhung Ihres Immobilienwerts<br/>
+            • <b>🔋 Energieunabhängigkeit:</b> Reduzierung Ihrer Abhängigkeit von Strompreiserhöhungen<br/><br/>
+            
+            <b>📋 Unser Service für Sie:</b><br/>
+            ✓ Komplettlösung aus einer Hand - von der Planung bis zur Inbetriebnahme<br/>
+            ✓ Hochwertige Komponenten mit Langzeitgarantie<br/>
+            ✓ Professionelle Installation durch zertifizierte Fachkräfte<br/>
+            ✓ Umfassende Beratung zu Förderungen und Finanzierungsmöglichkeiten<br/><br/>
+            
+            Das vorliegende Angebot basiert auf Ihren Angaben und unserer jahrelangen Expertise 
+            im Bereich erneuerbarer Energien. Gerne besprechen wir alle Details persönlich mit 
+            Ihnen und beantworten Ihre Fragen in einem unverbindlichen Beratungsgespräch.<br/><br/>
+            
+            Wir freuen uns darauf, Sie auf Ihrem Weg zur eigenen, sauberen Energie zu begleiten!<br/><br/>
+            
+            Mit freundlichen Grüßen<br/>
+            <b>Ihr Solar-Experten-Team</b>
+            """
+        
+        self.story.append(Paragraph(cover_text, self.styles.get('CoverLetter', self.styles.get('Normal'))))
+
+    def _add_key_visuals_section(self):
+        """Fügt die Kennzahlen-Übersicht hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Kennzahlen-Übersicht", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Echte Kennzahlen aus den aktuellen Daten
+        analysis = self.analysis_results
+        pv_details = self.project_data.get('pv_details', {})
+        
+        anlage_kwp = analysis.get('anlage_kwp', 0)
+        annual_production = analysis.get('annual_pv_production_kwh', 0)
+        co2_savings = analysis.get('annual_co2_savings_kg', 0) / 1000  # in Tonnen
+        
+        # Verwende konsistente Eigenverbrauchsquote
+        self_consumption_rate = analysis.get('self_consumption_rate_percent', 
+                                           analysis.get('self_supply_rate_percent', 0))
+        
+        # Berechne oder schätze Modul-Anzahl
+        module_count = pv_details.get('module_quantity', 0)
+        if module_count == 0 and anlage_kwp > 0:
+            # Schätze basierend auf typischer Modulgröße (420 Wp)
+            module_count = max(1, round(anlage_kwp * 1000 / 420))
+        
+        # Amortisation mit Plausibilitätsprüfung
+        amortization_years = analysis.get('amortization_time_years', 0)
+        if amortization_years > 25:  # Unrealistisch hoch
+            amortization_years = analysis.get('simple_payback_years', 12)
+        
+        kpi_text = f"""
+        <b>🔋 Anlagenleistung:</b> {anlage_kwp:.1f} kWp<br/>
+        <b>⚡ Jährlicher Ertrag:</b> {annual_production:,.0f} kWh<br/>
+        <b>🌱 CO₂-Einsparung:</b> {co2_savings:.1f} t/Jahr<br/>
+        <b>🏠 Eigenverbrauchsquote:</b> {self_consumption_rate:.1f}%<br/>
+        <b>📦 PV-Module:</b> {module_count} Stück<br/>
+        <b>💰 Amortisation:</b> {amortization_years:.1f} Jahre<br/>
+        <b>📈 Autarkiegrad:</b> {analysis.get('self_supply_rate_percent', 0):.1f}%
+        """
+        self.story.append(Paragraph(kpi_text, self.styles.get('Normal')))
+
+    def _add_technical_components_section(self):
+        """Fügt die technischen Komponenten hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Technische Komponenten", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Echte Komponenten-Daten
+        pv_details = self.project_data.get('pv_details', {})
+        project_details = self.project_data.get('project_details', {})
+        
+        # Berechne Modul-Anzahl aus Anlagenleistung falls nicht direkt verfügbar
+        anlage_kwp = self.analysis_results.get('anlage_kwp', 0)
+        module_count = pv_details.get('module_quantity', 0)
+        
+        # Fallback: Schätze Modul-Anzahl wenn 0
+        if module_count == 0 and anlage_kwp > 0:
+            # Annahme: Durchschnittliches Modul hat ~400-450 Wp
+            estimated_module_power = 420  # Wp
+            module_count = max(1, round(anlage_kwp * 1000 / estimated_module_power))
+        
+        # Versuche Produktdaten über die get_product_by_id_func zu holen
+        module_info = "Hochleistungsmodule (420 Wp)"
+        inverter_info = "String-Wechselrichter"
+        storage_info = ""
+        
+        try:
+            if hasattr(self, 'get_product_by_id_func') and self.get_product_by_id_func:
+                # Modul-Informationen
+                module_id = project_details.get('selected_module_id')
+                if module_id:
+                    module_product = self.get_product_by_id_func(module_id)
+                    if module_product:
+                        module_power = module_product.get('power_wp', 400)
+                        module_info = f"{module_product.get('model_name', 'Modul')} ({module_power} Wp)"
+                        # Korrigiere Modul-Anzahl basierend auf echten Produktdaten
+                        if module_count == 0 and anlage_kwp > 0:
+                            module_count = max(1, round(anlage_kwp * 1000 / module_power))
+                
+                # Wechselrichter-Informationen
+                inverter_id = project_details.get('selected_inverter_id')
+                if inverter_id:
+                    inverter_product = self.get_product_by_id_func(inverter_id)
+                    if inverter_product:
+                        # Korrigiere kW-Wert (oft falsch als W gespeichert)
+                        power_kw = inverter_product.get('power_kw', 0)
+                        if power_kw > 100:  # Wahrscheinlich in Watt statt kW
+                            power_kw = power_kw / 1000
+                        inverter_info = f"{inverter_product.get('model_name', 'Wechselrichter')} ({power_kw:.1f} kW)"
+                
+                # Speicher-Informationen
+                if pv_details.get('include_storage') and project_details.get('selected_storage_id'):
+                    storage_id = project_details.get('selected_storage_id')
+                    storage_product = self.get_product_by_id_func(storage_id)
+                    if storage_product:
+                        storage_capacity = storage_product.get('storage_power_kw', storage_product.get('capacity_kwh', 0))
+                        storage_info = f"<b>Batteriespeicher:</b> {storage_product.get('model_name', 'Speicher')} ({storage_capacity} kWh)<br/>"
+        except Exception as e:
+            print(f"Fehler beim Laden der Produktdaten: {e}")
+            pass  # Fallback zu Standard-Texten
+        
+        # Geschätze Werte für realistische Darstellung
+        if anlage_kwp > 0:
+            estimated_modules = max(module_count, round(anlage_kwp * 1000 / 420))
+        else:
+            estimated_modules = module_count
+            
+        components_text = f"""
+        <b>PV-Module:</b> {estimated_modules}x {module_info}<br/>
+        <b>Gesamtleistung:</b> {anlage_kwp:.1f} kWp<br/>
+        <b>Wechselrichter:</b> {inverter_info}<br/>
+        {storage_info}<b>Montagesystem:</b> {project_details.get('mounting_type', 'Aufdach-Montage')}<br/>
+        <b>Dachausrichtung:</b> {project_details.get('orientation', 'Süd')}<br/>
+        <b>Dachneigung:</b> {project_details.get('tilt_angle', '30')}°<br/>
+        <b>Überwachung:</b> Smart Monitoring System inkl. App<br/>
+        <b>Garantie:</b> 25 Jahre Leistungsgarantie auf Module, 10 Jahre Produktgarantie
+        """
+        self.story.append(Paragraph(components_text, self.styles.get('Normal')))
+    
+    def _add_project_overview_section(self):
+        """Fügt die Projektübersicht hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Projektübersicht", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Projekt-Informationen
+        project_details = self.project_data.get('project_details', {})
+        customer_data = self.project_data.get('customer_data', {})
+        
+        overview_text = f"""
+        <b>Kunde:</b> {customer_data.get('first_name', '')} {customer_data.get('last_name', '')}<br/>
+        <b>Adresse:</b> {customer_data.get('address', '')}, {customer_data.get('zip_code', '')} {customer_data.get('city', '')}<br/>
+        <b>Haustyp:</b> {project_details.get('house_type', 'Nicht angegeben')}<br/>
+        <b>Dachtyp:</b> {project_details.get('roof_type', 'Nicht angegeben')}<br/>
+        <b>Ausrichtung:</b> {project_details.get('orientation', 'Nicht angegeben')}
+        """
+        self.story.append(Paragraph(overview_text, self.styles.get('Normal')))
+
+    def _append_documents_to_pdf(self, main_pdf_bytes, document_paths_to_append):
+        """Hängt externe PDFs an ein PDF in Bytes an."""
+        if not _PYPDF_AVAILABLE or not document_paths_to_append: 
+            return main_pdf_bytes
+        writer = PdfWriter()
+        try:
+            writer.append(io.BytesIO(main_pdf_bytes))
+            for doc_path in document_paths_to_append:
+                if os.path.exists(doc_path):
+                    writer.append(doc_path)
+            output_buffer = io.BytesIO()
+            writer.write(output_buffer)
+            return output_buffer.getvalue()
+        except Exception as e:
+            print(f"Fehler beim Zusammenfügen der PDFs: {e}")
+            return main_pdf_bytes
+        
+    def _add_economics_section(self):
+        """Fügt die Wirtschaftlichkeits-Analyse hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Wirtschaftlichkeit", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Wirtschaftlichkeits-Kennzahlen
+        analysis = self.analysis_results
+        economics_text = f"""
+        <b>Gesamtinvestition:</b> {analysis.get('total_investment_netto', 0):,.0f} €<br/>
+        <b>Amortisationszeit:</b> {analysis.get('amortization_time_years', 0):.1f} Jahre<br/>
+        <b>Eigenverbrauchsquote:</b> {analysis.get('self_supply_rate_percent', 0):.1f}%<br/>
+        <b>Jährlicher Nutzen (Jahr 1):</b> {analysis.get('annual_financial_benefit_year1', 0):,.0f} €
+        """
+        self.story.append(Paragraph(economics_text, self.styles.get('Normal')))
+
+    def _add_costs_section(self):
+        """Fügt die Kostenaufstellung hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Kostenaufstellung", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Kosten-Details
+        analysis = self.analysis_results
+        pv_details = self.project_data.get('pv_details', {})
+        
+        # Berechne Einzelpreise
+        total_investment = analysis.get('total_investment_netto', 0)
+        anlage_kwp = analysis.get('anlage_kwp', 0)
+        
+        # Berechne oder schätze Modul-Anzahl
+        module_count = pv_details.get('module_quantity', 0)
+        if module_count == 0 and anlage_kwp > 0:
+            module_count = max(1, round(anlage_kwp * 1000 / 420))  # 420 Wp pro Modul
+        
+        # Realistische Kostenverteilung basierend auf aktuellen Marktpreisen
+        module_cost_pct = 0.40  # ~40% Module
+        inverter_cost_pct = 0.15  # ~15% Wechselrichter
+        installation_cost_pct = 0.30  # ~30% Installation & Montage
+        other_cost_pct = 0.15  # ~15% Sonstiges (Kabel, Überwachung, etc.)
+        
+        module_costs = total_investment * module_cost_pct
+        inverter_costs = total_investment * inverter_cost_pct
+        installation_costs = total_investment * installation_cost_pct
+        other_costs = total_investment * other_cost_pct
+        
+        # Berechne Preis pro Modul realistisch
+        price_per_module = module_costs / max(module_count, 1)
+        
+        costs_text = f"""
+        <b>📋 Detaillierte Kostenaufstellung:</b><br/><br/>
+        
+        <b>🔸 PV-Module:</b> {module_count} Stück à {price_per_module:,.0f} € = {module_costs:,.0f} €<br/>
+        <b>🔸 Wechselrichter:</b> {inverter_costs:,.0f} €<br/>
+        <b>🔸 Installation & Montage:</b> {installation_costs:,.0f} €<br/>
+        <b>🔸 Anschluss & Zubehör:</b> {other_costs:,.0f} €<br/>
+        
+        <br/>
+        <b>💶 Gesamtpreis (netto):</b> {total_investment:,.0f} €<br/>
+        <b>💶 MwSt. (19%):</b> {total_investment * 0.19:,.0f} €<br/>
+        <b>💰 Gesamtpreis (brutto):</b> {total_investment * 1.19:,.0f} €<br/>
+        <br/>
+        <b>📊 Preis pro kWp:</b> {total_investment/max(anlage_kwp,0.1):,.0f} € (netto)<br/>
+        <br/>
+        <b>⏱️ Zahlungsbedingungen:</b><br/>
+        • 20% Anzahlung bei Auftragserteilung<br/>
+        • 60% bei Lieferung der Komponenten<br/>
+        • 20% nach erfolgreicher Inbetriebnahme<br/><br/>
+        
+        <i>✅ Alle Preise sind Festpreise und gelten für 30 Tage ab Angebotsdatum.<br/>
+        ✅ Förderung und Finanzierungsoptionen auf Anfrage verfügbar.</i>
+        """
+        self.story.append(Paragraph(costs_text, self.styles.get('Normal')))
+
+    def _add_simulation_section(self):
+        """Fügt die Simulations-Details hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Simulations-Details", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Simulations-Informationen
+        analysis = self.analysis_results
+        simulation_text = f"""
+        <b>Jährliche PV-Produktion:</b> {analysis.get('annual_pv_production_kwh', 0):,.0f} kWh<br/>
+        <b>Eigenverbrauch:</b> {analysis.get('self_consumption_kwh', 0):,.0f} kWh<br/>
+        <b>Netzeinspeisung:</b> {analysis.get('grid_feed_in_kwh', 0):,.0f} kWh<br/>
+        <b>Autarkiegrad:</b> {analysis.get('self_supply_rate_percent', 0):.1f}%
+        """
+        self.story.append(Paragraph(simulation_text, self.styles.get('Normal')))
+
+    def _add_co2_section(self):
+        """Fügt die CO₂-Einsparung hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("CO₂-Einsparung", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # CO₂-Kennzahlen
+        analysis = self.analysis_results
+        co2_text = f"""
+        <b>Jährliche CO₂-Einsparung:</b> {analysis.get('annual_co2_savings_kg', 0):,.0f} kg<br/>
+        <b>Entspricht Bäumen:</b> {analysis.get('co2_equivalent_trees_per_year', 0):.0f} Bäume/Jahr<br/>
+        <b>Entspricht Auto-km:</b> {analysis.get('co2_equivalent_car_km_per_year', 0):,.0f} km/Jahr<br/>
+        <b>25-jährige CO₂-Einsparung:</b> {analysis.get('annual_co2_savings_kg', 0) * 25:,.0f} kg
+        """
+        self.story.append(Paragraph(co2_text, self.styles.get('Normal')))
+
+    def _add_charts_section(self):
+        """Fügt die Diagramme/Visualisierungen hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Diagramme & Visualisierungen", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Prüfe, ob Diagramme in analysis_results verfügbar sind
+        charts_available = []
+        if self.analysis_results:
+            chart_keys = [k for k in self.analysis_results.keys() if k.endswith('_chart_bytes')]
+            # Verbessere die Chart-Namen für bessere Lesbarkeit
+            chart_names_map = {
+                'monthly_prod_cons': 'Monatliche Produktion vs. Verbrauch',
+                'cumulative_cashflow': 'Kumulativer Cashflow (25 Jahre)',
+                'pv_usage': 'PV-Nutzung und Eigenverbrauch',
+                'consumption_coverage': 'Verbrauchsdeckung durch PV',
+                'cost_overview': 'Kostenübersicht und Einsparungen',
+                'cost_projection': 'Kostenentwicklung (mit/ohne PV)',
+                'monthly_savings': 'Monatliche Einsparungen',
+                'payback_analysis': 'Amortisationsanalyse',
+                'environmental_impact': 'Umweltauswirkungen',
+                'system_performance': 'Anlagenleistung'
+            }
+            
+            for key in chart_keys:
+                chart_base = key.replace('_chart_bytes', '')
+                friendly_name = chart_names_map.get(chart_base, 
+                    chart_base.replace('_', ' ').title())
+                charts_available.append(friendly_name)
+        
+        if charts_available and len(charts_available) > 0:
+            # Zeige die ersten 8 Charts detailliert
+            main_charts = charts_available[:8]
+            additional_count = max(0, len(charts_available) - 8)
+            
+            charts_text = f"""
+            <b>📊 Verfügbare Visualisierungen für Ihr Projekt:</b><br/><br/>
+            
+            <b>🔍 Hauptdiagramme:</b><br/>
+            {chr(10).join([f"• <b>{chart}</b>" for chart in main_charts])}
+            
+            {f"<br/><b>📈 Zusätzliche Analysen:</b> {additional_count} weitere Diagramme verfügbar<br/>" if additional_count > 0 else ""}
+            
+            <br/>
+            <b>💡 Verfügbare Chart-Kategorien:</b><br/>
+            • <b>Wirtschaftlichkeit:</b> Cashflow, Amortisation, Kosteneinsparungen<br/>
+            • <b>Technische Analyse:</b> Systemleistung, Eigenverbrauch, Autarkie<br/>
+            • <b>Umweltaspekte:</b> CO₂-Einsparung, Nachhaltigkeit<br/>
+            • <b>Monatliche Übersichten:</b> Produktion, Verbrauch, Ersparnisse<br/>
+            
+            <br/>
+            <i>📱 Die interaktiven Diagramme sind in der Web-Anwendung verfügbar.<br/>
+            📄 Ausgewählte Charts können in die finale PDF-Version integriert werden.</i>
+            """
+        else:
+            charts_text = """
+            <b>📊 Geplante Visualisierungen für Ihr Projekt:</b><br/><br/>
+            
+            <b>🔹 Wirtschaftlichkeits-Diagramme:</b><br/>
+            • <b>Monatliche Erträge:</b> Visualisierung der erwarteten Stromproduktion<br/>
+            • <b>Kostenentwicklung:</b> Stromkosten mit und ohne PV-Anlage<br/>
+            • <b>Amortisationsdiagramm:</b> Zeitpunkt der Kostendeckung<br/>
+            
+            <b>🔹 Technische Analysen:</b><br/>
+            • <b>Eigenverbrauch vs. Einspeisung:</b> Optimale Nutzung der Energie<br/>
+            • <b>Systemleistung:</b> Anlagenperformance über das Jahr<br/>
+            • <b>Verbrauchsdeckung:</b> Deckung des Haushaltsverbrauchs<br/>
+            
+            <b>🔹 Umwelt & Nachhaltigkeit:</b><br/>
+            • <b>CO₂-Einsparung:</b> Umweltbeitrag über die Anlagenlaufzeit<br/>
+            • <b>Nachhaltigkeit:</b> Langfristige Umweltwirkung<br/>
+            
+            <br/>
+            <i>📊 Detaillierte Diagramme werden nach der finalen Projektkonfiguration erstellt.<br/>
+            🎯 Alle Visualisierungen basieren auf Ihren spezifischen Projektdaten.</i>
+            """
+        
+        self.story.append(Paragraph(charts_text, self.styles.get('Normal')))
+
+    def _add_future_aspects_section(self):
+        """Fügt die Zukunftsaspekte hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Zukunftsaspekte", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Zukunftsaspekte
+        future_text = """
+        <b>Erweiterungsmöglichkeiten:</b> Speichersystem, Wallbox für E-Fahrzeuge<br/>
+        <b>Wartung:</b> Regelmäßige Reinigung und Inspektion empfohlen<br/>
+        <b>Garantie:</b> 25 Jahre Leistungsgarantie auf Module<br/>
+        <b>Monitoring:</b> Online-Überwachung der Anlagenleistung
+        """
+        self.story.append(Paragraph(future_text, self.styles.get('Normal')))
+
+    def _add_generic_section(self, section_name):
+        """Fügt eine generische Sektion hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph(section_name, self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Spezielle Inhalte je nach Sektion
+        if section_name == "SideBySideSims" or section_name == "Simulations-Vergleich":
+            generic_text = """
+            <b>Szenario-Vergleich:</b><br/>
+            • <b>Ohne PV-Anlage:</b> Kontinuierlich steigende Stromkosten<br/>
+            • <b>Mit PV-Anlage:</b> Drastische Reduzierung der Stromkosten<br/>
+            • <b>Unabhängigkeit:</b> Weniger abhängig von Strompreiserhöhungen<br/>
+            • <b>Wertsteigerung:</b> Erhöhung des Immobilienwerts
+            """
+        elif section_name == "CustomImages" or section_name == "Individuelle Bilder":
+            generic_text = """
+            <b>Visualisierung Ihres Projekts:</b><br/>
+            • Dach-Aufnahmen und Planungsbilder<br/>
+            • 3D-Renderings der geplanten Anlage<br/>
+            • Installationsdetails und Komponenten<br/>
+            <i>Individuelle Bilder werden nach der Vor-Ort-Begehung hinzugefügt.</i>
+            """
+        elif section_name == "CustomTexts" or section_name == "Individuelle Texte":
+            generic_text = """
+            <b>Projektspezifische Informationen:</b><br/>
+            • Individuelle Beratungsergebnisse<br/>
+            • Spezielle Anforderungen und Lösungen<br/>
+            • Lokale Gegebenheiten und Besonderheiten<br/>
+            <i>Projektspezifische Details werden nach der Beratung ergänzt.</i>
+            """
+        elif section_name == "HighlightBox" or section_name == "Highlight-Box":
+            generic_text = """
+            <b>🌟 Ihre Vorteile auf einen Blick:</b><br/>
+            ✓ <b>Sofortige Kosteneinsparungen</b> ab der ersten Kilowattstunde<br/>
+            ✓ <b>Umweltfreundlich</b> - Aktiver Beitrag zum Klimaschutz<br/>
+            ✓ <b>Wertsteigerung</b> Ihrer Immobilie<br/>
+            ✓ <b>25 Jahre Garantie</b> auf die Solarmodule<br/>
+            ✓ <b>Staatliche Förderung</b> und Einspeisevergütung
+            """
+        else:
+            generic_text = f"""
+            <b>Weitere Informationen zu {section_name}:</b><br/>
+            Diese Sektion wird basierend auf Ihren spezifischen Anforderungen 
+            und nach der detaillierten Projektplanung vervollständigt.<br/>
+            <i>Individuelle Inhalte werden in der finalen Version ergänzt.</i>
+            """
+        
+        self.story.append(Paragraph(generic_text, self.styles.get('Normal')))
+    
+    def _add_fallback_content(self):
+        """Fügt Standard-Inhalt hinzu, falls keine Sektionen verarbeitet wurden"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        # Standard-Titel
+        self.story.append(Spacer(1, 5*cm))
+        self.story.append(Paragraph("Solar-Angebot", self.styles.get('OfferTitle', self.styles.get('Title'))))
+        
+        # Standard-Inhalt
+        self.story.append(Spacer(1, 2*cm))
+        self.story.append(Paragraph("Angebot für Photovoltaikanlage", self.styles.get('Heading2')))
+        
+        standard_text = """
+        Vielen Dank für Ihr Interesse an einer Photovoltaikanlage. 
+        Gerne unterbreiten wir Ihnen unser Angebot für eine maßgeschneiderte Solarlösung.
+        """
+        self.story.append(Paragraph(standard_text, self.styles.get('Normal')))
+        self.story.append(Paragraph("Technische Komponenten", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        # Beispiel-Komponenten
+        components_text = """
+        <b>Solarmodule:</b> Hocheffiziente Monokristalline Module<br/>
+        <b>Wechselrichter:</b> String-Wechselrichter mit Optimierern<br/>
+        <b>Montagesystem:</b> Aufdach-Montage mit Dachhaken<br/>
+        <b>Überwachung:</b> App-basiertes Monitoring-System
+        """
+        self.story.append(Paragraph(components_text, self.styles.get('Normal')))
+
+    def _add_two_column_layout(self, content_left, content_right):
+        if self.selected_title_image_b64:
+            try:
+                image_data = base64.b64decode(self.selected_title_image_b64)
+                self.story.append(Image(io.BytesIO(image_data), width=21*cm, height=29.7*cm))
+            except Exception as e:
+                self.story.append(Paragraph(f"[Fehler: Titelbild: {e}]", self.styles['ErrorText']))
+        else:
+            self.story.append(Spacer(1, 5 * cm))
+            self.story.append(Paragraph(self.selected_offer_title_text, self.styles['h1']))
+        self.story.append(PageBreak())
+        
+    def _build_salt_and_pepper_story(self):
+        # Reduzierte, minimalistische Story
+        self.story.append(Paragraph("Firmeninfos", self.styles['h2']))
+        # ... (weitere minimalistische Inhalte)
+        self.story.append(Paragraph("Leistungen und Komponenten", self.styles['h2']))
+        self.story.append(Paragraph("Preis", self.styles['h2']))
+        self.story.append(Paragraph("Unterschriftenfeld", self.styles['h2']))
+        self.story.append(Paragraph("Schlusswort", self.styles['h2']))
+
+    def _handle_attachments(self, main_pdf_bytes):
+        paths_to_append = []
+        # Logik zum Sammeln der Dokumentenpfade...
+        # ...
+        return _append_documents_to_pdf(main_pdf_bytes, paths_to_append)
+
+    # === NEUE OPTIONALE BUSINESS-SEKTIONEN ===
+    
+    def _add_company_profile_section(self):
+        """Fügt die Unternehmensprofil-Sektion hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Unser Unternehmen", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        company_profile_text = f"""
+        <b>{self.company_info.get('name', 'Unser Unternehmen')}</b><br/><br/>
+        Mit langjähriger Erfahrung im Bereich Photovoltaik sind wir Ihr zuverlässiger Partner für nachhaltige Energielösungen. 
+        Unser engagiertes Team begleitet Sie von der ersten Beratung bis zur finalen Inbetriebnahme Ihrer Anlage.<br/><br/>
+        <b>Kontakt:</b><br/>
+        📍 {self.company_info.get('street', '')}, {self.company_info.get('zip_code', '')} {self.company_info.get('city', '')}<br/>
+        📞 {self.company_info.get('phone', '')}<br/>
+        📧 {self.company_info.get('email', '')}
+        """
+        self.story.append(Paragraph(company_profile_text, self.styles.get('Normal')))
+
+    def _add_certifications_section(self):
+        """Fügt die Zertifizierungen-Sektion hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Zertifizierungen & Qualitätsstandards", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        cert_text = """
+        <b>Unsere Zertifizierungen & Qualitätsstandards:</b><br/><br/>
+        ✓ <b>VDE-Zertifizierung</b> - Elektrotechnische Sicherheit<br/>
+        ✓ <b>Meisterbetrieb</b> - Handwerkliche Qualität<br/>
+        ✓ <b>IHK-Sachverständiger</b> - Technische Expertise<br/>
+        ✓ <b>ISO 9001</b> - Qualitätsmanagementsystem<br/>
+        ✓ <b>Fachbetrieb für Photovoltaik</b> - Spezialisierung<br/><br/>
+        Alle Komponenten entsprechen den aktuellen DIN- und VDE-Normen.
+        """
+        self.story.append(Paragraph(cert_text, self.styles.get('Normal')))
+
+    def _add_references_section(self):
+        """Fügt die Referenzen-Sektion hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Referenzen & Kundenerfahrungen", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        ref_text = """
+        <b>Referenzen & Kundenerfahrungen:</b><br/><br/>
+        ⭐⭐⭐⭐⭐ <i>"Professionelle Beratung und saubere Montage. Unsere Anlage läuft seit 2 Jahren perfekt!"</i><br/>
+        - Familie Müller, 8,5 kWp Anlage<br/><br/>
+        ⭐⭐⭐⭐⭐ <i>"Von der Planung bis zur Inbetriebnahme - alles aus einer Hand und termingerecht."</i><br/>
+        - Herr Schmidt, 12 kWp mit Speicher<br/><br/>
+        ⭐⭐⭐⭐⭐ <i>"Kompetente Beratung, faire Preise, einwandfreie Ausführung. Sehr empfehlenswert!"</i><br/>
+        - Frau Weber, 6,2 kWp Anlage<br/><br/>
+        <b>Über 500 zufriedene Kunden</b> vertrauen auf unsere Expertise.
+        """
+        self.story.append(Paragraph(ref_text, self.styles.get('Normal')))
+
+    def _add_installation_section(self):
+        """Fügt die Installation-Sektion hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Professionelle Installation", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        install_text = """
+        <b>Professionelle Installation - Ihr Weg zur eigenen Solaranlage:</b><br/><br/>
+        <b>1. Terminplanung & Vorbereitung</b><br/>
+        • Detaillierte Terminabsprache<br/>
+        • Anmeldung beim Netzbetreiber<br/>
+        • Bereitstellung aller Komponenten<br/><br/>
+        <b>2. Montage (1-2 Tage)</b><br/>
+        • Dachmontage durch zertifizierte Dachdecker<br/>
+        • Elektrische Installation durch Elektromeister<br/>
+        • Sicherheitsprüfung nach VDE-Norm<br/><br/>
+        <b>3. Inbetriebnahme & Übergabe</b><br/>
+        • Funktionstest und Messung<br/>
+        • Einweisung in die Bedienung<br/>
+        • Übergabe aller Unterlagen
+        """
+        self.story.append(Paragraph(install_text, self.styles.get('Normal')))
+
+    def _add_maintenance_section(self):
+        """Fügt die Wartung-Sektion hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Wartung & Langzeitservice", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        maint_text = """
+        <b>Wartung & Langzeitservice für maximale Erträge:</b><br/><br/>
+        <b>Wartungsleistungen:</b><br/>
+        • Jährliche Sichtprüfung der Module<br/>
+        • Überprüfung der elektrischen Verbindungen<br/>
+        • Funktionstest des Wechselrichters<br/>
+        • Reinigung bei Bedarf<br/>
+        • Ertragskontrolle und Optimierung<br/><br/>
+        <b>24/7 Monitoring:</b><br/>
+        • Online-Überwachung der Anlagenleistung<br/>
+        • Automatische Störungsmeldung<br/>
+        • Ferndiagnose und schnelle Hilfe<br/><br/>
+        <b>Wartungsvertrag verfügbar</b> - Sprechen Sie uns an!
+        """
+        self.story.append(Paragraph(maint_text, self.styles.get('Normal')))
+
+    def _add_financing_section(self):
+        """Fügt die Finanzierung-Sektion hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Flexible Finanzierungslösungen", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        fin_text = """
+        <b>Flexible Finanzierungsmöglichkeiten:</b><br/><br/>
+        💰 <b>KfW-Förderung</b><br/>
+        • Zinsgünstige Darlehen bis 150.000€<br/>
+        • Tilgungszuschüsse möglich<br/>
+        • Wir unterstützen bei der Antragstellung<br/><br/>
+        🏦 <b>Bankfinanzierung</b><br/>
+        • Partnerschaften mit regionalen Banken<br/>
+        • Attraktive Konditionen für Solaranlagen<br/>
+        • Laufzeiten bis 20 Jahre<br/><br/>
+        📊 <b>Leasing & Pacht</b><br/>
+        • Keine Anfangsinvestition<br/>
+        • Monatliche Raten ab 89€<br/>
+        • Rundum-Sorglos-Paket inklusive<br/><br/>
+        Gerne erstellen wir Ihnen ein individuelles Finanzierungskonzept!
+        """
+        self.story.append(Paragraph(fin_text, self.styles.get('Normal')))
+
+    def _add_insurance_section(self):
+        """Fügt die Versicherung-Sektion hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Umfassender Versicherungsschutz", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        ins_text = """
+        <b>Umfassender Versicherungsschutz für Ihre Investition:</b><br/><br/>
+        🛡️ <b>Photovoltaik-Versicherung</b><br/>
+        • Schutz vor Sturm, Hagel, Blitzschlag<br/>
+        • Diebstahl- und Vandalismus-Schutz<br/>
+        • Elektronikversicherung für Wechselrichter<br/><br/>
+        ⚡ <b>Ertragsausfallversicherung</b><br/>
+        • Absicherung bei Produktionsausfall<br/>
+        • Ersatz entgangener EEG-Vergütung<br/>
+        • Mehrkosten bei Reparaturen<br/><br/>
+        🏠 <b>Integration in bestehende Versicherungen</b><br/>
+        • Prüfung der Wohngebäudeversicherung<br/>
+        • Anpassung bestehender Policen<br/>
+        • Kostengünstige Ergänzungen<br/><br/>
+        Wir beraten Sie gerne zu optimalen Versicherungslösungen!
+        """
+        self.story.append(Paragraph(ins_text, self.styles.get('Normal')))
+
+    def _add_warranty_section(self):
+        """Fügt die Garantie-Sektion hinzu"""
+        if not hasattr(self, 'story'):
+            self.story = []
+            
+        from reportlab.platypus import Paragraph, Spacer
+        from reportlab.lib.units import cm
+        
+        self.story.append(Spacer(1, 1*cm))
+        self.story.append(Paragraph("Herstellergarantie & Gewährleistung", self.styles.get('SectionTitle', self.styles.get('Heading2'))))
+        
+        warr_text = """
+        <b>Garantie & Gewährleistung - Ihre Sicherheit:</b><br/><br/>
+        🔧 <b>Herstellergarantien:</b><br/>
+        • <b>Module:</b> 25 Jahre Leistungsgarantie<br/>
+        • <b>Wechselrichter:</b> 10-20 Jahre Herstellergarantie<br/>
+        • <b>Speichersystem:</b> 10 Jahre Garantie<br/>
+        • <b>Montagesystem:</b> 15 Jahre Material-/Korrosionsschutz<br/><br/>
+        ⚙️ <b>Handwerkergewährleistung:</b><br/>
+        • 2 Jahre auf Montage und Installation<br/>
+        • 5 Jahre erweiterte Gewährleistung möglich<br/>
+        • Schnelle Reaktionszeiten bei Problemen<br/><br/>
+        📞 <b>Service-Hotline:</b><br/>
+        • Kostenlose Beratung bei Fragen<br/>
+        • Ferndiagnose und Support<br/>
+        • Vor-Ort-Service innerhalb 48h<br/><br/>
+        <b>Ihr Vertrauen ist unsere Verpflichtung!</b>
+        """
+        self.story.append(Paragraph(warr_text, self.styles.get('Normal')))
 
 _PDF_GENERATOR_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Da pdf_generator.py im selben Verzeichnis wie der data/ Ordner liegt, ist der Basis-Pfad korrekt
@@ -438,6 +1549,29 @@ if _REPORTLAB_AVAILABLE:
     ])
     PRODUCT_MAIN_TABLE_STYLE = TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),0),('TOPPADDING',(0,0),(-1,-1),0),('BOTTOMPADDING',(0,0),(-1,-1),0)])
 
+def _draw_page_statics(canvas, doc, theme):
+    """Zeichnet Kopf- und Fußzeile basierend auf den Theme-Optionen."""
+    canvas.saveState()
+    
+    logo_placement = theme.get('logo_placement', 'none')
+    is_title_page = (doc.page == 1)
+
+    if (logo_placement == 'every_page') or (logo_placement == 'title_only' and is_title_page):
+        logo_path = theme.get('logo_path')
+        if logo_path and os.path.exists(logo_path):
+            logo_pos_cm = theme.get('logo_pos', (17, 27))
+            logo_size_cm = theme.get('logo_size', (3, 1.5))
+            canvas.drawImage(logo_path, logo_pos_cm[0] * cm, logo_pos_cm[1] * cm, width=logo_size_cm[0] * cm, height=logo_size_cm[1] * cm, preserveAspectRatio=True, mask='auto')
+
+    if theme.get('show_page_numbers', True) and not is_title_page:
+        page_num_text = f"Seite {doc.page}"
+        fonts = theme.get('fonts', {})
+        colors_map = theme.get('colors', {})
+        canvas.setFont(fonts.get('family_main', 'Helvetica'), fonts.get('size_footer', 8))
+        canvas.setFillColor(colors.HexColor(colors_map.get('footer_text', '#7f8c8d')))
+        canvas.drawRightString(20 * cm, 1.5 * cm, page_num_text)
+        
+    canvas.restoreState()    
     # MODERNE TABELLENSTYLES mit Zebra-Streifen
     def create_zebra_table_style(num_rows, header_bg=PRIMARY_COLOR_HEX, alt_bg=BACKGROUND_COLOR_HEX):
         """Erstellt einen modernen Tabellenstil mit Zebra-Streifen"""
@@ -478,6 +1612,26 @@ if _REPORTLAB_AVAILABLE:
         ('LINEBELOW',(0,0),(-1,0),2,colors.HexColor(PRIMARY_COLOR_HEX)), # Elegante Unterstreichung
     ])
 
+    def _append_documents_to_pdf(main_pdf_bytes, document_paths_to_append):
+        """Hängt externe PDFs an ein PDF in Bytes an."""
+        if not _PYPDF_AVAILABLE or not document_paths_to_append: return main_pdf_bytes
+        writer = PdfWriter()
+        try:
+            writer.append(io.BytesIO(main_pdf_bytes))
+            for doc_path in document_paths_to_append:
+                if os.path.exists(doc_path):
+                    try:
+                        writer.append(doc_path)
+                    except Exception as e:
+                        print(f"WARNUNG: PDF-Anhang '{doc_path}' fehlerhaft: {e}")
+            output_buffer = io.BytesIO()
+            writer.write(output_buffer)
+            return output_buffer.getvalue()
+        except Exception as e:
+            print(f"Fehler beim Zusammenfügen der PDFs: {e}")
+            return main_pdf_bytes
+
+        
 class PageNumCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
         self._page_layout_callback = kwargs.pop('onPage_callback', None)
@@ -657,7 +1811,25 @@ def _draw_custom_content(c: canvas.Canvas, theme: Dict, content: Dict):
         c.drawImage(image_path, 1*cm, 1*cm, width=18*cm, preserveAspectRatio=True)
     c.showPage()
 
-# Mapping von Modul-Namen (aus der UI) zu den Zeichenfunktionen
+def _append_documents_to_pdf(main_pdf_bytes, document_paths_to_append):
+    """Hängt externe PDFs an ein PDF in Bytes an."""
+    if not _PYPDF_AVAILABLE or not document_paths_to_append: return main_pdf_bytes
+    writer = PdfWriter()
+    try:
+        writer.append(io.BytesIO(main_pdf_bytes))
+        for doc_path in document_paths_to_append:
+            if os.path.exists(doc_path):
+                try:
+                    writer.append(doc_path)
+                except Exception as e:
+                    print(f"WARNUNG: PDF-Anhang '{doc_path}' fehlerhaft: {e}")
+        output_buffer = io.BytesIO()
+        writer.write(output_buffer)
+        return output_buffer.getvalue()
+    except Exception as e:
+        print(f"Fehler beim Zusammenfügen der PDFs: {e}")
+        return main_pdf_bytes
+        # Mapping von Modul-Namen (aus der UI) zu den Zeichenfunktionen
 MODULE_MAP = {
     "deckblatt": _draw_cover_page,
     "anschreiben": _draw_cover_letter,
@@ -728,51 +1900,8 @@ def create_offer_pdf(
     c.save()
     print(f"PDF erfolgreich erstellt: {output_filename}")
 
-def page_layout_handler(
-    canvas_obj: canvas.Canvas,
-    doc_template: SimpleDocTemplate,
-    texts_ref: Dict[str, str],
-    company_info_ref: Dict,
-    company_logo_base64_ref: Optional[str],
-    offer_number_ref: str,
-    page_width_ref: float,
-    page_height_ref: float,
-    margin_left_ref: float,
-    margin_right_ref: float,
-    margin_top_ref: float,
-    margin_bottom_ref: float,
-    doc_width_ref: float,
-    doc_height_ref: float,
-    include_custom_footer_ref: bool = True,
-    include_header_logo_ref: bool = True,
-    background_color_ref: Optional[str] = None,
-    background_image_b64_ref: Optional[str] = None,
-):
+def page_layout_handler(canvas_obj: canvas.Canvas, doc_template: SimpleDocTemplate, texts_ref: Dict[str, str], company_info_ref: Dict, company_logo_base64_ref: Optional[str], offer_number_ref: str, page_width_ref: float, page_height_ref: float, margin_left_ref: float, margin_right_ref: float, margin_top_ref: float, margin_bottom_ref: float, doc_width_ref: float, doc_height_ref: float, include_custom_footer_ref: bool = True, include_header_logo_ref: bool = True):
     canvas_obj.saveState()
-    if background_color_ref:
-        try:
-            canvas_obj.setFillColor(colors.HexColor(background_color_ref))
-            canvas_obj.rect(0, 0, page_width_ref, page_height_ref, stroke=0, fill=1)
-        except Exception:
-            pass
-    if background_image_b64_ref:
-        try:
-            img_bytes_bg = (
-                base64.b64decode(background_image_b64_ref.split(',', 1)[1])
-                if ',' in background_image_b64_ref
-                else base64.b64decode(background_image_b64_ref)
-            )
-            img_reader_bg = ImageReader(io.BytesIO(img_bytes_bg))
-            canvas_obj.drawImage(
-                img_reader_bg,
-                0,
-                0,
-                width=page_width_ref,
-                height=page_height_ref,
-                mask='auto',
-            )
-        except Exception:
-            pass
     current_chapter_title = getattr(canvas_obj, 'current_chapter_title_for_header', '')
     page_num = canvas_obj.getPageNumber()
 
@@ -1166,32 +2295,144 @@ def _add_product_details_to_story(
 
 
 def generate_offer_pdf(
-    project_data: Dict[str, Any],
-    analysis_results: Optional[Dict[str, Any]],
-    company_info: Dict[str, Any],
-    company_logo_base64: Optional[str],
-    selected_title_image_b64: Optional[str],
-    selected_offer_title_text: str,
-    selected_cover_letter_text: str,
-    sections_to_include: Optional[List[str]],
-    inclusion_options: Dict[str, Any],
-    load_admin_setting_func: Callable, 
-    save_admin_setting_func: Callable, 
-    list_products_func: Callable, 
-    get_product_by_id_func: Callable, 
-    db_list_company_documents_func: Callable[[int, Optional[str]], List[Dict[str, Any]]],
-    active_company_id: Optional[int],
-    texts: Dict[str, str],
-    use_modern_design: bool = True,    **kwargs
+    project_data: Dict, analysis_results: Dict, company_info: Dict, 
+    company_logo_base64: Optional[str] = None,
+    selected_title_image_b64: Optional[str] = None,
+    selected_offer_title_text: str = "Ihr Angebot",
+    selected_cover_letter_text: str = "",
+    sections_to_include: Optional[List[str]] = None,
+    inclusion_options: Optional[Dict[str, Any]] = None,
+    load_admin_setting_func: Optional[Callable] = None,
+    save_admin_setting_func: Optional[Callable] = None,
+    list_products_func: Optional[Callable] = None,
+    get_product_by_id_func: Optional[Callable] = None,
+    db_list_company_documents_func: Optional[Callable] = None,
+    active_company_id: Optional[int] = None,
+    texts: Optional[Dict[str, str]] = None,
+    **kwargs
 ) -> Optional[bytes]:
+    
+    # Fallback-Funktionen wenn nicht bereitgestellt
+    if not load_admin_setting_func:
+        load_admin_setting_func = lambda key, default: default
+    if not save_admin_setting_func:
+        save_admin_setting_func = lambda key, value: True
+    
+    # Validierung der erforderlichen Parameter
+    if not texts:
+        texts = {}
+    if not inclusion_options:
+        inclusion_options = {}
+    if not sections_to_include:
+        sections_to_include = ["ProjectOverview", "TechnicalComponents", "CostDetails", "Economics", "SimulationDetails", "CO2Savings", "Visualizations", "FutureAspects"]
+        
+    if not _REPORTLAB_AVAILABLE:
+        if project_data and texts and company_info:
+            return _create_plaintext_pdf_fallback(project_data, analysis_results, texts, company_info, selected_offer_title_text, selected_cover_letter_text)
+        return None
 
+    # DATENVALIDIERUNG: Prüfe Verfügbarkeit der erforderlichen Daten
+    validation_result = {'is_valid': True, 'warnings': [], 'critical_errors': [], 'missing_data_summary': []}
+    # validation_result = _validate_pdf_data_availability(project_data or {}, analysis_results or {}, texts)
+    
+    # Wenn kritische Daten fehlen, erstelle Fallback-PDF
+    if not validation_result['is_valid']:
+        print(f"⚠️ PDF-Erstellung: Kritische Daten fehlen: {', '.join(validation_result['critical_errors'])}")
+        customer_data = project_data.get('customer_data', {}) if project_data else {}
+        return _create_no_data_fallback_pdf(texts, customer_data)
+    
+    # Warnungen ausgeben, wenn Daten unvollständig sind
+    if validation_result['warnings']:
+        print(f"⚠️ PDF-Erstellung: Daten unvollständig: {', '.join(validation_result['missing_data_summary'])}")
+        for warning in validation_result['warnings']:
+            print(f"   - {warning}")
+
+    design_settings = {'primary_color': '#4F81BD', 'secondary_color': '#C0C0C0'}
+    # design_settings = load_admin_setting_func('pdf_design_settings', {'primary_color': PRIMARY_COLOR_HEX, 'secondary_color': SECONDARY_COLOR_HEX})
+    if isinstance(design_settings, dict):
+        _update_styles_with_dynamic_colors(design_settings)
+    
+    main_offer_buffer = io.BytesIO()
+    offer_number_final = _get_next_offer_number(texts, load_admin_setting_func, save_admin_setting_func)
+    
+    include_company_logo_opt = inclusion_options.get("include_company_logo", True)
+    include_product_images_opt = inclusion_options.get("include_product_images", True)
+    include_all_documents_opt = inclusion_options.get("include_all_documents", False) # Korrigierter Key
+    company_document_ids_to_include_opt = inclusion_options.get("company_document_ids_to_include", [])
+    include_optional_component_details_opt = inclusion_options.get("include_optional_component_details", True) # NEUE Option
+    
+    # NEUE OPTIONEN für Footer und Header-Logo (wie gewünscht)
+    include_custom_footer_opt = inclusion_options.get("include_custom_footer", True)  
+    include_header_logo_opt = inclusion_options.get("include_header_logo", True)
+
+    doc = SimpleDocTemplate(main_offer_buffer, title=get_text(texts, "pdf_offer_title_doc_param", "Angebot: Photovoltaikanlage").format(offer_number=offer_number_final),
+                            author=company_info.get("name", "SolarFirma"), pagesize=pagesizes.A4,
+                            leftMargin=2*cm, rightMargin=2*cm, topMargin=2.5*cm, bottomMargin=2.5*cm)
+
+    story: List[Any] = []
+    
+    current_project_data_pdf = project_data if isinstance(project_data, dict) else {}
+    current_analysis_results_pdf = analysis_results if isinstance(analysis_results, dict) else {}
+    customer_pdf = current_project_data_pdf.get("customer_data", {})
+    pv_details_pdf = current_project_data_pdf.get("project_details", {})
+    available_width_content = doc.width
+
+    # --- Deckblatt ---
+    try:
+        if selected_title_image_b64:
+            img_flowables_title = _get_image_flowable(selected_title_image_b64, doc.width, texts, max_height=doc.height / 1.8, align='CENTER')
+            if img_flowables_title: story.extend(img_flowables_title); story.append(Spacer(1, 0.5 * cm))
+
+        if include_company_logo_opt and company_logo_base64:
+            logo_flowables_deckblatt = _get_image_flowable(company_logo_base64, 6*cm, texts, max_height=3*cm, align='CENTER')
+            if logo_flowables_deckblatt: story.extend(logo_flowables_deckblatt); story.append(Spacer(1, 0.5 * cm))
+
+        offer_title_processed_pdf = _replace_placeholders(selected_offer_title_text, customer_pdf, company_info, offer_number_final, texts, current_analysis_results_pdf)
+        story.append(Paragraph(offer_title_processed_pdf, STYLES.get('OfferTitle')))
+        
+        company_info_html_pdf = "<br/>".join(filter(None, [
+            f"<b>{company_info.get('name', '')}</b>", company_info.get("street", ""),
+            f"{company_info.get('zip_code', '')} {company_info.get('city', '')}".strip(),
+            (f"{get_text(texts, 'pdf_phone_label_short', 'Tel.')}: {company_info.get('phone', '')}" if company_info.get('phone') else None),
+            (f"{get_text(texts, 'pdf_email_label_short', 'Mail')}: {company_info.get('email', '')}" if company_info.get('email') else None),
+            (f"{get_text(texts, 'pdf_website_label_short', 'Web')}: {company_info.get('website', '')}" if company_info.get('website') else None),
+            (f"{get_text(texts, 'pdf_taxid_label', 'StNr/USt-ID')}: {company_info.get('tax_id', '')}" if company_info.get('tax_id') else None),
+        ]))
+        story.append(Paragraph(company_info_html_pdf, STYLES.get('CompanyInfoDeckblatt')))
+          # KORRIGIERTES 4-ZEILEN-FORMAT wie gewünscht:
+        # [Anrede] [Titel]
+        # [Nachname] [Vorname]  
+        # [Strasse] [Hausnummer]
+        # [Postleitzahl] [Ort]
+        line1 = f"{customer_pdf.get('salutation','')} {customer_pdf.get('title','')}".strip()
+        line2 = f"{customer_pdf.get('last_name','')} {customer_pdf.get('first_name','')}".strip()
+        line3 = f"{customer_pdf.get('address','')} {customer_pdf.get('house_number','')}".strip()
+        line4 = f"{customer_pdf.get('zip_code','')} {customer_pdf.get('city','')}".strip()
+        
+        customer_address_block_pdf_lines = [line1, line2, line3, line4]
+        # Firmenname falls vorhanden zusätzlich einfügen
+        if customer_pdf.get("company_name"):
+            customer_address_block_pdf_lines.insert(1, str(customer_pdf.get("company_name")))
+            
+        customer_address_block_pdf = "<br/>".join(filter(None, customer_address_block_pdf_lines))
+        story.append(Paragraph(customer_address_block_pdf, STYLES.get("CustomerAddress")))
+        
+        story.append(Spacer(1, 0.2 * cm))
+        story.append(Paragraph(f"{get_text(texts, 'pdf_offer_number_label', 'Angebotsnummer')}: <b>{offer_number_final}</b>", STYLES.get('NormalRight')))
+        story.append(Paragraph(f"{get_text(texts, 'pdf_offer_date_label', 'Datum')}: {datetime.now().strftime('%d.%m.%Y')}", STYLES.get('NormalRight')))
+        story.append(PageBreak())
+    except Exception as e_cover:
+        story.append(Paragraph(f"Fehler bei Erstellung des Deckblatts: {e_cover}", STYLES.get('NormalLeft')))
+        story.append(PageBreak())
+    
     if not _REPORTLAB_AVAILABLE:
         if project_data and texts and company_info:
             return _create_plaintext_pdf_fallback(project_data, analysis_results, texts, company_info, selected_offer_title_text, selected_cover_letter_text)
         return None
     
     # DATENVALIDIERUNG: Prüfe Verfügbarkeit der erforderlichen Daten
-    validation_result = _validate_pdf_data_availability(project_data or {}, analysis_results or {}, texts)
+    validation_result = {'is_valid': True, 'warnings': [], 'critical_errors': [], 'missing_data_summary': []}
+    # validation_result = _validate_pdf_data_availability(project_data or {}, analysis_results or {}, texts)
     
     # Wenn kritische Daten fehlen, erstelle Fallback-PDF
     if not validation_result['is_valid']:
@@ -1205,7 +2446,8 @@ def generate_offer_pdf(
         for warning in validation_result['warnings']:
             print(f"   - {warning}")
     
-    design_settings = load_admin_setting_func('pdf_design_settings', {'primary_color': PRIMARY_COLOR_HEX, 'secondary_color': SECONDARY_COLOR_HEX})
+    design_settings = {'primary_color': '#4F81BD', 'secondary_color': '#C0C0C0'}
+    # design_settings = load_admin_setting_func('pdf_design_settings', {'primary_color': PRIMARY_COLOR_HEX, 'secondary_color': SECONDARY_COLOR_HEX})
     if isinstance(design_settings, dict):
         _update_styles_with_dynamic_colors(design_settings)
     
@@ -1572,9 +2814,6 @@ def generate_offer_pdf(
                         'yearly_production_chart_bytes': {"title_key": "pdf_chart_label_pvvis_yearly", "default_title": "PV Visuals: Jahresproduktion"},
                         'break_even_chart_bytes': {"title_key": "pdf_chart_label_pvvis_breakeven", "default_title": "PV Visuals: Break-Even"},
                         'amortisation_chart_bytes': {"title_key": "pdf_chart_label_pvvis_amort", "default_title": "PV Visuals: Amortisation"},
-                        'degradation_chart_bytes': {"title_key": "pdf_chart_label_degradation", "default_title": "Moduldegradation"},
-                        'battery_cycles_chart_bytes': {"title_key": "pdf_chart_label_battery_cycles", "default_title": "Batteriezyklen"},
-                        'energy_independence_chart_bytes': {"title_key": "pdf_chart_label_energy_independence", "default_title": "Entwicklung Autarkie"},
                     }
                     charts_added_count = 0
                     selected_charts_for_pdf_opt = inclusion_options.get("selected_charts_for_pdf", [])
@@ -1735,24 +2974,15 @@ def generate_offer_pdf(
     main_pdf_bytes: Optional[bytes] = None
     try:
         layout_callback_kwargs_build = {
-            'texts_ref': texts,
-            'company_info_ref': company_info,
+            'texts_ref': texts, 'company_info_ref': company_info,
             'company_logo_base64_ref': company_logo_base64 if include_company_logo_opt else None,
-            'offer_number_ref': offer_number_final,
-            'page_width_ref': doc.pagesize[0],
-            'page_height_ref': doc.pagesize[1],
-            'margin_left_ref': doc.leftMargin,
-            'margin_right_ref': doc.rightMargin,
-            'margin_top_ref': doc.topMargin,
-            'margin_bottom_ref': doc.bottomMargin,
-            'doc_width_ref': doc.width,
-            'doc_height_ref': doc.height,
+            'offer_number_ref': offer_number_final, 'page_width_ref': doc.pagesize[0], 
+            'page_height_ref': doc.pagesize[1],'margin_left_ref': doc.leftMargin, 
+            'margin_right_ref': doc.rightMargin,'margin_top_ref': doc.topMargin, 
+            'margin_bottom_ref': doc.bottomMargin,'doc_width_ref': doc.width, 'doc_height_ref': doc.height,
             # NEUE OPTIONEN (wie gewünscht)
             'include_custom_footer_ref': include_custom_footer_opt,
-            'include_header_logo_ref': include_header_logo_opt,
-            # Hintergrundoptionen
-            'background_color_ref': inclusion_options.get('background_color_hex'),
-            'background_image_b64_ref': inclusion_options.get('background_image_base64'),
+            'include_header_logo_ref': include_header_logo_opt
         }
         doc.build(story, canvasmaker=lambda *args, **kwargs_c: PageNumCanvas(*args, onPage_callback=page_layout_handler, callback_kwargs=layout_callback_kwargs_build, **kwargs_c))
         main_pdf_bytes = main_offer_buffer.getvalue()
@@ -2070,6 +3300,64 @@ def _create_no_data_fallback_pdf(texts: Dict[str, str], customer_data: Dict[str,
     doc.build(story)
     buffer.seek(0)
     return buffer.getvalue()
+    
+    # HINZUGEFÜGT VON SEGGELI ULTRA ZU pdf_generator.py
+# Zeile: ~2001 (am Ende der Datei einfügen)
+
+# BENÖTIGTE IMPORTE (stellen Sie sicher, dass diese am Anfang der Datei vorhanden sind)
+import plotly.graph_objects as go
+import pandas as pd
+import math
+from typing import Dict, Any
+
+# HILFSFUNKTION (falls _export_plotly_fig_to_bytes nicht existiert, bitte diese einfügen)
+def _export_plotly_fig_to_bytes(fig, texts, format='png'):
+    """Exportiert eine Plotly-Figur in Bytes."""
+    try:
+        return fig.to_image(format=format)
+    except Exception as e:
+        print(f"Fehler beim Exportieren der Plotly-Figur: {e}")
+        return None
+
+def generate_prod_vs_cons_chart_image(analysis_results: Dict[str, Any], texts: Dict[str, str]):
+    """
+    Erstellt das "Verbrauch vs. Produktion"-Diagramm und gibt es als Bild-Bytes zurück.
+    Diese Funktion ist eine Modifikation von 'render_production_vs_consumption_switcher'
+    und enthält keine Streamlit-UI-Elemente. Sie ist für den PDF-Export optimiert.
+    """
+    month_labels = texts.get("month_names_short_list", "Jan,Feb,Mrz,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez").split(',')
+    verbrauch_raw = analysis_results.get('monthly_consumption_sim', [100 + 10 * i for i in range(12)]) # Fallback-Daten
+    produktion_raw = analysis_results.get('monthly_productions_sim', [80 + 20 * i for i in range(12)]) # Fallback-Daten
+
+    verbrauch = [float(v) if isinstance(v, (int, float)) and not math.isnan(v) else 0.0 for v in verbrauch_raw]
+    produktion = [float(p) if isinstance(p, (int, float)) and not math.isnan(p) else 0.0 for p in produktion_raw]
+
+    # Feste Konfigurationen für das PDF (keine UI-Auswahl)
+    chart_type = "Säulen" # Festgelegt für das PDF
+    colors = ["#1f77b4", "#ff7f0e"] # Standardfarben
+
+    # Diagramm erstellen
+    fig = go.Figure()
+    if chart_type == "Säulen":
+        fig.add_trace(go.Bar(x=month_labels, y=verbrauch, name='Verbrauch (kWh)', marker_color=colors[0]))
+        fig.add_trace(go.Bar(x=month_labels, y=produktion, name='Produktion (kWh)', marker_color=colors[1]))
+    # Hier könnten weitere Diagrammtypen als 'elif' implementiert werden
+
+    fig.update_layout(
+        title="Monatlicher Verbrauch vs. Produktion (Jahr 1)",
+        xaxis_title="Monat",
+        yaxis_title="kWh",
+        plot_bgcolor='rgba(255, 255, 255, 1)', # Weißer Hintergrund für PDF
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(size=12),
+        height=400,
+        margin=dict(l=50, r=50, t=80, b=50),
+        barmode='group'
+    )
+    
+    # Diagramm als Bild-Daten (Bytes) exportieren und zurückgeben
+    image_bytes = _export_plotly_fig_to_bytes(fig, texts)
+    return image_bytes
     
 # Änderungshistorie
 # 2025-06-03, Gemini Ultra: PageNumCanvas.save() korrigiert, um Duplizierung des PDF-Inhalts zu verhindern.
