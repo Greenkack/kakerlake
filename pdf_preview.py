@@ -12,15 +12,37 @@ import io
 from datetime import datetime
 import time
 
+
 try:
     from pdf_generator import generate_offer_pdf
+    PDF_GENERATOR_AVAILABLE = True
+except ImportError:
+    PDF_GENERATOR_AVAILABLE = False
+    def generate_offer_pdf(*args, **kwargs): return None
+
+try:
+    from reportlab.platypus import Table, TableStyle, Paragraph
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
     from reportlab.pdfgen import canvas
-    from PIL import Image
-    import fitz  # PyMuPDF für PDF-zu-Bild-Konvertierung
-    PDF_PREVIEW_AVAILABLE = True
+    REPORTLAB_AVAILABLE = True
 except ImportError:
-    PDF_PREVIEW_AVAILABLE = False
+    REPORTLAB_AVAILABLE = False
+    # Erstelle Dummy-Klassen, wenn ReportLab nicht installiert ist
+    class Table: pass
+    class TableStyle: pass
+    class Paragraph: pass
+    def getSampleStyleSheet(): return {}
+
+PDF_PREVIEW_AVAILABLE = PDF_GENERATOR_AVAILABLE and REPORTLAB_AVAILABLE
+
+try:
+    from PIL import Image
+    import fitz  # PyMuPDF
+    _VISUAL_LIBS_AVAILABLE = True
+except ImportError:
+    _VISUAL_LIBS_AVAILABLE = False
 
 class PDFPreviewEngine:
     """Engine für PDF-Vorschau mit Cache und Optimierungen"""
@@ -41,7 +63,11 @@ class PDFPreviewEngine:
     ) -> Optional[bytes]:
         """Generiert ein Vorschau-PDF"""
         try:
-            # Cache-Key erstellen
+            from pdf_generator import generate_offer_pdf
+            
+            # Cache-Key erstellen (vereinfacht, kann erweitert werden)
+            project_data = kwargs.get('project_data', {})
+            inclusion_options = kwargs.get('inclusion_options', {})
             cache_key = self._create_cache_key(project_data, inclusion_options)
             
             # Aus Cache laden wenn vorhanden
@@ -116,7 +142,7 @@ def render_pdf_preview_interface(
 ):
     """Rendert die erweiterte PDF-Vorschau-Oberfläche"""
     
-    st.subheader("PDF-Vorschau & Bearbeitung")
+    st.subheader("👁️ PDF-Vorschau & Bearbeitung")
     
     if not PDF_PREVIEW_AVAILABLE:
         st.error("PDF-Vorschau nicht verfügbar. Bitte installieren Sie PyMuPDF: `pip install pymupdf`")
@@ -131,8 +157,71 @@ def render_pdf_preview_interface(
     # Layout: Sidebar für Optionen, Hauptbereich für Vorschau
     col1, col2 = st.columns([1, 2])
     
+    with st.expander("Vorschau-Einstellungen", expanded=True):
+        preview_mode = st.radio("Vorschau-Modus", ["Schnell (erste 3 Seiten)", "Vollständig (eingebettet)"], horizontal=True)
+        # Erste Instanz: Einfacher Button
+        update_preview = st.button("🔄 Vorschau aktualisieren", use_container_width=True, key="preview_update_simple")
+    if update_preview or 'preview_pdf_bytes' not in st.session_state:
+        with st.spinner("Generiere Vorschau..."):
+            # Holen der aktuellen UI-Einstellungen
+            theme_name = st.session_state.get('pdf_theme_name', 'Blau Elegant')
+            
+            # Standard inclusion_options bereitstellen falls nicht verfügbar
+            inclusion_options = st.session_state.get('pdf_inclusion_options', {
+                "include_company_logo": True,
+                "include_product_images": True,
+                "include_all_documents": False,
+                "company_document_ids_to_include": [],
+                "selected_charts_for_pdf": [],
+                "include_optional_component_details": True,
+                "include_custom_footer": True,
+                "include_header_logo": True
+            })
+            
+            # Alle notwendigen Parameter für den finalen Generator zusammenstellen
+            pdf_generation_params = {
+                "project_data": project_data,
+                "analysis_results": analysis_results,
+                "company_info": company_info,
+                "inclusion_options": inclusion_options,  # WICHTIG: Fehlender Parameter hinzugefügt
+                "texts": texts,
+                "theme_name": theme_name,
+                # Weitere Parameter aus Session State
+                "selected_title_image_b64": st.session_state.get('selected_title_image_b64_data_doc_output'),
+                "selected_offer_title_text": st.session_state.get('selected_offer_title_text_content_doc_output', 'Ihr Angebot'),
+                "selected_cover_letter_text": st.session_state.get('selected_cover_letter_text_content_doc_output', 'Sehr geehrte Damen und Herren,'),
+                "sections_to_include": st.session_state.get('pdf_selected_main_sections', ["ProjectOverview", "TechnicalComponents", "CostDetails"])
+            }
+
+            # PDF über die Engine generieren
+            pdf_bytes = engine.generate_preview_pdf(**pdf_generation_params)
+            
+            if pdf_bytes:
+                st.session_state.preview_pdf_bytes = pdf_bytes
+                st.success("✅ Vorschau aktualisiert")
+            else:
+                st.error("❌ Fehler bei der Vorschau-Generierung")
+
+    # --- Vorschau anzeigen ---
+    if 'preview_pdf_bytes' in st.session_state:
+        pdf_bytes = st.session_state.preview_pdf_bytes
+        
+        if preview_mode == "Schnell (erste 3 Seiten)":
+            images = engine.pdf_to_images(pdf_bytes, max_pages=3)
+            if images:
+                for idx, img in enumerate(images):
+                    st.markdown(f"**Seite {idx + 1}**")
+                    st.image(img, use_column_width=True)
+                    st.markdown("---")
+            else:
+                st.warning("Vorschau-Bilder konnten nicht erstellt werden.")
+        else: # Vollständige Vorschau
+            base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800" type="application/pdf"></iframe>'
+            st.markdown(pdf_display, unsafe_allow_html=True)
+    
     with col1:
-        st.markdown("### Vorschau-Optionen")
+        st.markdown("### ⚙️ Vorschau-Optionen")
         
         # Schnelloptionen
         preview_mode = st.radio(
@@ -157,7 +246,7 @@ def render_pdf_preview_interface(
         )
         
         # Anzeigeoptionen
-        st.markdown("### Anzeigeoptionen")
+        st.markdown("### 🎨 Anzeigeoptionen")
         
         preview_zoom = st.slider(
             "Zoom (%)",
@@ -174,13 +263,14 @@ def render_pdf_preview_interface(
         
         # Manuelle Aktualisierung
         update_preview = st.button(
-            "Vorschau aktualisieren",
+            "🔄 Vorschau aktualisieren",
             use_container_width=True,
-            disabled=auto_update
+            disabled=auto_update,
+            key="preview_update_manual"
         )
     
     with col2:
-        st.markdown("###  PDF-Vorschau")
+        st.markdown("### 📄 PDF-Vorschau")
         
         # Vorschau-Container
         preview_container = st.container()
@@ -219,9 +309,9 @@ def render_pdf_preview_interface(
                 
                 if pdf_bytes:
                     st.session_state.preview_pdf_bytes = pdf_bytes
-                    st.success("Vorschau aktualisiert")
+                    st.success("✅ Vorschau aktualisiert")
                 else:
-                    st.error("Fehler bei der PDF-Generierung")
+                    st.error("❌ Fehler bei der PDF-Generierung")
                     return None
         
         # Vorschau anzeigen
@@ -271,7 +361,7 @@ def render_pdf_preview_interface(
                             st.session_state.preview_current_page = 0
                         
                         with col_prev:
-                            if st.button("⬅Zurück", disabled=st.session_state.preview_current_page == 0):
+                            if st.button("⬅️ Zurück", disabled=st.session_state.preview_current_page == 0, key="preview_page_back"):
                                 st.session_state.preview_current_page -= 1
                                 st.rerun()
                         
@@ -288,7 +378,7 @@ def render_pdf_preview_interface(
                                 st.rerun()
                         
                         with col_next:
-                            if st.button("Weiter", disabled=st.session_state.preview_current_page >= total_pages - 1):
+                            if st.button("Weiter ➡️", disabled=st.session_state.preview_current_page >= total_pages - 1, key="preview_page_forward"):
                                 st.session_state.preview_current_page += 1
                                 st.rerun()
                         
@@ -305,7 +395,7 @@ def render_pdf_preview_interface(
         if 'preview_pdf_bytes' in st.session_state:
             st.markdown("---")
             st.download_button(
-                label="Vorschau-PDF herunterladen",
+                label="📥 Vorschau-PDF herunterladen",
                 data=st.session_state.preview_pdf_bytes,
                 file_name=f"Vorschau_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
                 mime="application/pdf",
