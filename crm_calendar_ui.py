@@ -31,14 +31,14 @@ class CRMCalendar:
     
     def render_calendar_interface(self, texts: Dict[str, str]):
         """Rendert die Kalender-Hauptoberfläche"""
-        st.header("CRM Kalender & Termine")
+        st.header("📅 CRM Kalender & Termine")
         
         if not DATABASE_AVAILABLE:
             st.error("Datenbankverbindung nicht verfügbar")
             return
         
         # Tabs für verschiedene Ansichten
-        tab1, tab2, tab3 = st.tabs(["Kalenderansicht", "Neuer Termin", "Terminliste"])
+        tab1, tab2, tab3 = st.tabs(["📅 Kalenderansicht", "➕ Neuer Termin", "📋 Terminliste"])
         
         with tab1:
             self._render_calendar_view()
@@ -51,7 +51,7 @@ class CRMCalendar:
     
     def _render_calendar_view(self):
         """Rendert die Kalenderansicht"""
-        st.subheader("Monatsansicht")
+        st.subheader("📅 Monatsansicht")
         
         # Datum-Navigation
         col1, col2, col3 = st.columns([1, 2, 1])
@@ -99,7 +99,7 @@ class CRMCalendar:
         self._render_calendar_grid(st.session_state.calendar_date)
         
         # Heute-Button
-        if st.button("Heute"):
+        if st.button("📍 Heute"):
             st.session_state.calendar_date = datetime.now().replace(day=1)
             st.rerun()
     
@@ -157,7 +157,7 @@ class CRMCalendar:
     
     def _render_new_appointment_form(self):
         """Rendert das Formular für neue Termine"""
-        st.subheader("Neuen Termin erstellen")
+        st.subheader("➕ Neuen Termin erstellen")
         
         with st.form("new_appointment_form"):
             col1, col2 = st.columns(2)
@@ -231,7 +231,7 @@ class CRMCalendar:
             
             notes = st.text_area("Notizen", placeholder="Zusätzliche Informationen zum Termin")
             
-            submitted = st.form_submit_button("Termin erstellen", type="primary")
+            submitted = st.form_submit_button("📅 Termin erstellen", type="primary")
             
             if submitted:
                 if title and appointment_date and appointment_time:
@@ -250,16 +250,16 @@ class CRMCalendar:
                     }
                     
                     if self._create_appointment(appointment_data):
-                        st.success("Termin wurde erfolgreich erstellt!")
+                        st.success("✅ Termin wurde erfolgreich erstellt!")
                         st.rerun()
                     else:
-                        st.error("Fehler beim Erstellen des Termins")
+                        st.error("❌ Fehler beim Erstellen des Termins")
                 else:
                     st.error("Bitte füllen Sie alle Pflichtfelder aus")
     
     def _render_appointment_list(self):
         """Rendert die Terminliste"""
-        st.subheader("Alle Termine")
+        st.subheader("📋 Alle Termine")
         
         # Filter-Optionen
         col1, col2, col3 = st.columns(3)
@@ -315,9 +315,9 @@ class CRMCalendar:
             with col1:
                 st.markdown(f"**{apt_type['icon']} {appointment['title']}**")
                 if appointment.get('customer_name'):
-                    st.caption(f"{appointment['customer_name']}")
+                    st.caption(f"👤 {appointment['customer_name']}")
                 if appointment.get('location'):
-                    st.caption(f"{appointment['location']}")
+                    st.caption(f"📍 {appointment['location']}")
             
             with col2:
                 st.markdown(f"📅 {appointment['appointment_date'].strftime('%d.%m.%Y')}")
@@ -331,7 +331,7 @@ class CRMCalendar:
                 }
                 status_color = status_colors.get(appointment['status'], '⚪')
                 st.markdown(f"{status_color} {appointment['status'].title()}")
-                st.caption(f"⏱{appointment['duration_minutes']} Min.")
+                st.caption(f"⏱️ {appointment['duration_minutes']} Min.")
             
             with col4:
                 if st.button("✏️", key=f"edit_{appointment['id']}", help="Bearbeiten"):
@@ -344,7 +344,7 @@ class CRMCalendar:
                         st.rerun()
             
             if appointment.get('notes'):
-                st.caption(f"{appointment['notes']}")
+                st.caption(f"📝 {appointment['notes']}")
             
             st.markdown("---")
     
@@ -547,6 +547,69 @@ def render_crm_calendar(texts: Dict[str, str], module_name: Optional[str] = None
     calendar_manager = CRMCalendar()
     calendar_manager.render_calendar_interface(texts)
 
+def render_calendar_ui(): # Beispiel für Ihre Haupt-UI-Funktion
+    st.title("🗓️ Kalender & Terminplanung")
+
+    # ... (Ihr bestehender Code für die Kalenderanzeige) ...
+    st.write("Ihre geplanten Aktivitäten:")
+    
+    st.markdown("---")
+    
+    # --- PLATZHALTER FÜR GOOGLE KALENDER IMPORT by Seggeli Ultra ---
+    with st.expander("📅 Google Kalender Import (Live-Synchronisation)", expanded=True):
+        st.info("Hier werden Termine aus Ihrem verbundenen Google Kalender angezeigt. Klicken Sie, um einen Termin als neuen Lead im CRM zu speichern.")
+        
+        # PLATZHALTER: Hier würde der API-Aufruf an Google stattfinden.
+        # Wir simulieren die Antwort mit Beispieldaten.
+        google_events = [
+            {'summary': 'Erstberatung mit Familie Huber', 'description': 'Thema: PV-Anlage für Neubau.\nE-Mail: familie.huber@mail.de\nTel: 0176 98765432', 'start_time': datetime(2025, 8, 20, 11, 0).isoformat()},
+            {'summary': 'Technik-Check bei Solar Solutions GmbH', 'description': 'Kontakt: Herr Kurz\nE-Mail: kurz@solarsolutions.de', 'start_time': datetime(2025, 8, 21, 15, 0).isoformat()}
+        ]
+
+        # UI für jedes gefundene Event erstellen
+        for i, event in enumerate(google_events):
+            cols = st.columns([3, 1])
+            with cols[0]:
+                st.markdown(f"**{event['summary']}**")
+                st.caption(f"Zeitpunkt: {datetime.fromisoformat(event['start_time']).strftime('%d.%m.%Y %H:%M')}")
+            with cols[1]:
+                if st.button("Als Lead importieren", key=f"import_lead_btn_{i}"):
+                    try:
+                        conn = get_db_connection()
+                        cursor = conn.cursor()
+                        new_id = import_lead_from_calendar_event(cursor, event)
+                        conn.commit()
+                        conn.close()
+                        if new_id:
+                            st.success(f"Lead (ID: {new_id}) erfolgreich importiert!")
+                            st.rerun()
+                        else:
+                            st.error("Import fehlgeschlagen.")
+                    except Exception as e:
+                        st.error(f"DB-Fehler: {e}")
+
+        # Beispiel-Event 2
+        event2_data = {
+            'summary': 'Follow-Up bei Firma SolarTech GmbH',
+            'description': 'Thema: Angebotsdetails besprechen.\nKontakt: Herr Weber\nE-Mail: weber@solartech.de',
+            'start_time': datetime(2025, 8, 16, 14, 30).isoformat()
+        }
+        cols2 = st.columns([3, 1])
+        with cols2[0]:
+            st.write(f"**Titel:** {event2_data['summary']}")
+            st.caption(f"**Zeit:** {event2_data['start_time']}")
+        with cols2[1]:
+            if st.button("Als Lead importieren", key="import_lead_2"):
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                new_id = import_lead_from_calendar_event(cursor, event2_data)
+                conn.commit()
+                conn.close()
+                if new_id:
+                    st.success(f"Lead 'SolarTech GmbH' (ID: {new_id}) erfolgreich importiert!")
+                    st.rerun()
+                else:
+                    st.error("Import fehlgeschlagen.")
 # Änderungshistorie
 # 2025-06-21, Gemini Ultra: CRM Calendar UI implementiert
 #                           - Monatskalender mit Terminanzeige
