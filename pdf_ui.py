@@ -12,7 +12,9 @@ import base64
 import traceback
 import os
 import json
-from doc_output import _show_pdf_data_status
+import pandas as pd
+from datetime import datetime
+
 
 # --- Fallback-Funktionsreferenzen ---
 def _dummy_load_admin_setting_pdf_ui(key, default=None):
@@ -32,6 +34,7 @@ def _dummy_list_company_documents(company_id: int, doc_type: Optional[str]=None)
     return []
 
 _generate_offer_pdf_safe = _dummy_generate_offer_pdf
+
 try:
     from pdf_generator import generate_offer_pdf
     _generate_offer_pdf_safe = generate_offer_pdf
@@ -51,6 +54,41 @@ except (ImportError, ModuleNotFoundError):
     
     def create_pdf_template_presets():
         return {}
+
+try:
+    from doc_output import _show_pdf_data_status
+except ImportError:
+    def _show_pdf_data_status(*args, **kwargs):
+        st.warning("Datenstatus-Modul (doc_output) nicht gefunden.")
+        return True
+ 
+try:
+    from reportlab.platypus import Table, TableStyle, Paragraph
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib import colors
+except ImportError:
+    # Erstelle Dummy-Klassen, wenn ReportLab nicht installiert ist
+    class Table: pass
+    class TableStyle: pass
+    class Paragraph: pass
+    def getSampleStyleSheet(): return {}
+        
+# 🔥 PROFESSIONAL PDF GENERATOR INTEGRATION
+try:
+    from pdf_generator_professional import ProfessionalPDFGenerator
+    _PROFESSIONAL_PDF_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    _PROFESSIONAL_PDF_AVAILABLE = False
+    
+    class ProfessionalPDFGenerator:
+        def __init__(self, *args, **kwargs):
+            pass
+        def create_professional_pdf(self):
+            return None
+        def load_template_presets(self):
+            return {}
+        def save_template_preset(self, name, config):
+            return False
 
 # --- Hilfsfunktionen ---
 def get_text_pdf_ui(texts_dict: Dict[str, str], key: str, fallback_text: Optional[str] = None) -> str:
@@ -88,6 +126,272 @@ def render_pdf_ui(
         texts, project_data, analysis_results, 
         get_active_company_details_func, db_list_company_documents_func, get_product_by_id_func
     )
+    
+    # --- Dynamische Inhalte außerhalb der Form ---
+    st.subheader("🎨 Erweiterte Inhalte")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        # --- Frei gestaltbare Textbereiche ---
+        if 'custom_text_blocks' not in st.session_state: st.session_state.custom_text_blocks = []
+        if st.button("✍️ Freien Textbereich hinzufügen"):
+            st.session_state.custom_text_blocks.append({'title': '', 'content': ''})
+        
+    with col2:
+        # --- Frei einfügbare Bilder ---
+        if 'custom_images' not in st.session_state: st.session_state.custom_images = []
+        if st.button("🖼️ Weiteres Bild hinzufügen"):
+            st.session_state.custom_images.append({'title': '', 'description': '', 'data': None, 'filename': ''})
+
+    with st.form(key="pdf_final_form_seggeli_ultra"):
+        st.subheader("1. Design & Layout")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            # Design-Theme auswählen
+            theme_options = ["Blau Elegant", "Öko Grün", "Salt & Pepper"]
+            theme_name = st.selectbox(
+                "Design-Vorlage auswählen",
+                options=theme_options,
+                help="Wählen Sie das visuelle Erscheinungsbild Ihres PDFs. 'Salt & Pepper' ist eine minimalistische Text-Version."
+            )
+        
+        with col2:
+            # PDF-Qualität und Format
+            pdf_quality = st.selectbox(
+                "PDF-Qualität",
+                ["Standard", "Hoch", "Druck-Qualität"],
+                help="Höhere Qualität = größere Dateien, aber bessere Darstellung"
+            )
+        
+        st.markdown("---")
+        st.subheader("2. 📊 Inhalts-Optionen & Features")
+        
+        # Zwei umfassende Menü-Sektionen
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### 🎯 **Kern-Inhalte & Darstellung**")
+            
+            include_company_logo = st.checkbox(
+                "🏢 Firmenlogo anzeigen",
+                value=True,
+                help="Logo der aktiven Firma im PDF-Header"
+            )
+            
+            include_product_images = st.checkbox(
+                "📸 Produktbilder einbinden",
+                value=True,
+                help="Bilder der gewählten PV-Module, Wechselrichter etc."
+            )
+            
+            include_technical_specs = st.checkbox(
+                "⚙️ Detaillierte Technik-Spezifikationen",
+                value=True,
+                help="Umfassende technische Details zu allen Komponenten"
+            )
+            
+            include_cost_breakdown = st.checkbox(
+                "💰 Detaillierte Kostenaufschlüsselung",
+                value=True,
+                help="Aufschlüsselung nach Modulen, Wechselrichtern, Installation etc."
+            )
+            
+            include_charts_graphs = st.checkbox(
+                "📈 Wirtschaftlichkeits-Diagramme",
+                value=True,
+                help="ROI, Amortisation, Ersparnisse über die Zeit"
+            )
+            
+            include_co2_analysis = st.checkbox(
+                "🌱 CO₂-Einsparung & Nachhaltigkeit",
+                value=True,
+                help="Umweltbilanz und CO₂-Reduktion der Anlage"
+            )
+        
+        with col2:
+            st.markdown("#### 🔧 **Erweiterte Features & Anhänge**")
+            
+            include_simulation_details = st.checkbox(
+                "🔬 Detaillierte Simulationsergebnisse",
+                value=True,
+                help="Monats-/Jahresproduktion, Verbrauchsanalyse, Eigenverbrauch"
+            )
+            
+            include_roof_visualization = st.checkbox(
+                "🏠 Dachvisualisierung & Satellitenbilder",
+                value=True,
+                help="Satellitenaufnahme mit PV-Modulplatzierung"
+            )
+            
+            include_future_scenarios = st.checkbox(
+                "🔮 Zukunftsszenarien & Erweiterungen",
+                value=True,
+                help="E-Auto-Integration, Speicher-Upgrade, Strompreisentwicklung"
+            )
+            
+            include_legal_info = st.checkbox(
+                "📋 Rechtliche Hinweise & Garantien",
+                value=True,
+                help="Garantiebedingungen, Versicherung, rechtliche Aspekte"
+            )
+            
+            include_installation_timeline = st.checkbox(
+                "📅 Installations-Zeitplan & Prozess",
+                value=True,
+                help="Projektablauf von der Bestellung bis zur Inbetriebnahme"
+            )
+            
+            include_product_datasheets = st.checkbox(
+                "📄 Produktdatenblätter als Anhang",
+                value=False,
+                help="Vollständige Herstellerdatenblätter anhängen (größere PDF)"
+            )
+        
+        st.markdown("---")
+        st.subheader("3. Reihenfolge & Inhalte der Sektionen")
+
+        # Mapping der Sektions-Keys zu den UI-Namen
+        all_sections_map = {
+            "TitlePageCoverLetter": "Titel & Anschreiben",
+            "KeyVisuals": "Kennzahlen-Übersicht (Donuts)",
+            "TechnicalComponents": "Technische Komponenten",
+            "MainCharts": "Wirtschaftlichkeits-Analyse",
+            "CostsAndEconomics": "Kosten & Tabellen",
+            "SideBySideSims": "Simulations-Vergleich",
+            "CustomImages": "Individuelle Bilder",
+            "CustomTexts": "Individuelle Texte",
+            "HighlightBox": "Highlight-Box",
+            "OptionalCharts": "Weitere Diagramme"
+        }
+
+        if 'pdf_section_order' not in st.session_state:
+            st.session_state.pdf_section_order = list(all_sections_map.keys())
+
+        # Erstelle DataFrame für den Data Editor
+        ordered_section_names = [all_sections_map[key] for key in st.session_state.pdf_section_order]
+        df_sections = pd.DataFrame({
+            "Aktiv": [True] * len(ordered_section_names),
+            "Sektion": ordered_section_names,
+        })
+
+        st.info("💡 Passen Sie die Reihenfolge per Drag-and-Drop an und (de-)aktivieren Sie Sektionen.")
+        edited_df = st.data_editor(
+            df_sections,
+            use_container_width=True,
+            hide_index=True,
+            disabled=("Sektion",), # Nur die Checkbox ist editierbar
+            key="section_order_editor_final"
+        )
+        
+        st.markdown("---")
+        st.subheader("4. Optionale & Individuelle Inhalte")
+
+        # --- Frei gestaltbare Textbereiche (nur Eingabefelder, Buttons sind außerhalb) ---
+        for i, text_block in enumerate(st.session_state.get('custom_text_blocks', [])):
+            with st.container(border=True):
+                text_block['title'] = st.text_input("Überschrift für Textblock", key=f"custom_text_title_{i}")
+                text_block['content'] = st.text_area("Inhalt des Textblocks", key=f"custom_text_content_{i}")
+
+        # --- Frei einfügbare Bilder (nur Eingabefelder, Buttons sind außerhalb) ---
+        for i, image_slot in enumerate(st.session_state.get('custom_images', [])):
+             with st.container(border=True):
+                image_slot['title'] = st.text_input("Bild-Überschrift", key=f"custom_img_title_{i}")
+                uploaded_file = st.file_uploader("Bilddatei", type=['png', 'jpg', 'jpeg'], key=f"custom_img_upload_{i}")
+                if uploaded_file:
+                    image_slot['data'] = uploaded_file.getvalue()
+                    image_slot['filename'] = uploaded_file.name
+                if image_slot.get('filename'): st.caption(f"Geladen: {image_slot['filename']}")
+                image_slot['description'] = st.text_area("Bild-Beschreibung", key=f"custom_img_desc_{i}")
+
+        # --- Nebeneinanderliegende Simulationen ---
+        # (Ihre bestehende `chart_key_to_friendly_name_map` wird hier benötigt)
+        all_available_chart_keys = list(analysis_results.keys()) if analysis_results else []
+        chart_key_map = {k: k.replace('_chart_bytes','').replace('_',' ').title() for k in all_available_chart_keys}
+        
+        side_by_side_sim_keys = st.multiselect(
+            "Wählen Sie 2 Simulationen für eine Vergleichsansicht",
+            options=[k for k in all_available_chart_keys if 'switcher' in k or '3d' in k.lower()],
+            format_func=lambda x: chart_key_map.get(x, x),
+            max_selections=2
+        )
+
+        # --- Highlight-Box ---
+        include_highlight_box = st.checkbox("Highlight-Box ('Ihr Vorteil') einfügen?")
+        highlight_box_title = ""
+        highlight_box_content = ""
+        if include_highlight_box:
+            highlight_box_title = st.text_input("Titel für Highlight-Box", "Ihr entscheidender Vorteil")
+            highlight_box_content = st.text_area("Inhalt für Highlight-Box", "Mit dieser Photovoltaikanlage sichern Sie sich...")
+
+        # --- SUBMIT BUTTON ---
+        submitted = st.form_submit_button("🚀 Finales PDF erstellen", type="primary", use_container_width=True)
+
+    # --- PDF-Generierungslogik nach dem Submit ---
+    if submitted:
+        with st.spinner("Seggeli Ultra komponiert Ihr PDF..."):
+            active_company = get_active_company_details_func()
+            company_info_for_pdf = active_company if active_company else {}
+            
+            # Key-Mapping von UI-Namen zurück zu internen Keys
+            reverse_section_map = {v: k for k, v in all_sections_map.items()}
+            ordered_keys = [reverse_section_map[name] for name in edited_df['Sektion']]
+            
+            active_df = edited_df[edited_df['Aktiv'] == True]
+            final_section_order = [reverse_section_map[name] for name in active_df['Sektion']]
+            
+            # Erweiterte Inclusion-Optionen aus UI-Checkboxen erstellen
+            inclusion_options = {
+                "include_company_logo": include_company_logo,
+                "include_product_images": include_product_images,
+                "include_technical_specs": include_technical_specs,
+                "include_cost_breakdown": include_cost_breakdown,
+                "include_charts_graphs": include_charts_graphs,
+                "include_co2_analysis": include_co2_analysis,
+                "include_simulation_details": include_simulation_details,
+                "include_roof_visualization": include_roof_visualization,
+                "include_future_scenarios": include_future_scenarios,
+                "include_legal_info": include_legal_info,
+                "include_installation_timeline": include_installation_timeline,
+                "include_product_datasheets": include_product_datasheets,
+                "pdf_quality": pdf_quality,
+                "theme_name": theme_name
+            }
+
+            try:
+                pdf_bytes = generate_offer_pdf(
+                    project_data=project_data,
+                    analysis_results=analysis_results,
+                    company_info=company_info_for_pdf,
+                    texts=texts,
+                    theme_name=theme_name,
+                    inclusion_options=inclusion_options,  # Erweiterte Optionen übergeben
+                    section_order_df=active_df,  # DataFrame statt Liste übergeben
+                    custom_images_list=st.session_state.get('custom_images', []),
+                    custom_text_blocks_list=st.session_state.get('custom_text_blocks', []),
+                    side_by_side_sim_keys=side_by_side_sim_keys,
+                    highlight_box_data={'include': include_highlight_box, 'title': highlight_box_title, 'content': highlight_box_content},
+                    get_product_by_id_func=get_product_by_id_func,
+                    db_list_company_documents_func=db_list_company_documents_func,
+                    active_company_id=company_info_for_pdf.get('id'),
+                    # Erweiterte Template-Parameter
+                    selected_title_image_b64=None,
+                    selected_offer_title_text="Ihr individuelles Solaranlagen-Angebot",
+                    selected_cover_letter_text="Sehr geehrte Damen und Herren,\n\nwir freuen uns, Ihnen unser maßgeschneidertes Angebot für Ihre Photovoltaikanlage zu präsentieren.",
+                )
+            except Exception as e:
+                st.error(f"Fehler bei PDF-Generierung: {str(e)}")
+                pdf_bytes = None
+
+            if pdf_bytes:
+                st.success("✅ PDF erfolgreich komponiert!")
+                st.download_button(
+                    label="📥 PDF Herunterladen", data=pdf_bytes,
+                    file_name=f"Angebot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                    mime="application/pdf", use_container_width=True
+                )
+            else:
+                st.error("❌ PDF-Erstellung fehlgeschlagen.")
 
     if 'pdf_generating_lock_v1' not in st.session_state: st.session_state.pdf_generating_lock_v1 = False
     if 'pdf_inclusion_options' not in st.session_state:
