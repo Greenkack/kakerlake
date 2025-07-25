@@ -1361,11 +1361,11 @@ class PDFThemeManager:
             st.markdown("#### Visuelle Effekte")
             
             effects = {
-                'watermark': st.checkbox("Wasserzeichen", value=False),
+                'watermark': st.checkbox("Wasserzeichen", value=True),
                 'page_numbers': st.checkbox("Seitenzahlen", value=True),
                 'header_line': st.checkbox("Kopfzeilen-Linie", value=True),
                 'footer_line': st.checkbox("Fußzeilen-Linie", value=True),
-                'section_borders': st.checkbox("Abschnitts-Rahmen", value=False),
+                'section_borders': st.checkbox("Abschnitts-Rahmen", value=True),
                 'highlight_important': st.checkbox("Wichtige Infos hervorheben", value=True),
                 'use_icons': st.checkbox("Icons verwenden", value=True),
                 'rounded_corners': st.checkbox("Abgerundete Ecken", value=True)
@@ -1521,7 +1521,7 @@ def render_pdf_theme_manager(texts: Dict[str, str]):
                         'timestamp': datetime.now().isoformat()
                     }
                     
-                    theme_json = json.dumps(theme_data, indent=2, ensure_ascii=False)
+                    theme_json = json.dumps(theme_data, indent=2, ensure_ascii=True)
                     
                     st.download_button(
                         label="💾 Theme herunterladen",
