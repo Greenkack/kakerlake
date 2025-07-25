@@ -36,6 +36,7 @@ _DEFAULT_GLOBAL_CONSTANTS_FALLBACK: Dict[str, Any] = {
     'maintenance_fixed_eur_pa': 50.0, 'maintenance_variable_eur_per_kwp_pa': 5.0,
     'maintenance_increase_percent_pa': 2.0, 'one_time_bonus_eur': 0.0,
     'global_yield_adjustment_percent': 0.0, 'reference_specific_yield_pr': 1100.0,
+    'pvgis_enabled': True,  # Neue Option für PVGIS aktivieren/deaktivieren
     'specific_yields_by_orientation_tilt': {
         "Süd_0":1050.0, "Süd_15":1080.0, "Süd_30":1100.0, "Süd_45":1080.0, "Süd_60":1050.0,
         "Südost_0":980.0, "Südost_15":1030.0, "Südost_30":1070.0, "Südost_45":1030.0, "Südost_60":980.0,
@@ -1107,6 +1108,46 @@ def render_visualization_settings(load_admin_setting_func: Callable, save_admin_
 
 def render_advanced_settings(load_admin_setting_func: Callable, save_admin_setting_func: Callable ):
     st.subheader(get_text_local("admin_advanced_header", "Erweiterte Einstellungen"))
+    
+    # PVGIS-Einstellungen
+    st.markdown("---")
+    st.subheader(get_text_local("admin_pvgis_settings_header", "PVGIS-Einstellungen"))
+    current_global_constants = load_admin_setting_func('global_constants', {})
+    temp_merged_constants = _DEFAULT_GLOBAL_CONSTANTS_FALLBACK.copy()
+    if isinstance(current_global_constants, dict): 
+        temp_merged_constants.update(current_global_constants) 
+    current_global_constants = temp_merged_constants
+    
+    with st.form(f"pvgis_settings_form{WIDGET_KEY_SUFFIX}"):
+        pvgis_enabled = st.checkbox(
+            get_text_local("admin_pvgis_enabled_label", "PVGIS-API für Ertragsberechnung verwenden"),
+            value=bool(current_global_constants.get('pvgis_enabled', True)),
+            key=f"pvgis_enabled_checkbox{WIDGET_KEY_SUFFIX}",
+            help=get_text_local("admin_pvgis_enabled_help", "Wenn aktiviert, wird die PVGIS-API für präzise Ertragsdaten verwendet. Bei Deaktivierung werden manuelle Berechnungen verwendet.")
+        )
+        
+        pvgis_system_loss = st.number_input(
+            label=get_text_local("admin_pvgis_system_loss_label", "PVGIS Systemverluste (%)"),
+            value=float(current_global_constants.get('pvgis_system_loss_default_percent', 14.0)),
+            min_value=0.0,
+            max_value=50.0,
+            step=0.5,
+            format="%.1f",
+            key=f"pvgis_system_loss{WIDGET_KEY_SUFFIX}",
+            help=get_text_local("admin_pvgis_system_loss_help", "Systemverluste für PVGIS-Berechnung (Standard: 14%)")
+        )
+        
+        if st.form_submit_button(get_text_local("admin_save_pvgis_settings_button", "PVGIS-Einstellungen speichern")):
+            current_global_constants['pvgis_enabled'] = pvgis_enabled
+            current_global_constants['pvgis_system_loss_default_percent'] = pvgis_system_loss
+            
+            if save_admin_setting_func('global_constants', current_global_constants):
+                st.success(get_text_local("admin_pvgis_settings_save_success", "PVGIS-Einstellungen erfolgreich gespeichert."))
+                st.session_state.selected_page_key_sui = "admin"
+                st.rerun()
+            else:
+                st.error(get_text_local("admin_pvgis_settings_save_error", "Fehler beim Speichern der PVGIS-Einstellungen."))
+    
     render_api_key_settings(load_admin_setting_func, save_admin_setting_func) 
     st.markdown("---"); st.subheader(get_text_local("admin_localization_settings_header", "Lokalisierung"))
     st.info(get_text_local("admin_localization_info", "Bearbeiten Sie hier die Texte der Anwendung (JSON-Format)..."))
