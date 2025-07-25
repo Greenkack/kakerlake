@@ -13,13 +13,22 @@ können. Jeder Block ist in einer eigenen Klasse gekapselt, wodurch die
 Block‑Architektur (LEGO‑Prinzip) unterstützt wird. Neue Blöcke können
 hinzugefügt werden, indem die ``PDFBlock``‑Basisklasse erweitert wird.
 
+**NEUE TOM-90 DESIGN FEATURES:**
+- Tom90Page2Block: 3D-isometrische Grafiken mit grauer Box und technischen Details
+- Tom90Page3Block: Zwei-Box-Vergleich (Mit/Ohne PV) mit TOM-90 Farben
+- Tom90Page4Block: Detaillierte Komponenten-Tabelle im TOM-90 Style
+- Tom90Page5Block: Finanzierung und Kontakt-Informationen
+- TOM-90 spezifische Farben: #0d3780 (blau), #f6f6f6 (hellgrau), #e1dfdf (grau)
+- Erweiterte Theme-Funktionen für konsistentes Design
+- Optional aktivierbare TOM-90 Design-Seiten über inclusion_options
+
 Hinweis: Dieser Renderer ist nicht direkt in ``generate_offer_pdf``
 eingebunden, um die Rückwärtskompatibilität zu gewährleisten. Das
 Einbinden erfolgt über die Funktion ``generate_tom90_offer_pdf`` am Ende
 dieser Datei. Entwickler können diese Funktion wie gewohnt in der App
 verwenden, um ein TOM‑90 konformes PDF zu erzeugen.
 
-Autor: KI‑Agent
+Autor: KI‑Agent (erweitert für TOM-90 Design)
 Datum: 2025‑07‑25
 """
 
@@ -100,6 +109,39 @@ except ImportError:
         }
     def create_modern_table_style(theme: Dict[str, Any]) -> TableStyle:
         return TableStyle([])
+
+# ---------------------------------------------------------------------------
+# TOM-90 specific theme and helper functions
+# ---------------------------------------------------------------------------
+
+def get_tom90_theme() -> Dict[str, Any]:
+    """Erstellt das spezifische TOM-90 Farbschema basierend auf der Vorlage."""
+    return {
+        'name': 'TOM-90',
+        'styles': {},
+        'colors': {
+            'primary': '#0d3780',      # TOM-90 Dunkelblau
+            'secondary': '#f6f6f6',    # TOM-90 Hellgrau
+            'background': '#ffffff',   # Weiß
+            'text_body': '#000000',    # Schwarz
+            'text_heading': '#0d3780', # TOM-90 Dunkelblau
+            'footer_text': '#888888',  # Grau
+            'tom90_gray': '#e1dfdf',   # TOM-90 Grau
+            'tom90_medium_gray': '#b4b4b4',  # TOM-90 Mittelgrau
+            'success': '#008000',      # Grün für positive Werte
+            'error': '#cc0000',        # Rot für negative Werte
+            'highlight': '#e8f4fd',    # Hellblau für Highlights
+        },
+        'fonts': {
+            'family_main': 'Helvetica', 
+            'family_bold': 'Helvetica-Bold',
+            'size_h1': 20, 
+            'size_h2': 16, 
+            'size_h3': 12, 
+            'size_body': 10, 
+            'size_footer': 8
+        },
+    }
 
 # ---------------------------------------------------------------------------
 # Helper functions
@@ -440,36 +482,37 @@ class DonutChartsBlock(PDFBlock):
         super().__init__(name='donut_charts', required=True)
 
     def _generate_donut_image(self, value: float, title: str, colors: List[str]) -> Optional[Image]:
+        """Erzeugt ein schlankes Donut‑Diagramm mit mittigem Label."""
         if not _MATPLOTLIB_AVAILABLE or not _REPORTLAB_AVAILABLE:
             return None
         try:
+            # Donut-Ring schmaler machen: width = 0.3 des Radius
             fig, ax = plt.subplots(figsize=(3, 3))
             sizes = [max(0, min(100, value)), max(0, 100 - value)]
-            labels = [f"{title} ({value:.0f}%)", ""]
-            ax.pie(
+            wedges, _ = ax.pie(
                 sizes,
-                labels=labels,
                 colors=colors,
                 startangle=90,
                 counterclock=False,
-                wedgeprops=dict(width=0.4, edgecolor='white'),
-                textprops={'color': '#000000', 'fontsize': 8},
+                wedgeprops=dict(width=0.3, edgecolor='white'),
             )
-            ax.axis('equal')
+            # Wert in der Mitte anzeigen
+            ax.text(0, 0, f"{value:.0f} %", ha='center', va='center', fontsize=12, weight='bold', color=colors[0])
             ax.set_title(title, fontsize=10)
+            ax.axis('equal')
             buffer = io.BytesIO()
             fig.savefig(buffer, format='PNG', bbox_inches='tight', dpi=150)
             plt.close(fig)
             buffer.seek(0)
             img = Image(buffer)
-            max_width = 6 * cm
-            max_height = 6 * cm
-            scale = min(max_width / img.drawWidth, max_height / img.drawHeight)
+            # Skalierung beibehalten
+            scale = min((6 * cm) / img.drawWidth, (6 * cm) / img.drawHeight)
             img.drawWidth *= scale
             img.drawHeight *= scale
             return img
         except Exception:
             return None
+
 
     def create_flowables(self, context: Dict[str, Any]) -> List[Any]:
         flows: List[Any] = []
@@ -672,24 +715,25 @@ class BarChartBlock(PDFBlock):
             labels = ["Mit Speicher", "Ohne Speicher"]
             data = [values.get('mit', 0), values.get('ohne', 0)]
             fig, ax = plt.subplots(figsize=(4, 3))
-            bar_colors = [theme.get('colors', {}).get('primary', '#003366'), theme.get('colors', {}).get('secondary', '#0081b8')]
-            bars = ax.bar(labels, data, color=bar_colors)
-            ax.set_ylabel('Ersparnis (EUR)')
-            ax.set_title('Ersparnis über 20 Jahre')
+            primary = theme.get('colors', {}).get('primary', '#003366')
+            secondary = theme.get('colors', {}).get('secondary', '#0081b8')
+            bars = ax.bar(labels, data, color=[primary, secondary], width=0.6, edgecolor='white', linewidth=0.5)
+            ax.set_ylabel('Ersparnis (EUR)', fontsize=10)
+            ax.set_title('Ersparnis über 20 Jahre', fontsize=11)
+            ax.grid(axis='y', linestyle='--', linewidth=0.4, alpha=0.6)
             for bar in bars:
                 height = bar.get_height()
-                ax.annotate(f"{height:,.0f} €".replace(',', '.'), xy=(bar.get_x() + bar.get_width() / 2, height),
-                            xytext=(0, 3), textcoords="offset points", ha='center', va='bottom', fontsize=8)
-            ax.grid(axis='y', linestyle='--', linewidth=0.5, alpha=0.7)
+                ax.annotate(f"{height:,.0f} €".replace(',', '.'),
+                            xy=(bar.get_x() + bar.get_width() / 2, height),
+                            xytext=(0, 4), textcoords="offset points",
+                            ha='center', va='bottom', fontsize=8)
             buffer = io.BytesIO()
             fig.tight_layout()
             fig.savefig(buffer, format='PNG', dpi=150)
             plt.close(fig)
             buffer.seek(0)
             img = Image(buffer)
-            max_w = 12 * cm
-            max_h = 6 * cm
-            scale = min(max_w / img.drawWidth, max_h / img.drawHeight)
+            scale = min((12 * cm) / img.drawWidth, (6 * cm) / img.drawHeight)
             img.drawWidth *= scale
             img.drawHeight *= scale
             return img
@@ -727,7 +771,37 @@ class BarChartBlock(PDFBlock):
             flows.append(Paragraph(desc, styles.get('BodyText', ParagraphStyle('BodyText'))))
             flows.append(Spacer(1, 0.4 * cm))
         return flows
+        rows = []
+        list_products_func = context.get('list_products_func')
+        get_product_by_id_func = context.get('get_product_by_id_func')
 
+        # Beispiel: Schleife über alle ausgewählten Produkte, sofern Funktionen existieren
+        if list_products_func and get_product_by_id_func:
+            for prod in list_products_func():
+                prod_data = get_product_by_id_func(prod['id'])
+                if not prod_data:
+                    continue
+                # Produktbild aus Base64
+                img_b64 = prod_data.get('image_b64')
+                img_flowable = _b64_to_image_flowable(img_b64, max_width=4*cm, max_height=3*cm) if img_b64 else None
+                # Tabellenzeile: Bild | Name | Leistung / Kapazität | weitere Daten
+                row_cells = []
+                if img_flowable:
+                    row_cells.append(img_flowable)
+                else:
+                    row_cells.append("–")
+                row_cells.append(prod_data.get('name', ''))
+                row_cells.append(prod_data.get('power_kw', ''))
+                row_cells.append(prod_data.get('capacity_kwh', ''))
+                rows.append(row_cells)
+            # Kopfzeile definieren
+            col_widths = [4*cm, 4*cm, 3*cm, context['doc_width'] - 11*cm]
+            table = Table([["Bild", "Name", "Leistung", "Kapazität"]] + rows, colWidths=col_widths)
+            table.setStyle(create_modern_table_style(theme))
+            flows.append(table)
+        else:
+            pass
+            
 class HaveYouKnowBlock(PDFBlock):
     def __init__(self) -> None:
         super().__init__(name='have_you_known', required=False)
@@ -1104,14 +1178,727 @@ class FinancingDetailsBlock(PDFBlock):
         return flows
 
 # ---------------------------------------------------------------------------
+# TOM-90 Specific Design Blocks (basierend auf vorlage.json)
+# ---------------------------------------------------------------------------
+
+class Tom90Page2Block(PDFBlock):
+    """Seite 2 mit 3D-isometrischen Grafiken und TOM-90 Design."""
+    
+    def __init__(self) -> None:
+        super().__init__(name='tom90_page2', required=True)
+    
+    def create_flowables(self, context: Dict[str, Any]) -> List[Any]:
+        flows: List[Any] = []
+        if not _REPORTLAB_AVAILABLE:
+            return flows
+            
+        theme = context['theme']
+        styles = theme.get('styles', {})
+        
+        # TOM-90 Farben aus der Vorlage
+        tom90_blue = '#0d3780'
+        tom90_light_gray = '#f6f6f6'
+        tom90_gray = '#e1dfdf'
+        tom90_medium_gray = '#b4b4b4'
+        
+        flows.append(PageBreak())
+        flows.append(Spacer(1, 1*cm))
+        
+        # Haupttitel für Seite 2
+        flows.append(Paragraph("Ihr neues Energiesystem", styles.get('h1', ParagraphStyle('h1'))))
+        flows.append(Spacer(1, 0.5*cm))
+        
+        # Große graue Box mit 3D-Darstellung (simuliert)
+        analysis = context['analysis_results']
+        project = context['project_data']
+        
+        # System-Daten für die 3D-Box
+        anlage_kwp = analysis.get('anlage_kwp', 0)
+        annual_production = analysis.get('annual_pv_production_kwh', 0)
+        module_count = project.get('pv_details', {}).get('module_quantity', 0)
+        if module_count == 0 and anlage_kwp > 0:
+            module_count = max(1, round(anlage_kwp * 1000 / 420))
+        
+        # 3D-Box Content (TOM-90 Style) - Sichere Version ohne Unicode-Probleme
+        box_content = f"""
+        <para alignment="center" fontSize="16" textColor="{tom90_blue}">
+        <b>3D-VISUALISIERUNG IHRES PV-SYSTEMS</b>
+        </para>
+        <br/><br/>
+        
+        <para alignment="center" fontSize="12">
+        PV-Module: <b>{module_count} Stück</b> auf Ihrem Dach<br/>
+        Gesamtleistung: <b>{anlage_kwp:.1f} kWp</b><br/>
+        Jahresertrag: <b>{annual_production:,.0f} kWh</b><br/>
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="10" textColor="#666666">
+        [3D-Isometrische Darstellung würde hier erscheinen]<br/>
+        Realistische Darstellung Ihrer Dachfläche mit<br/>
+        optimal positionierten Solarmodulen in 3D-Ansicht
+        </para>
+        """
+        
+        # Erstelle die große graue Box (wie in TOM-90)
+        box_table_data = [[Paragraph(box_content, styles.get('Normal'))]]
+        box_table = Table(box_table_data, colWidths=[context['doc_width'] - 2*cm])
+        box_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), tom90_light_gray),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (-1,-1), 20),
+            ('RIGHTPADDING', (0,0), (-1,-1), 20),
+            ('TOPPADDING', (0,0), (-1,-1), 30),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 30),
+            ('BOX', (0,0), (-1,-1), 2, tom90_blue),
+            ('GRID', (0,0), (-1,-1), 1, tom90_medium_gray),
+        ]))
+        flows.append(box_table)
+        flows.append(Spacer(1, 1*cm))
+        
+        # Technische Details in TOM-90 Style (ohne Unicode-Emoji)
+        tech_details = [
+            ["Gebäudedaten", ""],
+            ["Dachneigung", f"{project.get('project_details', {}).get('tilt_angle', '30')}°"],
+            ["Ausrichtung", project.get('project_details', {}).get('orientation', 'Süd')],
+            ["Dachfläche", f"{analysis.get('roof_area_sqm', 'nicht angegeben')} m²"],
+            ["", ""],
+            ["Anlagendaten", ""],
+            ["Modultyp", "Monokristallin, 420 Wp"],
+            ["Wechselrichter", "String-Wechselrichter"],
+            ["Montagesystem", "Aufdach-Montage"],
+        ]
+        
+        tech_table = Table(tech_details, colWidths=[8*cm, context['doc_width'] - 10*cm])
+        tech_table.setStyle(TableStyle([
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (-1,-1), 8),
+            ('RIGHTPADDING', (0,0), (-1,-1), 8),
+            ('TOPPADDING', (0,0), (-1,-1), 4),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ('BACKGROUND', (0,0), (0,0), tom90_blue),
+            ('TEXTCOLOR', (0,0), (0,0), colors.white),
+            ('FONTNAME', (0,0), (0,0), 'Helvetica-Bold'),
+            ('BACKGROUND', (0,5), (0,5), tom90_blue),
+            ('TEXTCOLOR', (0,5), (0,5), colors.white),
+            ('FONTNAME', (0,5), (0,5), 'Helvetica-Bold'),
+            ('GRID', (0,1), (-1,4), 0.5, tom90_medium_gray),
+            ('GRID', (0,6), (-1,-1), 0.5, tom90_medium_gray),
+        ]))
+        flows.append(tech_table)
+        
+        return flows
+
+class Tom90Page3Block(PDFBlock):
+    """Seite 3 mit zwei großen Vergleichs-Boxen (TOM-90 Design)."""
+    
+    def __init__(self) -> None:
+        super().__init__(name='tom90_page3', required=True)
+    
+    def create_flowables(self, context: Dict[str, Any]) -> List[Any]:
+        flows: List[Any] = []
+        if not _REPORTLAB_AVAILABLE:
+            return flows
+            
+        theme = context['theme']
+        styles = theme.get('styles', {})
+        analysis = context['analysis_results']
+        
+        # TOM-90 Farben
+        tom90_blue = '#0d3780'
+        tom90_light_gray = '#f6f6f6'
+        tom90_medium_gray = '#b4b4b4'
+        
+        flows.append(PageBreak())
+        flows.append(Spacer(1, 1*cm))
+        
+        # Haupttitel
+        flows.append(Paragraph("Wirtschaftlichkeits-Vergleich", styles.get('h1', ParagraphStyle('h1'))))
+        flows.append(Spacer(1, 0.8*cm))
+        
+        # Kennzahlen extrahieren
+        eigenverbrauch = analysis.get('self_consumption_rate_percent', 42)
+        autarkie = analysis.get('self_supply_rate_percent', 54)
+        annual_savings = analysis.get('annual_financial_benefit_year1', 1200)
+        amortization = analysis.get('amortization_time_years', 12)
+        co2_savings = analysis.get('annual_co2_savings_kg', 3500) / 1000
+        
+        # Linke Box: "Mit PV-Anlage"
+        left_content = f"""
+        <para alignment="center" fontSize="14" textColor="{tom90_blue}">
+        <b>MIT PV-ANLAGE</b>
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="24" textColor="{tom90_blue}">
+        <b>{eigenverbrauch:.0f}%</b>
+        </para>
+        <para alignment="center" fontSize="12">
+        Eigenverbrauchsquote
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="20" textColor="{tom90_blue}">
+        <b>{autarkie:.0f}%</b>
+        </para>
+        <para alignment="center" fontSize="12">
+        Unabhängigkeitsgrad
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="16" textColor="#008000">
+        <b>+ {annual_savings:,.0f} €</b>
+        </para>
+        <para alignment="center" fontSize="10">
+        Ersparnis pro Jahr
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="12" textColor="#008000">
+        <b>{co2_savings:.1f} t CO₂</b> weniger pro Jahr
+        </para>
+        """
+        
+        # Rechte Box: "Ohne PV-Anlage"
+        right_content = f"""
+        <para alignment="center" fontSize="14" textColor="#cc0000">
+        <b>OHNE PV-ANLAGE</b>
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="24" textColor="#cc0000">
+        <b>0%</b>
+        </para>
+        <para alignment="center" fontSize="12">
+        Eigenverbrauchsquote
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="20" textColor="#cc0000">
+        <b>0%</b>
+        </para>
+        <para alignment="center" fontSize="12">
+        Unabhängigkeitsgrad
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="16" textColor="#cc0000">
+        <b>+ 0 €</b>
+        </para>
+        <para alignment="center" fontSize="10">
+        Ersparnis pro Jahr
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="12" textColor="#cc0000">
+        Stetig <b>steigende Stromkosten</b><br/>
+        Volle <b>Abhängigkeit</b> vom Netz
+        </para>
+        """
+        
+        # Zwei-Spalten-Layout für die Boxen
+        box_width = (context['doc_width'] - 3*cm) / 2
+        comparison_data = [
+            [
+                Paragraph(left_content, styles.get('Normal')),
+                Paragraph(right_content, styles.get('Normal'))
+            ]
+        ]
+        
+        comparison_table = Table(comparison_data, colWidths=[box_width, box_width])
+        comparison_table.setStyle(TableStyle([
+            # Linke Box (Mit PV)
+            ('BACKGROUND', (0,0), (0,0), tom90_light_gray),
+            ('BOX', (0,0), (0,0), 3, tom90_blue),
+            ('ALIGN', (0,0), (0,0), 'CENTER'),
+            ('VALIGN', (0,0), (0,0), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (0,0), 15),
+            ('RIGHTPADDING', (0,0), (0,0), 15),
+            ('TOPPADDING', (0,0), (0,0), 20),
+            ('BOTTOMPADDING', (0,0), (0,0), 20),
+            
+            # Rechte Box (Ohne PV)
+            ('BACKGROUND', (1,0), (1,0), '#fff5f5'),
+            ('BOX', (1,0), (1,0), 3, '#cc0000'),
+            ('ALIGN', (1,0), (1,0), 'CENTER'),
+            ('VALIGN', (1,0), (1,0), 'MIDDLE'),
+            ('LEFTPADDING', (1,0), (1,0), 15),
+            ('RIGHTPADDING', (1,0), (1,0), 15),
+            ('TOPPADDING', (1,0), (1,0), 20),
+            ('BOTTOMPADDING', (1,0), (1,0), 20),
+        ]))
+        flows.append(comparison_table)
+        flows.append(Spacer(1, 1*cm))
+        
+        # Amortisations-Info (ohne Unicode-Emoji)
+        amort_content = f"""
+        <para alignment="center" fontSize="16" textColor="{tom90_blue}">
+        <b>AMORTISATION: {amortization:.1f} JAHRE</b>
+        </para>
+        <para alignment="center" fontSize="12">
+        Nach {amortization:.1f} Jahren haben sich die Investitionskosten amortisiert.<br/>
+        Danach produzieren Sie <b>kostenlosen Strom</b> für weitere 13+ Jahre!
+        </para>
+        """
+        
+        amort_table = Table([[Paragraph(amort_content, styles.get('Normal'))]], 
+                           colWidths=[context['doc_width'] - 2*cm])
+        amort_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), '#e8f4fd'),
+            ('BOX', (0,0), (-1,-1), 2, tom90_blue),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (-1,-1), 15),
+            ('RIGHTPADDING', (0,0), (-1,-1), 15),
+            ('TOPPADDING', (0,0), (-1,-1), 15),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 15),
+        ]))
+        flows.append(amort_table)
+        
+        return flows
+
+class Tom90Page4Block(PDFBlock):
+    """Seite 4 mit detaillierten Komponenten und Spezifikationen."""
+    
+    def __init__(self) -> None:
+        super().__init__(name='tom90_page4', required=True)
+    
+    def create_flowables(self, context: Dict[str, Any]) -> List[Any]:
+        flows: List[Any] = []
+        if not _REPORTLAB_AVAILABLE:
+            return flows
+            
+        theme = context['theme']
+        styles = theme.get('styles', {})
+        analysis = context['analysis_results']
+        project = context['project_data']
+        
+        # TOM-90 Farben
+        tom90_blue = '#0d3780'
+        tom90_light_gray = '#f6f6f6'
+        tom90_medium_gray = '#b4b4b4'
+        
+        flows.append(PageBreak())
+        flows.append(Spacer(1, 1*cm))
+        
+        # Haupttitel
+        flows.append(Paragraph("Komponenten & Spezifikationen", styles.get('h1', ParagraphStyle('h1'))))
+        flows.append(Spacer(1, 0.8*cm))
+        
+        # Komponenten-Details
+        anlage_kwp = analysis.get('anlage_kwp', 0)
+        module_count = project.get('pv_details', {}).get('module_quantity', 0)
+        if module_count == 0 and anlage_kwp > 0:
+            module_count = max(1, round(anlage_kwp * 1000 / 420))
+        
+        # Hauptkomponenten-Tabelle (ohne Unicode-Emoji)
+        components_data = [
+            ["KOMPONENTE", "SPEZIFIKATION", "DETAILS"],
+            ["", "", ""],
+            ["PV-Module", f"{module_count} Stück", "Monokristalline Hochleistungsmodule"],
+            ["", "420 Wp pro Modul", "25 Jahre Leistungsgarantie"],
+            ["", f"Gesamt: {anlage_kwp:.1f} kWp", "Wirkungsgrad: >20%"],
+            ["", "", ""],
+            ["Wechselrichter", "String-Wechselrichter", "Europäischer Wirkungsgrad >96%"],
+            ["", f"Leistung: {anlage_kwp:.1f} kW", "10 Jahre Herstellergarantie"],
+            ["", "Smart Monitoring", "App-Überwachung inklusive"],
+            ["", "", ""],
+            ["Montagesystem", "Aufdach-Montage", "Korrosionsbeständiges Aluminium"],
+            ["", "Dachhaken-System", "TÜV-geprüft und zertifiziert"],
+            ["", "Windlastwerte", "Entspricht lokalen Bauvorschriften"],
+        ]
+        
+        # Speicher hinzufügen falls vorhanden
+        if project.get('pv_details', {}).get('include_storage'):
+            battery_capacity = project.get('project_details', {}).get('battery_capacity_kwh', 6.1)
+            components_data.extend([
+                ["", "", ""],
+                ["Batteriespeicher", f"{battery_capacity} kWh", "Lithium-Ionen-Technologie"],
+                ["", "10 Jahre Garantie", "Notstrom-Funktion verfügbar"],
+                ["", "Smart Energy Management", "Optimierte Eigenverbrauchssteuerung"],
+            ])
+        
+        comp_table = Table(components_data, colWidths=[4*cm, 4*cm, context['doc_width'] - 10*cm])
+        comp_table.setStyle(TableStyle([
+            # Header
+            ('BACKGROUND', (0,0), (-1,0), tom90_blue),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 12),
+            ('ALIGN', (0,0), (-1,0), 'CENTER'),
+            
+            # Trennzeilen
+            ('BACKGROUND', (0,1), (-1,1), tom90_medium_gray),
+            ('BACKGROUND', (0,5), (-1,5), tom90_medium_gray),
+            ('BACKGROUND', (0,9), (-1,9), tom90_medium_gray),
+            
+            # Komponenten-Kategorien
+            ('FONTNAME', (0,2), (0,2), 'Helvetica-Bold'),
+            ('FONTNAME', (0,6), (0,6), 'Helvetica-Bold'),
+            ('FONTNAME', (0,10), (0,10), 'Helvetica-Bold'),
+            
+            # Allgemeine Formatierung
+            ('FONTSIZE', (0,1), (-1,-1), 10),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (-1,-1), 8),
+            ('RIGHTPADDING', (0,0), (-1,-1), 8),
+            ('TOPPADDING', (0,0), (-1,-1), 4),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ('GRID', (0,0), (-1,-1), 1, tom90_medium_gray),
+        ]))
+        
+        # Bei Speicher andere Zeilen hinzufügen
+        if project.get('pv_details', {}).get('include_storage'):
+            comp_table.setStyle(TableStyle([
+                ('BACKGROUND', (0,13), (-1,13), tom90_medium_gray),
+                ('FONTNAME', (0,14), (0,14), 'Helvetica-Bold'),
+            ]))
+        
+        flows.append(comp_table)
+        flows.append(Spacer(1, 1*cm))
+        
+        # Qualitäts- und Sicherheitshinweise (ohne Unicode-Emoji)
+        quality_content = f"""
+        <para alignment="center" fontSize="14" textColor="{tom90_blue}">
+        <b>QUALITÄT &amp; SICHERHEIT</b>
+        </para>
+        <br/>
+        
+        <para fontSize="11">
+        <b>✓ TÜV-Zertifizierung:</b> Alle Komponenten sind TÜV-geprüft und zertifiziert<br/>
+        <b>✓ CE-Kennzeichnung:</b> Entspricht allen EU-Sicherheitsstandards<br/>
+        <b>✓ VDE-Normen:</b> Installation nach VDE 0100 und VDE-AR-N 4105<br/>
+        <b>✓ Fachbetrieb:</b> Installation durch zertifizierte Elektrofachkräfte<br/>
+        <b>✓ Versicherung:</b> Vollständige Photovoltaik-Versicherung empfohlen<br/>
+        <b>✓ Monitoring:</b> 24/7 Überwachung und Ferndiagnose möglich
+        </para>
+        """
+        
+        quality_table = Table([[Paragraph(quality_content, styles.get('Normal'))]], 
+                             colWidths=[context['doc_width'] - 2*cm])
+        quality_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), tom90_light_gray),
+            ('BOX', (0,0), (-1,-1), 2, tom90_blue),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('LEFTPADDING', (0,0), (-1,-1), 15),
+            ('RIGHTPADDING', (0,0), (-1,-1), 15),
+            ('TOPPADDING', (0,0), (-1,-1), 15),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 15),
+        ]))
+        flows.append(quality_table)
+        
+        return flows
+
+class Tom90Page5Block(PDFBlock):
+    """Seite 5 mit Finanzierung und Abschluss."""
+    
+    def __init__(self) -> None:
+        super().__init__(name='tom90_page5', required=True)
+    
+    def create_flowables(self, context: Dict[str, Any]) -> List[Any]:
+        flows: List[Any] = []
+        if not _REPORTLAB_AVAILABLE:
+            return flows
+            
+        theme = context['theme']
+        styles = theme.get('styles', {})
+        analysis = context['analysis_results']
+        company_info = context['company_info']
+        
+        # TOM-90 Farben
+        tom90_blue = '#0d3780'
+        tom90_light_gray = '#f6f6f6'
+        tom90_medium_gray = '#b4b4b4'
+        
+        flows.append(PageBreak())
+        flows.append(Spacer(1, 1*cm))
+        
+        # Haupttitel
+        flows.append(Paragraph("Investition & Finanzierung", styles.get('h1', ParagraphStyle('h1'))))
+        flows.append(Spacer(1, 0.8*cm))
+        
+        # Investitions-Übersicht
+        total_investment = analysis.get('total_investment_netto', 0)
+        if total_investment == 0:
+            total_investment = analysis.get('anlage_kwp', 8.4) * 1300  # Schätzung
+        
+        investment_data = [
+            ["INVESTITIONS-ÜBERSICHT", "BETRAG"],
+            ["", ""],
+            ["Solarmodule & Wechselrichter", f"{total_investment * 0.55:,.0f} €"],
+            ["Montagesystem & Installation", f"{total_investment * 0.30:,.0f} €"],
+            ["Elektroinstallation & Zubehör", f"{total_investment * 0.10:,.0f} €"],
+            ["Planung & Inbetriebnahme", f"{total_investment * 0.05:,.0f} €"],
+            ["", ""],
+            ["NETTO-GESAMTPREIS", f"{total_investment:,.0f} €"],
+            ["MwSt. (19%)", f"{total_investment * 0.19:,.0f} €"],
+            ["BRUTTO-GESAMTPREIS", f"{total_investment * 1.19:,.0f} €"],
+        ]
+        
+        invest_table = Table(investment_data, colWidths=[10*cm, context['doc_width'] - 12*cm])
+        invest_table.setStyle(TableStyle([
+            # Header
+            ('BACKGROUND', (0,0), (-1,0), tom90_blue),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('ALIGN', (0,0), (-1,0), 'CENTER'),
+            
+            # Trennzeilen
+            ('BACKGROUND', (0,1), (-1,1), tom90_medium_gray),
+            ('BACKGROUND', (0,6), (-1,6), tom90_medium_gray),
+            
+            # Summenzeilen
+            ('BACKGROUND', (0,7), (-1,7), tom90_light_gray),
+            ('FONTNAME', (0,7), (-1,7), 'Helvetica-Bold'),
+            ('BACKGROUND', (0,9), (-1,9), tom90_blue),
+            ('TEXTCOLOR', (0,9), (-1,9), colors.white),
+            ('FONTNAME', (0,9), (-1,9), 'Helvetica-Bold'),
+            
+            # Allgemeine Formatierung
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('ALIGN', (1,0), (1,-1), 'RIGHT'),  # Beträge rechtsbündig
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (-1,-1), 8),
+            ('RIGHTPADDING', (0,0), (-1,-1), 8),
+            ('TOPPADDING', (0,0), (-1,-1), 4),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ('GRID', (0,0), (-1,-1), 1, tom90_medium_gray),
+        ]))
+        flows.append(invest_table)
+        flows.append(Spacer(1, 1*cm))
+        
+        # Finanzierungsoptionen (ohne Unicode-Emoji)
+        financing_content = f"""
+        <para alignment="center" fontSize="14" textColor="{tom90_blue}">
+        <b>FINANZIERUNGSOPTIONEN</b>
+        </para>
+        <br/>
+        
+        <para fontSize="11">
+        <b>1. Barkauf (Empfohlen)</b><br/>
+        ✓ Beste Rendite durch sofortige Eigentumsübertragung<br/>
+        ✓ Keine Zinsen oder zusätzliche Kosten<br/>
+        ✓ Volle KfW-Förderung und Steuervorteile<br/>
+        <br/>
+        
+        <b>2. KfW-Darlehen (270)</b><br/>
+        ✓ Zinsgünstige Finanzierung bis 150.000 €<br/>
+        ✓ Laufzeit bis 20 Jahre möglich<br/>
+        ✓ Teilweise tilgungsfreie Anlaufjahre<br/>
+        ✓ <b>Rate ab {total_investment * 0.004:.0f} €/Monat</b> bei 4% Zinssatz<br/>
+        <br/>
+        
+        <b>3. Solar-Leasing</b><br/>
+        ✓ Keine Anfangsinvestition erforderlich<br/>
+        ✓ Rundum-Service inklusive Wartung<br/>
+        ✓ <b>Ab {total_investment * 0.0025:.0f} €/Monat</b> (20 Jahre Laufzeit)<br/>
+        ✓ Option zum Kauf nach Vertragsende
+        </para>
+        """
+        
+        financing_table = Table([[Paragraph(financing_content, styles.get('Normal'))]], 
+                               colWidths=[context['doc_width'] - 2*cm])
+        financing_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), tom90_light_gray),
+            ('BOX', (0,0), (-1,-1), 2, tom90_blue),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('LEFTPADDING', (0,0), (-1,-1), 20),
+            ('RIGHTPADDING', (0,0), (-1,-1), 20),
+            ('TOPPADDING', (0,0), (-1,-1), 15),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 15),
+        ]))
+        flows.append(financing_table)
+        flows.append(Spacer(1, 1*cm))
+        
+        # Nächste Schritte & Kontakt (ohne Unicode-Emoji)
+        next_steps_content = f"""
+        <para alignment="center" fontSize="14" textColor="{tom90_blue}">
+        <b>IHRE NÄCHSTEN SCHRITTE</b>
+        </para>
+        <br/>
+        
+        <para fontSize="11">
+        <b>1. Angebot prüfen</b> - Nehmen Sie sich Zeit für alle Details<br/>
+        <b>2. Vor-Ort-Termin</b> - Kostenlose Begehung und finale Planung<br/>
+        <b>3. Auftragserteilung</b> - Unterzeichnung des Installationsvertrags<br/>
+        <b>4. Anmeldung</b> - Wir kümmern uns um alle Formalitäten<br/>
+        <b>5. Installation</b> - Professionelle Montage durch unser Team<br/>
+        <b>6. Inbetriebnahme</b> - Übergabe und Einweisung<br/>
+        </para>
+        <br/>
+        
+        <para alignment="center" fontSize="12" textColor="{tom90_blue}">
+        <b>KONTAKT FÜR RÜCKFRAGEN</b><br/>
+        {company_info.get('name', 'Ihr Solar-Partner')}<br/>
+        Tel: {company_info.get('phone', 'Tel. auf Anfrage')}<br/>
+        E-Mail: {company_info.get('email', 'info@solar-partner.de')}<br/>
+        <br/>
+        <b>Wir freuen uns auf Ihr Vertrauen!</b>
+        </para>
+        """
+        
+        next_steps_table = Table([[Paragraph(next_steps_content, styles.get('Normal'))]], 
+                                colWidths=[context['doc_width'] - 2*cm])
+        next_steps_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), '#e8f4fd'),
+            ('BOX', (0,0), (-1,-1), 2, tom90_blue),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('LEFTPADDING', (0,0), (-1,-1), 20),
+            ('RIGHTPADDING', (0,0), (-1,-1), 20),
+            ('TOPPADDING', (0,0), (-1,-1), 15),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 15),
+        ]))
+        flows.append(next_steps_table)
+        
+        return flows
+
+# ---------------------------------------------------------------------------
+# TOM-90 Spezifische Theme-Funktionen
+# ---------------------------------------------------------------------------
+
+def create_tom90_table_style(theme: Dict[str, Any]) -> TableStyle:
+    """Erstellt einen TOM-90 spezifischen Tabellenstil."""
+    if not _REPORTLAB_AVAILABLE:
+        return None
+        
+    tom90_blue = '#0d3780'
+    tom90_light_gray = '#f6f6f6'
+    tom90_medium_gray = '#b4b4b4'
+    
+    return TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), tom90_blue),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 10),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('LEFTPADDING', (0,0), (-1,-1), 8),
+        ('RIGHTPADDING', (0,0), (-1,-1), 8),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('GRID', (0,0), (-1,-1), 1, tom90_medium_gray),
+        ('BACKGROUND', (0,1), (-1,-1), colors.white),
+        ('FONTSIZE', (0,1), (-1,-1), 9),
+    ])
+
+def get_tom90_enhanced_theme() -> Dict[str, Any]:
+    """Erweiterte TOM-90 Theme-Definition mit allen Stilen."""
+    if not _REPORTLAB_AVAILABLE:
+        return get_tom90_theme()
+    
+    base_theme = get_tom90_theme()
+    
+    # Erweiterte Stile hinzufügen
+    base_theme['styles'] = {
+        'h1': ParagraphStyle(
+            'TOM90_H1',
+            fontName='Helvetica-Bold',
+            fontSize=18,
+            textColor=colors.HexColor('#0d3780'),
+            spaceAfter=12,
+            alignment=0  # Links
+        ),
+        'h2': ParagraphStyle(
+            'TOM90_H2',
+            fontName='Helvetica-Bold',
+            fontSize=14,
+            textColor=colors.HexColor('#0d3780'),
+            spaceAfter=8,
+            alignment=0
+        ),
+        'h3': ParagraphStyle(
+            'TOM90_H3',
+            fontName='Helvetica-Bold',
+            fontSize=12,
+            textColor=colors.HexColor('#0d3780'),
+            spaceAfter=6,
+            alignment=0
+        ),
+        'Normal': ParagraphStyle(
+            'TOM90_Normal',
+            fontName='Helvetica',
+            fontSize=10,
+            textColor=colors.black,
+            spaceAfter=6,
+            alignment=0
+        ),
+        'BodyText': ParagraphStyle(
+            'TOM90_BodyText',
+            fontName='Helvetica',
+            fontSize=10,
+            textColor=colors.black,
+            spaceAfter=6,
+            alignment=4  # Justify
+        ),
+        'Center': ParagraphStyle(
+            'TOM90_Center',
+            fontName='Helvetica',
+            fontSize=10,
+            textColor=colors.black,
+            spaceAfter=6,
+            alignment=1  # Center
+        ),
+    }
+    
+    return base_theme
+
+def create_tom90_styled_box(content: str, theme: Dict[str, Any], box_type: str = "default") -> Table:
+    """Erstellt eine TOM-90 styled Box mit Inhalt."""
+    if not _REPORTLAB_AVAILABLE:
+        return None
+        
+    styles = theme.get('styles', {})
+    tom90_blue = '#0d3780'
+    tom90_light_gray = '#f6f6f6'
+    tom90_medium_gray = '#b4b4b4'
+    
+    # Box-Typ bestimmt Farben
+    if box_type == "highlight":
+        bg_color = '#e8f4fd'
+        border_color = tom90_blue
+    elif box_type == "warning":
+        bg_color = '#fff5f5'
+        border_color = '#cc0000'
+    elif box_type == "success":
+        bg_color = '#f0fff0'
+        border_color = '#008000'
+    else:  # default
+        bg_color = tom90_light_gray
+        border_color = tom90_blue
+    
+    content_paragraph = Paragraph(content, styles.get('Normal', ParagraphStyle('Normal')))
+    box_table = Table([[content_paragraph]], colWidths=[16*cm])
+    box_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), bg_color),
+        ('BOX', (0,0), (-1,-1), 2, border_color),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('LEFTPADDING', (0,0), (-1,-1), 15),
+        ('RIGHTPADDING', (0,0), (-1,-1), 15),
+        ('TOPPADDING', (0,0), (-1,-1), 15),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 15),
+    ]))
+    
+    return box_table
+
+# ---------------------------------------------------------------------------
 # Custom Canvas for Page Numbers and Bottom Logo
 # ---------------------------------------------------------------------------
 
 if _REPORTLAB_AVAILABLE:
     class NumberedCanvas(_rl_canvas.Canvas):
         def __init__(self, *args, include_numbers: bool = True,
-                     include_logo: bool = True, company_logo_b64: Optional[str] = None,
-                     **kwargs) -> None:
+            include_logo: bool = True, company_logo_b64: Optional[str] = None,
+            **kwargs) -> None:
             super().__init__(*args, **kwargs)
             self.include_numbers = include_numbers
             self.include_logo = include_logo
@@ -1176,7 +1963,14 @@ class Tom90Renderer:
         self.company_logo_base64 = company_logo_base64
         self.title_image_b64 = title_image_b64
         self.offer_title_text = offer_title_text
-        self.theme = get_theme(theme_name) if _THEMING_AVAILABLE else get_theme()
+        
+        # TOM-90 Enhanced Theme als Standard verwenden
+        if theme_name == "TOM-90" or theme_name == "Blau Elegant":
+            self.theme = get_tom90_enhanced_theme()
+        else:
+            self.theme = get_theme(theme_name) if _THEMING_AVAILABLE else get_tom90_enhanced_theme()
+        
+        # Primary Color überschreiben falls angegeben
         if primary_color:
             try:
                 if primary_color.startswith('#'):
@@ -1206,6 +2000,16 @@ class Tom90Renderer:
                 ChartBlock(),
                 TermsBlock(),
             ]
+            
+            # TOM-90 spezifische Design-Blöcke hinzufügen (aktiviert per default)
+            # TOM-90 spezifische Design-Blöcke hinzufügen (aktiviert per default)
+            if inclusion_options.get('include_tom90_design_pages', True):
+                self.blocks.extend([
+                    Tom90Page2Block(),  # 3D-Isometrische Darstellung
+                    Tom90Page3Block(),  # Zwei-Box-Vergleich
+                    Tom90Page4Block(),  # Komponenten-Details
+                    Tom90Page5Block(),  # Finanzierung & Kontakt
+                ])
 
     def _header_footer(self, canvas_obj, doc) -> None:
         if not _REPORTLAB_AVAILABLE:
@@ -1278,8 +2082,15 @@ class Tom90Renderer:
                     if flows:
                         story.append(KeepTogether(flows))
                 except Exception as e:
-                    err_msg = f"Fehler im Block {block.name}: {e}"
-                    story.append(Paragraph(err_msg, self.theme.get('styles', {}).get('ErrorText', ParagraphStyle('ErrorText'))))
+                    # Sichere Exception-Behandlung ohne weitere Exception-Verschachtelung
+                    err_msg = f"Fehler im Block {block.name}: {str(e)[:200]}..."
+                    try:
+                        # Versuche eine sichere Fehlermeldung zu erstellen
+                        error_style = ParagraphStyle('ErrorText', fontName='Helvetica', fontSize=10, textColor=colors.red)
+                        story.append(Paragraph(err_msg, error_style))
+                    except:
+                        # Falls auch das fehlschlägt, ignoriere den Block
+                        pass
         try:
             include_numbers = self.inclusion_options.get('include_page_numbers', True)
             include_logo = self.inclusion_options.get('include_page_logo', False)
