@@ -100,8 +100,8 @@ class PDFPreviewEngine:
         key_parts = [
             project_data.get('customer_data', {}).get('last_name', ''),
             str(project_data.get('project_details', {}).get('module_quantity', 0)),
-            str(options.get('include_charts', False)),
-            str(options.get('include_all_documents', False))
+            str(options.get('include_charts', True)),
+            str(options.get('include_all_documents', True))
         ]
         return "_".join(key_parts)
     
@@ -157,7 +157,7 @@ def render_pdf_preview_interface(
     # Layout: Sidebar für Optionen, Hauptbereich für Vorschau
     col1, col2 = st.columns([1, 2])
     
-    with st.expander("Vorschau-Einstellungen", expanded=True):
+    with st.expander("Vorschau-Einstellungen", expanded=False):
         preview_mode = st.radio("Vorschau-Modus", ["Schnell (erste 3 Seiten)", "Vollständig (eingebettet)"], horizontal=True)
         # Erste Instanz: Einfacher Button
         update_preview = st.button("🔄 Vorschau aktualisieren", use_container_width=True, key="preview_update_simple")
@@ -170,7 +170,7 @@ def render_pdf_preview_interface(
             inclusion_options = st.session_state.get('pdf_inclusion_options', {
                 "include_company_logo": True,
                 "include_product_images": True,
-                "include_all_documents": False,
+                "include_all_documents": True,
                 "company_document_ids_to_include": [],
                 "selected_charts_for_pdf": [],
                 "include_optional_component_details": True,
@@ -233,7 +233,7 @@ def render_pdf_preview_interface(
         # Aktualisierungsoptionen
         auto_update = st.checkbox(
             "Automatische Aktualisierung",
-            value=False,
+            value=True,
             help="Vorschau wird bei Änderungen automatisch aktualisiert"
         )
         
@@ -281,7 +281,7 @@ def render_pdf_preview_interface(
                 # Basis-Inklusionsoptionen
                 inclusion_options = {
                     'include_company_logo': True,
-                    'include_all_documents': False,
+                    'include_all_documents': True,
                     'include_optional_component_details': True,
                     'include_charts': True,
                     'selected_charts_for_pdf': ['monthly_generation_chart', 'deckungsgrad_chart']
