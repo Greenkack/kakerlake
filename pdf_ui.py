@@ -33,13 +33,6 @@ def _dummy_get_active_company_details() -> Optional[Dict[str, Any]]:
 def _dummy_list_company_documents(company_id: int, doc_type: Optional[str]=None) -> List[Dict[str, Any]]:
     return []
 
-_generate_offer_pdf_safe = _dummy_generate_offer_pdf
-
-try:
-    from pdf_generator import generate_offer_pdf
-    _generate_offer_pdf_safe = generate_offer_pdf
-except (ImportError, ModuleNotFoundError): pass 
-except Exception: pass
 
 # PDF-VORSCHAU INTEGRATION (NEU)
 try:
@@ -57,39 +50,24 @@ except (ImportError, ModuleNotFoundError):
 
 try:
     from doc_output import _show_pdf_data_status
+    from pdf_generator import generate_offer_pdf
+    from pdf_widgets import orderable_multiselect
+    # ... weitere Ihrer Importe
+    _DEPENDENCIES_AVAILABLE = True
+    _WIDGET_AVAILABLE = True
 except ImportError:
-    def _show_pdf_data_status(*args, **kwargs):
-        st.warning("Datenstatus-Modul (doc_output) nicht gefunden.")
-        return True
- 
-try:
-    from reportlab.platypus import Table, TableStyle, Paragraph
-    from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.lib import colors
-except ImportError:
-    # Erstelle Dummy-Klassen, wenn ReportLab nicht installiert ist
-    class Table: pass
-    class TableStyle: pass
-    class Paragraph: pass
-    def getSampleStyleSheet(): return {}
-        
-# 🔥 PROFESSIONAL PDF GENERATOR INTEGRATION
-try:
-    from pdf_generator_professional import ProfessionalPDFGenerator
-    _PROFESSIONAL_PDF_AVAILABLE = True
-except (ImportError, ModuleNotFoundError):
-    _PROFESSIONAL_PDF_AVAILABLE = False
-    
-    class ProfessionalPDFGenerator:
-        def __init__(self, *args, **kwargs):
-            pass
-        def create_professional_pdf(self):
-            return None
-        def load_template_presets(self):
-            return {}
-        def save_template_preset(self, name, config):
-            return False
+    _DEPENDENCIES_AVAILABLE = False
+    _WIDGET_AVAILABLE = False
+    # Definieren Sie hier Ihre Dummy-Funktionen für den Fall, dass Importe fehlschlagen
+    def _show_pdf_data_status(*args, **kwargs): return True
+    def generate_offer_pdf(*args, **kwargs): st.error("pdf_generator.py nicht gefunden."); return None
+    def orderable_multiselect(title, sections, default_order, key):
+        st.warning("pdf_widgets.py nicht gefunden. Standard-Auswahl wird verwendet.")
+        return [{'key': k, 'name': v, 'active': True} for k, v in sections.items()]
 
+def get_text_pdf_ui(texts_dict, key, fallback_text=None):
+    return texts_dict.get(key, fallback_text or key)
+    
 # --- Hilfsfunktionen ---
 def get_text_pdf_ui(texts_dict: Dict[str, str], key: str, fallback_text: Optional[str] = None) -> str:
     if not isinstance(texts_dict, dict):
@@ -121,6 +99,21 @@ def render_pdf_ui(
 ):
     st.header(get_text_pdf_ui(texts, "menu_item_doc_output", "Angebotsausgabe (PDF)"))
     
+    # --- PDF-Sektionen früh definieren ---
+    all_pdf_sections = {
+        "ProjectOverview": get_text_pdf_ui(texts, "pdf_section_title_projectoverview", "1. Projektübersicht"),
+        "TechnicalComponents": get_text_pdf_ui(texts, "pdf_section_title_technicalcomponents", "2. Systemkomponenten"),
+        "CostDetails": get_text_pdf_ui(texts, "pdf_section_title_costdetails", "3. Kostenaufstellung"),
+        "Economics": get_text_pdf_ui(texts, "pdf_section_title_economics", "4. Wirtschaftlichkeit"),
+        "SimulationDetails": get_text_pdf_ui(texts, "pdf_section_title_simulationdetails", "5. Simulation"),
+        "CO2Savings": get_text_pdf_ui(texts, "pdf_section_title_co2savings", "6. CO₂-Einsparung"),
+        "Visualizations": get_text_pdf_ui(texts, "pdf_section_title_visualizations", "7. Grafiken"),
+        "FutureAspects": get_text_pdf_ui(texts, "pdf_section_title_futureaspects", "8. Zukunftsaspekte")
+    }
+    
+    if not _WIDGET_AVAILABLE:
+        st.error("Kritisches UI-Modul 'pdf_widgets.py' nicht gefunden. Drag-and-Drop ist nicht verfügbar.")
+        return
     # Debug-Bereich hinzufügen
     render_pdf_debug_section(
         texts, project_data, analysis_results, 
@@ -128,44 +121,48 @@ def render_pdf_ui(
     )
     
     # --- Dynamische Inhalte außerhalb der Form ---
-    st.subheader("🎨 Erweiterte Inhalte")
+    st.subheader("🎨 zusätzliche Inhalte")
     
     col1, col2 = st.columns(2)
     with col1:
         # --- Frei gestaltbare Textbereiche ---
         if 'custom_text_blocks' not in st.session_state: st.session_state.custom_text_blocks = []
-        if st.button("✍️ Freien Textbereich hinzufügen"):
+        if st.button("✍️ gestaltbare Textbereich hinzufügen"):
             st.session_state.custom_text_blocks.append({'title': '', 'content': ''})
         
     with col2:
         # --- Frei einfügbare Bilder ---
         if 'custom_images' not in st.session_state: st.session_state.custom_images = []
-        if st.button("🖼️ Weiteres Bild hinzufügen"):
+        if st.button("🖼️ zusätzliches Bild / Foto hinzufügen"):
             st.session_state.custom_images.append({'title': '', 'description': '', 'data': None, 'filename': ''})
 
-    with st.form(key="pdf_final_form_seggeli_ultra"):
-        st.subheader("1. Design & Layout")
+    col1, col2 = st.columns(2)
         
-        col1, col2 = st.columns(2)
+    with col1:
+        default_order = list(all_pdf_sections.keys())
+        st.markdown("---")
+        st.subheader("1. Kategorien für den PDF Inhalt wählen")
+        
+        
+        final_section_config = orderable_multiselect(
+            title="PDF-Hauptinhalte wählen und ordnen",
+            sections=all_pdf_sections,
+            default_order=default_order,
+            key="pdf_final_section_config"
+        )
+        
+        st.markdown("---")
+        st.subheader("2. Features / Highlights auswählen")
+        
         with col1:
-            # Design-Theme auswählen
-            theme_options = ["Blau Elegant", "Öko Grün", "Salt & Pepper"]
-            theme_name = st.selectbox(
-                "Design-Vorlage auswählen",
-                options=theme_options,
-                help="Wählen Sie das visuelle Erscheinungsbild Ihres PDFs. 'Salt & Pepper' ist eine minimalistische Text-Version."
-            )
-        
-        with col2:
             # PDF-Qualität und Format
             pdf_quality = st.selectbox(
                 "PDF-Qualität",
                 ["Standard", "Hoch", "Druck-Qualität"],
-                help="Höhere Qualität = größere Dateien, aber bessere Darstellung"
+                help="Höhere Qualität = größere Dateien, aber bessere Darstellung",
+                key="pdf_quality_select_v1_unique"
             )
         
-        st.markdown("---")
-        st.subheader("2. 📊 Inhalts-Optionen & Features")
         
         # Zwei umfassende Menü-Sektionen
         col1, col2 = st.columns(2)
@@ -176,37 +173,43 @@ def render_pdf_ui(
             include_company_logo = st.checkbox(
                 "🏢 Firmenlogo anzeigen",
                 value=True,
-                help="Logo der aktiven Firma im PDF-Header"
+                help="Logo der aktiven Firma im PDF-Header",
+                key="pdf_include_company_logo_main"
             )
             
             include_product_images = st.checkbox(
                 "📸 Produktbilder einbinden",
                 value=True,
-                help="Bilder der gewählten PV-Module, Wechselrichter etc."
+                help="Bilder der gewählten PV-Module, Wechselrichter etc.",
+                key="pdf_include_product_images_main"
             )
             
             include_technical_specs = st.checkbox(
                 "⚙️ Detaillierte Technik-Spezifikationen",
                 value=True,
-                help="Umfassende technische Details zu allen Komponenten"
+                help="Umfassende technische Details zu allen Komponenten",
+                key="pdf_include_technical_specs_main"
             )
             
             include_cost_breakdown = st.checkbox(
                 "💰 Detaillierte Kostenaufschlüsselung",
                 value=True,
-                help="Aufschlüsselung nach Modulen, Wechselrichtern, Installation etc."
+                help="Aufschlüsselung nach Modulen, Wechselrichtern, Installation etc.",
+                key="pdf_include_cost_breakdown_main"
             )
             
             include_charts_graphs = st.checkbox(
                 "📈 Wirtschaftlichkeits-Diagramme",
                 value=True,
-                help="ROI, Amortisation, Ersparnisse über die Zeit"
+                help="ROI, Amortisation, Ersparnisse über die Zeit",
+                key="pdf_include_charts_graphs_main"
             )
             
             include_co2_analysis = st.checkbox(
                 "🌱 CO₂-Einsparung & Nachhaltigkeit",
                 value=True,
-                help="Umweltbilanz und CO₂-Reduktion der Anlage"
+                help="Umweltbilanz und CO₂-Reduktion der Anlage",
+                key="pdf_include_co2_analysis_main"
             )
         
         with col2:
@@ -244,14 +247,16 @@ def render_pdf_ui(
             
             include_product_datasheets = st.checkbox(
                 "📄 Produktdatenblätter als Anhang",
-                value=False,
+                value=True,
                 help="Vollständige Herstellerdatenblätter anhängen (größere PDF)"
             )
         
         st.markdown("---")
         st.subheader("3. Reihenfolge & Inhalte der Sektionen")
 
-        # Mapping der Sektions-Keys zu den UI-Namen
+        # --- FUNKTIONIERENDES DRAG-AND-DROP ---
+        # HINWEIS: Nutzt Ihre bestehende all_sections_map
+        # Ich habe "Attachments" hinzugefügt, da dies eine wählbare Sektion ist.
         all_sections_map = {
             "TitlePageCoverLetter": "Titel & Anschreiben",
             "KeyVisuals": "Kennzahlen-Übersicht (Donuts)",
@@ -262,30 +267,23 @@ def render_pdf_ui(
             "CustomImages": "Individuelle Bilder",
             "CustomTexts": "Individuelle Texte",
             "HighlightBox": "Highlight-Box",
-            "OptionalCharts": "Weitere Diagramme"
+            "OptionalCharts": "Weitere Diagramme",
+            "Attachments": "Anhänge (Datenblätter, Dokumente)" # <-- Hinzugefügt für Vollständigkeit
         }
+        
+        # Die Standard-Reihenfolge wird aus Ihrer Map generiert
+        default_order = list(all_sections_map.keys())
 
-        if 'pdf_section_order' not in st.session_state:
-            st.session_state.pdf_section_order = list(all_sections_map.keys())
-
-        # Erstelle DataFrame für den Data Editor
-        ordered_section_names = [all_sections_map[key] for key in st.session_state.pdf_section_order]
-        df_sections = pd.DataFrame({
-            "Aktiv": [True] * len(ordered_section_names),
-            "Sektion": ordered_section_names,
-        })
-
-        st.info("💡 Passen Sie die Reihenfolge per Drag-and-Drop an und (de-)aktivieren Sie Sektionen.")
-        edited_df = st.data_editor(
-            df_sections,
-            use_container_width=True,
-            hide_index=True,
-            disabled=("Sektion",), # Nur die Checkbox ist editierbar
-            key="section_order_editor_final"
+        # Aufruf des neuen, funktionierenden Widgets mit Ihrer Map
+        final_section_config = orderable_multiselect(
+            title="PDF-Sektionen anordnen & auswählen",
+            sections=all_sections_map,
+            default_order=default_order,
+            key="pdf_final_section_config"
         )
         
         st.markdown("---")
-        st.subheader("4. Optionale & Individuelle Inhalte")
+        st.subheader("4. Freie Gestaltung")
 
         # --- Frei gestaltbare Textbereiche (nur Eingabefelder, Buttons sind außerhalb) ---
         for i, text_block in enumerate(st.session_state.get('custom_text_blocks', [])):
@@ -325,14 +323,19 @@ def render_pdf_ui(
             highlight_box_content = st.text_area("Inhalt für Highlight-Box", "Mit dieser Photovoltaikanlage sichern Sie sich...")
 
         # --- SUBMIT BUTTON ---
-        submitted = st.form_submit_button("🚀 Finales PDF erstellen", type="primary", use_container_width=True)
-
+        submitted = st.button(
+            "🚀 Finales PDF erstellen",
+            type="primary",
+            use_container_width=True
+        )
     # --- PDF-Generierungslogik nach dem Submit ---
     if submitted:
         with st.spinner("Seggeli Ultra komponiert Ihr PDF..."):
             active_company = get_active_company_details_func()
             company_info_for_pdf = active_company if active_company else {}
-            
+            active_sections_df = pd.DataFrame(final_section_config)
+            active_sections_df = active_sections_df[active_sections_df['active']]
+            section_order = active_sections_df['key'].tolist()
             # Key-Mapping von UI-Namen zurück zu internen Keys
             reverse_section_map = {v: k for k, v in all_sections_map.items()}
             ordered_keys = [reverse_section_map[name] for name in edited_df['Sektion']]
@@ -340,6 +343,30 @@ def render_pdf_ui(
             active_df = edited_df[edited_df['Aktiv'] == True]
             final_section_order = [reverse_section_map[name] for name in active_df['Sektion']]
             
+            pdf_params = {
+                "project_data": project_data,
+                "analysis_results": analysis_results,
+                "company_info": get_active_company_details_func(),
+                "texts": texts,
+                "theme_name": theme_name,
+                "section_order": section_order,
+                # ... füllen Sie hier alle weiteren benötigten Parameter auf
+                "get_product_by_id_func": get_product_by_id_func,
+            }
+            
+            with st.spinner("Seggeli Ultra komponiert Ihr PDF..."):
+                pdf_bytes = generate_offer_pdf(**pdf_params)
+                
+                if pdf_bytes:
+                    st.success("✅ PDF erfolgreich komponiert!")
+                    st.download_button(
+                        label="📥 PDF Herunterladen", data=pdf_bytes,
+                        file_name=f"Angebot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                        mime="application/pdf", use_container_width=True
+                    )
+                else:
+                    st.error("❌ PDF-Erstellung fehlgeschlagen.")
+                
             # Erweiterte Inclusion-Optionen aus UI-Checkboxen erstellen
             inclusion_options = {
                 "include_company_logo": include_company_logo,
@@ -397,7 +424,7 @@ def render_pdf_ui(
     if 'pdf_inclusion_options' not in st.session_state:
         st.session_state.pdf_inclusion_options = {
             "include_company_logo": True, "include_product_images": True, 
-            "include_all_documents": False, "company_document_ids_to_include": [],
+            "include_all_documents": True, "company_document_ids_to_include": [],
             "selected_charts_for_pdf": [], "include_optional_component_details": True
         }
     if "pdf_selected_main_sections" not in st.session_state:
@@ -419,6 +446,9 @@ def render_pdf_ui(
     company_info_for_pdf = active_company if active_company else {"name": "Ihre Firma (Fallback)"}
     company_logo_b64_for_pdf = active_company.get('logo_base64') if active_company else None
     active_company_id_for_docs = active_company.get('id') if active_company else None # Korrigiert: None statt 0 als Fallback
+    if 'pdf_theme_name' not in st.session_state: st.session_state.pdf_theme_name = "Blau Elegant"
+    if 'custom_images' not in st.session_state: st.session_state.custom_images = []
+    if 'custom_text_blocks' not in st.session_state: st.session_state.custom_text_blocks = []
     
     if active_company: 
         st.caption(f"Angebot für Firma: **{active_company.get('name', 'Unbekannt')}** (ID: {active_company_id_for_docs})")
@@ -497,7 +527,7 @@ def render_pdf_ui(
     if "selected_cover_letter_name_doc_output" not in st.session_state: st.session_state.selected_cover_letter_name_doc_output = cover_letter_templates[0]['name'] if cover_letter_templates and isinstance(cover_letter_templates[0], dict) else None
     if "selected_cover_letter_text_content_doc_output" not in st.session_state: st.session_state.selected_cover_letter_text_content_doc_output = cover_letter_templates[0]['content'] if cover_letter_templates and isinstance(cover_letter_templates[0], dict) else ""
 
-    default_pdf_sections_map = {"ProjectOverview": get_text_pdf_ui(texts, "pdf_section_title_projectoverview", "1. Projektübersicht"),"TechnicalComponents": get_text_pdf_ui(texts, "pdf_section_title_technicalcomponents", "2. Systemkomponenten"),"CostDetails": get_text_pdf_ui(texts, "pdf_section_title_costdetails", "3. Kostenaufstellung"),"Economics": get_text_pdf_ui(texts, "pdf_section_title_economics", "4. Wirtschaftlichkeit"),"SimulationDetails": get_text_pdf_ui(texts, "pdf_section_title_simulationdetails", "5. Simulation"),"CO2Savings": get_text_pdf_ui(texts, "pdf_section_title_co2savings", "6. CO₂-Einsparung"),"Visualizations": get_text_pdf_ui(texts, "pdf_section_title_visualizations", "7. Grafiken"),"FutureAspects": get_text_pdf_ui(texts, "pdf_section_title_futureaspects", "8. Zukunftsaspekte")}
+    default_pdf_sections_map = all_pdf_sections  # Verwende die früh definierte Version
     all_main_section_keys = list(default_pdf_sections_map.keys())
     chart_key_to_friendly_name_map = {'monthly_prod_cons_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_monthly_compare", "Monatl. Produktion/Verbrauch (2D)"),'cost_projection_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_cost_projection", "Stromkosten-Hochrechnung (2D)"),'cumulative_cashflow_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_cum_cashflow", "Kumulierter Cashflow (2D)"),'consumption_coverage_pie_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_consum_coverage_pie", "Verbrauchsdeckung (Kreis)"),'pv_usage_pie_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pv_usage_pie", "PV-Nutzung (Kreis)"),'daily_production_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_daily_3d", "Tagesproduktion (3D)"),'weekly_production_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_weekly_3d", "Wochenproduktion (3D)"),'yearly_production_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_yearly_3d_bar", "Jahresproduktion (3D-Balken)"),'project_roi_matrix_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_roi_matrix_3d", "Projektrendite-Matrix (3D)"),'feed_in_revenue_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_feedin_3d", "Einspeisevergütung (3D)"),'prod_vs_cons_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_prodcons_3d", "Verbr. vs. Prod. (3D)"),'tariff_cube_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_tariffcube_3d", "Tarifvergleich (3D)"),'co2_savings_value_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_co2value_3d", "CO2-Ersparnis vs. Wert (3D)"),'investment_value_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_investval_3D", "Investitionsnutzwert (3D)"),'storage_effect_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_storageeff_3d", "Speicherwirkung (3D)"),'selfuse_stack_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_selfusestack_3d", "Eigenverbr. vs. Einspeis. (3D)"),'cost_growth_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_costgrowth_3d", "Stromkostensteigerung (3D)"),'selfuse_ratio_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_selfuseratio_3d", "Eigenverbrauchsgrad (3D)"),'roi_comparison_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_roicompare_3d", "ROI-Vergleich (3D)"),'scenario_comparison_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_scenariocomp_3d", "Szenarienvergleich (3D)"),'tariff_comparison_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_tariffcomp_3d", "Vorher/Nachher Stromkosten (3D)"),'income_projection_switcher_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_incomeproj_3d", "Einnahmenprognose (3D)"),'yearly_production_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pvvis_yearly", "PV Visuals: Jahresproduktion"),'break_even_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pvvis_breakeven", "PV Visuals: Break-Even"),'amortisation_chart_bytes': get_text_pdf_ui(texts, "pdf_chart_label_pvvis_amort", "PV Visuals: Amortisation")}
     all_available_chart_keys_for_selection = _get_all_available_chart_keys(analysis_results, chart_key_to_friendly_name_map)
@@ -603,7 +633,7 @@ def render_pdf_ui(
             st.session_state.pdf_inclusion_options["include_company_logo"] = st.checkbox(get_text_pdf_ui(texts, "pdf_include_company_logo_label", "Firmenlogo anzeigen?"), value=st.session_state.pdf_inclusion_options.get("include_company_logo", True), key="pdf_cb_logo_v13_form_main_stable")
             st.session_state.pdf_inclusion_options["include_product_images"] = st.checkbox(get_text_pdf_ui(texts, "pdf_include_product_images_label", "Produktbilder anzeigen? (Haupt & Zubehör)"), value=st.session_state.pdf_inclusion_options.get("include_product_images", True), key="pdf_cb_prod_img_v13_form_main_stable")
             st.session_state.pdf_inclusion_options["include_optional_component_details"] = st.checkbox(get_text_pdf_ui(texts, "pdf_include_optional_component_details_label", "Details zu optionalen Komponenten anzeigen?"), value=st.session_state.pdf_inclusion_options.get("include_optional_component_details", True), key="pdf_cb_opt_comp_details_v13_form_main_stable")
-            st.session_state.pdf_inclusion_options["include_all_documents"] = st.checkbox(get_text_pdf_ui(texts, "pdf_include_all_documents_label", "Alle Datenblätter & ausgew. Firmendokumente anhängen?"), value=st.session_state.pdf_inclusion_options.get("include_all_documents", False), key="pdf_cb_all_docs_v13_form_main_stable")
+            st.session_state.pdf_inclusion_options["include_all_documents"] = st.checkbox(get_text_pdf_ui(texts, "pdf_include_all_documents_label", "Alle Datenblätter & ausgew. Firmendokumente anhängen?"), value=st.session_state.pdf_inclusion_options.get("include_all_documents", True), key="pdf_cb_all_docs_v13_form_main_stable")
             st.markdown("**" + get_text_pdf_ui(texts, "pdf_options_select_company_docs", "Spezifische Firmendokumente für Anhang") + "**")
             if active_company_id_for_docs is not None and isinstance(active_company_id_for_docs, int) and callable(db_list_company_documents_func):
                 company_docs_list_form = db_list_company_documents_func(active_company_id_for_docs, None)
