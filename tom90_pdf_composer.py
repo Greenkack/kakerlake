@@ -177,3 +177,18 @@ def display_tom90_pdf_ui(offer_data: Dict[str, Any], analysis_results: Dict[str,
             st.markdown(pdf_display, unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Fehler bei der PDF‑Vorschau: {e}")
+
+        pdf_bytes = generate_tom90_offer_pdf(
+        project_data=offer_data,
+        analysis_results=analysis_results,
+        company_info=company_info,
+        company_logo_base64=None,
+        selected_title_image_b64=None,
+        selected_offer_title_text="Ihr Angebot",
+        inclusion_options=inclusion_options,
+        texts=texts,
+        theme_name="Blau Elegant",
+        primary_color=primary_color,
+        list_products_func=list_products_func,       # <-- Funktion zum Listen der Produkte
+        get_product_by_id_func=get_product_by_id_func  # <-- Funktion zum Abrufen eines Produkts
+    )
