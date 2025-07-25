@@ -150,6 +150,14 @@ def main():
         st.session_state.project_data = {'customer_data': {}, 'project_details': {}, 'economic_data': {}}
     if 'calculation_results' not in st.session_state:
         st.session_state.calculation_results = {}
+    
+    # Robust Session State für calculation_results mit Timestamp
+    if 'calculation_results_timestamp' not in st.session_state:
+        st.session_state.calculation_results_timestamp = None
+    
+    # Backup der calculation_results für Wiederherstellung nach Rerun
+    if 'calculation_results_backup' not in st.session_state:
+        st.session_state.calculation_results_backup = {}
 
     with st.sidebar:
         st.title(get_text_gui("sidebar_navigation_title"))
@@ -291,9 +299,37 @@ def main():
             if doc_output_module and database_module and product_db_module and callable(getattr(doc_output_module, 'render_pdf_ui', None)):
                 project_data_doc = st.session_state.get('project_data', {})
                 calc_results_doc = st.session_state.get("calculation_results", {})
-                if not project_data_doc or not project_data_doc.get('project_details',{}).get('module_quantity') or not calc_results_doc: 
-                    st.info(get_text_gui("pdf_creation_no_data_info"))
+                
+                # Erweiterte Validierung der Daten
+                project_valid = (project_data_doc and 
+                               project_data_doc.get('project_details',{}).get('module_quantity'))
+                calc_results_valid = (calc_results_doc and 
+                                    isinstance(calc_results_doc, dict) and 
+                                    len(calc_results_doc) > 0)
+                
+                if not project_valid or not calc_results_valid: 
+                    st.info("📋 **PDF-Generierung benötigt vollständige Projekt- und Berechnungsdaten**")
+                    st.markdown("""
+                    **Fehlende Daten:**
+                    - {} Projektdaten (Module, Wechselrichter, etc.)
+                    - {} Berechnungsergebnisse (Ertrag, Kosten, etc.)
+                    
+                    **Nächste Schritte:**
+                    1. Gehen Sie zur **Dateneingabe** und vervollständigen Sie das Projekt
+                    2. Führen Sie in der **Analysestufe** eine Berechnung durch
+                    3. Kehren Sie dann zur PDF-Generierung zurück
+                    """.format("❌" if not project_valid else "✅", 
+                             "❌" if not calc_results_valid else "✅"))
                 else:
+                    # Zusätzliche Validierung: Stelle sicher, dass calc_results_doc nicht leer ist
+                    if not calc_results_doc or len(calc_results_doc) == 0:
+                        # Versuche, die Daten aus der Session State zu laden
+                        calc_results_doc = st.session_state.get("calculation_results", {})
+                        if not calc_results_doc:
+                            st.error("⚠️ **Berechnungsdaten nicht verfügbar**")
+                            st.info("Bitte führen Sie zuerst eine Berechnung in der Analysestufe durch.")
+                            return
+                    
                     pdf_ui_kwargs_pass = {
                         "texts": TEXTS, "project_data": project_data_doc, "analysis_results": calc_results_doc,
                         "load_admin_setting_func": getattr(database_module, 'load_admin_setting', None),
