@@ -89,7 +89,7 @@ class MultiCompanyOfferGenerator:
         if "multi_offer_settings" not in st.session_state:
             st.session_state.multi_offer_settings = {
                 "module_quantity": 20,
-                "include_storage": False,
+                "include_storage": True,
             }
 
     def _load_all_products(self) -> Dict[str, List[Dict[str, Any]]]:
@@ -307,7 +307,7 @@ class MultiCompanyOfferGenerator:
         )
         settings["include_storage"] = cols[1].checkbox(
             "Batteriespeicher ins Angebot aufnehmen?",
-            value=settings.get("include_storage", False),
+            value=settings.get("include_storage", True),
         )
           # NEUE FEATURE: Automatische Preisstaffelung
         st.markdown("### 🎯 Automatische Produktrotation & Preisstaffelung")
@@ -608,7 +608,7 @@ class MultiCompanyOfferGenerator:
                 "include_product_images": True,
                 "include_charts": True,
                 "include_visualizations": True,
-                "include_all_documents": False,
+                "include_all_documents": True,
                 "include_optional_component_details": True,
                 "selected_sections": [
                     "ProjectOverview", "TechnicalComponents", "CostDetails", 
@@ -636,7 +636,7 @@ class MultiCompanyOfferGenerator:
             )
             pdf_options["include_all_documents"] = st.checkbox(
                 "Produktdatenblätter anhängen",
-                value=pdf_options.get("include_all_documents", False),
+                value=pdf_options.get("include_all_documents", True),
                 help="Produktdatenblätter und Firmendokumente als Anhang"
             )
         
@@ -778,7 +778,7 @@ class MultiCompanyOfferGenerator:
         """
         rotated_settings = base_settings.copy()
         
-        if not base_settings.get("enable_product_rotation", False):
+        if not base_settings.get("enable_product_rotation", True):
             return rotated_settings
         
         try:
@@ -1098,8 +1098,8 @@ class MultiCompanyOfferGenerator:
                 ])
                 
                 # Charts basierend auf Benutzereinstellungen filtern
-                charts_to_include = available_charts if pdf_options.get("include_charts", False) else []
-                if not pdf_options.get("include_visualizations", False):
+                charts_to_include = available_charts if pdf_options.get("include_charts", True) else []
+                if not pdf_options.get("include_visualizations", True):
                     # Technische Visualisierungen entfernen
                     charts_to_include = [c for c in charts_to_include if not any(
                         vis_key in c for vis_key in ['daily_production', 'weekly_production', 'yearly_production']
@@ -1127,7 +1127,7 @@ class MultiCompanyOfferGenerator:
                     inclusion_options={
                         "include_company_logo": pdf_options.get("include_company_logo", True),
                         "include_product_images": pdf_options.get("include_product_images", True),
-                        "include_all_documents": pdf_options.get("include_all_documents", False),
+                        "include_all_documents": pdf_options.get("include_all_documents", True),
                         "company_document_ids_to_include": [],  # TODO: Firmen-spezifische Dokumente
                         "selected_charts_for_pdf": charts_to_include,
                         "include_optional_component_details": pdf_options.get("include_optional_component_details", True),
