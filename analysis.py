@@ -18,6 +18,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from typing import Dict, Any, List, Optional, Tuple
 import os
+import time  # Für Timestamp-Funktionalität
 from reportlab.lib import colors # Für HexColor Zugriff
 import colorsys # Für HLS/RGB Konvertierungen
 from datetime import datetime, timedelta
@@ -2366,7 +2367,7 @@ def render_advanced_economics(integrator, calc_results: Dict[str, Any], project_
     st.subheader("Erweiterte Wirtschaftlichkeitsanalyse")
     
     # LCOE (Levelized Cost of Energy) Berechnung
-    with st.expander("LCOE - Stromgestehungskosten", expanded=True):
+    with st.expander("LCOE - Stromgestehungskosten", expanded=False):
         lcoe_params = {
             'investment': calc_results.get('total_investment_netto', 20000),
             'annual_production': calc_results.get('annual_pv_production_kwh', 10000),
@@ -2432,7 +2433,7 @@ def render_advanced_economics(integrator, calc_results: Dict[str, Any], project_
         st.plotly_chart(fig, use_container_width=True, key=f"energy_flow_sankey_{unique_session_id}")
     
     # NPV mit verschiedenen Diskontierungsraten
-    with st.expander("NPV-Sensitivitätsanalyse", expanded=True):
+    with st.expander("NPV-Sensitivitätsanalyse", expanded=False):
         discount_rates = np.arange(0.01, 0.10, 0.01)
         npv_values = []
         
@@ -2473,7 +2474,7 @@ def render_advanced_economics(integrator, calc_results: Dict[str, Any], project_
         """)
     
     # IRR (Internal Rate of Return) Berechnung
-    with st.expander("Renditeberechnung (IRR & MIRR)", expanded=True):
+    with st.expander("Renditeberechnung (IRR & MIRR)", expanded=False):
         irr_result = integrator.calculate_irr_advanced(calc_results)
         
         col1, col2, col3 = st.columns(3)
@@ -2505,7 +2506,7 @@ def render_detailed_energy_analysis(integrator, calc_results: Dict[str, Any], pr
     st.subheader("Detaillierte Energieflussanalyse")
     
     # Energiefluss-Sankey-Diagramm
-    with st.expander("Energiefluss-Visualisierung", expanded=True):
+    with st.expander("Energiefluss-Visualisierung", expanded=False):
         energy_flows = integrator.calculate_detailed_energy_flows(calc_results)
         
         # Sankey-Diagramm erstellen
@@ -2569,7 +2570,7 @@ def render_detailed_energy_analysis(integrator, calc_results: Dict[str, Any], pr
         )
     
     # Lastprofilanalyse
-    with st.expander("Lastprofilanalyse", expanded=True):
+    with st.expander("Lastprofilanalyse", expanded=False):
         load_profile = integrator.calculate_load_profile_analysis(calc_results, project_data)
         
         # Tageslastgang visualisieren
@@ -2652,7 +2653,7 @@ def render_technical_calculations(integrator, calc_results: Dict[str, Any], proj
     st.subheader("Technische Detailberechnungen")
     
     # Verschattungsanalyse
-    with st.expander("Verschattungsanalyse", expanded=True):
+    with st.expander("Verschattungsanalyse", expanded=False):
         shading_analysis = integrator.calculate_shading_analysis(project_data)
           # Verschattungsmatrix visualisieren
         months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
@@ -2713,7 +2714,7 @@ def render_technical_calculations(integrator, calc_results: Dict[str, Any], proj
             )
     
     # Temperatureffekte
-    with st.expander("Temperatureffekte", expanded=True):
+    with st.expander("Temperatureffekte", expanded=False):
         temp_analysis = integrator.calculate_temperature_effects(calc_results, project_data)
         
         # Temperaturverlauf und Leistung
@@ -2791,7 +2792,7 @@ def render_technical_calculations(integrator, calc_results: Dict[str, Any], proj
             )
     
     # Wechselrichter-Effizienz
-    with st.expander("Wechselrichter-Effizienzanalyse", expanded=True):
+    with st.expander("Wechselrichter-Effizienzanalyse", expanded=False):
         inverter_analysis = integrator.calculate_inverter_efficiency(calc_results, project_data)
         
         # Effizienzkurve
@@ -2864,7 +2865,7 @@ def render_financial_scenarios(integrator, calc_results: Dict[str, Any], project
     st.subheader("Finanzielle Szenarioanalyse")
     
     # Monte-Carlo-Simulation
-    with st.expander("Monte-Carlo-Risikoanalyse", expanded=True):
+    with st.expander("Monte-Carlo-Risikoanalyse", expanded=False):
         # Simulationsparameter
         col1, col2, col3 = st.columns(3)
         
@@ -2982,7 +2983,7 @@ def render_financial_scenarios(integrator, calc_results: Dict[str, Any], project
             st.plotly_chart(fig, use_container_width=True, key=f"sensitivity_analysis_chart_{unique_session_id}")
     
     # Förderszenarien
-    with st.expander("Förderszenarien", expanded=True):
+    with st.expander("Förderszenarien", expanded=False):
         subsidy_scenarios = integrator.calculate_subsidy_scenarios(calc_results)
         
         # Szenario-Vergleich
@@ -3049,7 +3050,7 @@ def render_environmental_calculations(integrator, calc_results: Dict[str, Any], 
     st.subheader("Umwelt & Nachhaltigkeit")
     
     # CO2-Bilanz
-    with st.expander("Detaillierte CO₂-Bilanz", expanded=True):
+    with st.expander("Detaillierte CO₂-Bilanz", expanded=False):
         co2_analysis = integrator.calculate_detailed_co2_analysis(calc_results)
         
         # CO2-Bilanz über Lebenszyklus
@@ -3148,7 +3149,7 @@ def render_environmental_calculations(integrator, calc_results: Dict[str, Any], 
         st.dataframe(environmental_impacts, use_container_width=True)
     
     # Kreislaufwirtschaft
-    with st.expander("Kreislaufwirtschaft & Recycling", expanded=True):
+    with st.expander("Kreislaufwirtschaft & Recycling", expanded=False):
         recycling_analysis = integrator.calculate_recycling_potential(calc_results, project_data)
         
         # Materialzusammensetzung
@@ -3205,7 +3206,7 @@ def render_optimization_suggestions(integrator, calc_results: Dict[str, Any], pr
     optimization_results = integrator.generate_optimization_suggestions(calc_results, project_data)
     
     # Optimierungspotenziale
-    with st.expander("Identifizierte Optimierungspotenziale", expanded=True):
+    with st.expander("Identifizierte Optimierungspotenziale", expanded=False):
         potentials_df = pd.DataFrame(optimization_results['optimization_potentials'])
         
         # Potential-Matrix
@@ -3295,7 +3296,7 @@ def render_optimization_suggestions(integrator, calc_results: Dict[str, Any], pr
                 st.markdown("---")
     
     # Systemoptimierung
-    with st.expander("Systemoptimierung", expanded=True):
+    with st.expander("Systemoptimierung", expanded=False):
         system_optimization = optimization_results['system_optimization']
         
         # Optimierungsparameter
@@ -3622,6 +3623,33 @@ def render_analysis(texts: Dict[str, str], results: Optional[Dict[str, Any]] = N
         st.error(get_text(texts, 'calculation_no_result_info'));
         if 'st' in globals() and hasattr(st, 'session_state'): st.session_state["calculation_results"] = {}
         return
+    
+    # *** BACKUP-VERSTÄRKUNG: Zusätzliche Session State Speicherung in analysis.py ***
+    try:
+        # Aktualisiere Session State mit aktuellen Ergebnissen
+        st.session_state.calculation_results = results_for_display.copy()
+        
+        # Stelle sicher, dass auch das Backup aktualisiert wird
+        if not hasattr(st.session_state, 'calculation_results_backup') or not st.session_state.calculation_results_backup:
+            timestamp = datetime.now().isoformat()
+            backup_data = {
+                'results': results_for_display.copy(),
+                'timestamp': timestamp,
+                'project_data_summary': {
+                    'anlage_kwp': results_for_display.get('anlage_kwp', 0),
+                    'total_investment_brutto': results_for_display.get('total_investment_brutto', 0),
+                    'annual_pv_production_kwh': results_for_display.get('annual_pv_production_kwh', 0)
+                }
+            }
+            st.session_state.calculation_results_backup = backup_data
+            st.session_state.calculation_timestamp = timestamp
+        
+        # Debug-Info
+        if results_for_display.get('app_debug_mode_enabled', False):
+            st.info(f"🔄 Berechnungsergebnisse aktualisiert (Zeitstempel: {st.session_state.get('calculation_timestamp', 'unbekannt')})")
+    except Exception as e:
+        st.warning(f"⚠️ Fehler beim Session State Update: {e}")
+    
     chart_byte_keys = ['consumption_coverage_pie_chart_bytes','pv_usage_pie_chart_bytes','daily_production_switcher_chart_bytes','weekly_production_switcher_chart_bytes','yearly_production_switcher_chart_bytes','project_roi_matrix_switcher_chart_bytes','feed_in_revenue_switcher_chart_bytes','prod_vs_cons_switcher_chart_bytes','tariff_cube_switcher_chart_bytes','co2_savings_value_switcher_chart_bytes','investment_value_switcher_chart_bytes','storage_effect_switcher_chart_bytes','selfuse_stack_switcher_chart_bytes','cost_growth_switcher_chart_bytes','selfuse_ratio_switcher_chart_bytes','roi_comparison_switcher_chart_bytes','scenario_comparison_switcher_chart_bytes','tariff_comparison_switcher_chart_bytes','income_projection_switcher_chart_bytes','monthly_prod_cons_chart_bytes','cost_projection_chart_bytes','cumulative_cashflow_chart_bytes','yearly_production_chart_bytes','break-even_chart_bytes','amortisation_chart_bytes']
     for chart_key_init in chart_byte_keys: results_for_display.setdefault(chart_key_init, None)
     calc_errors_list=[err for err in results_for_display.get('calculation_errors',[]) if err];all_display_errors=list(set(calc_errors_list + calculation_errors_for_current_run))
@@ -3862,8 +3890,33 @@ def render_analysis(texts: Dict[str, str], results: Optional[Dict[str, Any]] = N
         else:
             st.warning("⚠️ Keine Finanzierung in Projektdaten aktiviert")
 
+    # Speichere Berechnungsergebnisse robust in Session State
     if 'st' in globals() and hasattr(st, 'session_state') and 'results_for_display' in locals():
-        st.session_state["calculation_results"] = results_for_display.copy()
+        try:
+            # Stelle sicher, dass results_for_display ein Dictionary ist und Daten enthält
+            if isinstance(results_for_display, dict) and len(results_for_display) > 0:
+                st.session_state["calculation_results"] = results_for_display.copy()
+                
+                # Backup für Wiederherstellung nach Rerun
+                st.session_state["calculation_results_backup"] = results_for_display.copy()
+                
+                # Zusätzliche Validierung: Überprüfe wichtige Keys
+                important_keys = ['anlage_kwp', 'annual_pv_production_kwh', 'total_investment_netto']
+                present_keys = [key for key in important_keys if key in results_for_display]
+                
+                if len(present_keys) >= 2:  # Mindestens 2 wichtige Keys sollten vorhanden sein
+                    st.session_state["calculation_results_timestamp"] = time.time()
+                    st.session_state["calculation_results_backup_timestamp"] = time.time()
+                    # Optionale Debug-Info (nur wenn Debug-Modus aktiviert)
+                    # st.success(f"✅ Berechnungsergebnisse gespeichert ({len(results_for_display)} Keys)")
+                else:
+                    st.warning("⚠️ Berechnungsergebnisse scheinen unvollständig zu sein")
+            else:
+                st.error("❌ Berechnungsergebnisse sind leer oder ungültig")
+        except Exception as e:
+            st.error(f"❌ Fehler beim Speichern der Berechnungsergebnisse: {str(e)}")
+            # Fallback: Leere results setzen, um Konsistenz zu gewährleisten
+            st.session_state["calculation_results"] = {}
 
 def render_financing_analysis(results: Dict[str, Any], texts: Dict[str, str], viz_settings: Dict[str, Any]):
     """
@@ -3893,7 +3946,7 @@ def render_financing_analysis(results: Dict[str, Any], texts: Dict[str, str], vi
     st.markdown(f"**Gewählte Finanzierungsart:** {financing_type}")
     
     # Interaktive Finanzierungsparameter
-    with st.expander("**Finanzierungsparameter anpassen**", expanded=True):
+    with st.expander("**Finanzierungsparameter anpassen**", expanded=False):
         col_param1, col_param2, col_param3 = st.columns(3)
         
         with col_param1:
@@ -4202,7 +4255,7 @@ def render_financing_analysis(results: Dict[str, Any], texts: Dict[str, str], vi
     st.subheader("Detaillierte Finanzierungsvergleiche & Simulationen")
     
     # Szenario-Simulationen
-    with st.expander("📊 Finanzierungs-Szenario-Simulationen", expanded=True):
+    with st.expander("📊 Finanzierungs-Szenario-Simulationen", expanded=False):
         st.markdown("### Zinssatz-Sensitivitätsanalyse")
         
         # Parameter für Sensitivitätsanalyse
@@ -4309,7 +4362,7 @@ def render_financing_analysis(results: Dict[str, Any], texts: Dict[str, str], vi
                 }
     
     # ROI-Analyse mit Finanzierung
-    with st.expander("📈 ROI-Analyse mit Finanzierungsoptionen", expanded=True):
+    with st.expander("📈 ROI-Analyse mit Finanzierungsoptionen", expanded=False):
         st.markdown("### Return on Investment bei verschiedenen Finanzierungsarten")
         
         # PV-Erträge aus bestehenden Berechnungen
