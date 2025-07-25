@@ -52,6 +52,7 @@ def Dummy_load_admin_setting_calc(key, default=None):
             'global_yield_adjustment_percent': 0.0,
             'default_specific_yield_kwh_kwp': 950.0,
             'reference_specific_yield_pr': 1100.0,
+            'pvgis_enabled': True,  # Neue Option für PVGIS aktivieren/deaktivieren
             'specific_yields_by_orientation_tilt': {
                 "Süd_0":950.0, "Süd_15":980.0, "Süd_30":1000.0, "Süd_45":980.0, "Süd_60":950.0,
                 "Südost_0":900.0, "Südost_15":930.0, "Südost_30":950.0, "Südost_45":930.0, "Südost_60":900.0,
@@ -84,11 +85,11 @@ _DATABASE_AVAILABLE = False
 try:
     from database import load_admin_setting as real_load_admin_setting
     if not callable(real_load_admin_setting): raise ImportError("real_load_admin_setting nicht aufrufbar.")
-    _DATABASE_AVAILABLE = True
+    _DATABASE_AVAILABLE = False
 except ImportError: real_load_admin_setting = Dummy_load_admin_setting_calc
 except Exception: real_load_admin_setting = Dummy_load_admin_setting_calc
 
-_PRODUCT_DB_AVAILABLE = False
+_PRODUCT_DB_AVAILABLE = True
 try:
     from product_db import list_products as real_list_products, get_product_by_id as real_get_product_by_id, get_product_by_model_name as real_get_product_by_model_name
     if not callable(real_list_products) or not callable(real_get_product_by_id) or not callable(real_get_product_by_model_name):
@@ -1682,6 +1683,9 @@ def perform_calculations(
     module_capacity_w = float(module_details.get('capacity_w', 0.0) or 0.0) if module_details else 0.0
     results['anlage_kwp'] = (module_quantity * module_capacity_w) / 1000.0
     
+    # Anlagengröße für erweiterte Berechnungen definieren
+    anlage_kwp = results['anlage_kwp']
+    
         # Fallback: Neuberechnung, falls 'anlage_kwp' aus project_details fehlt oder 0 ist.
         # Dies ist die ursprüngliche Logik, die nun als Fallback dient.
        
@@ -1689,7 +1693,12 @@ def perform_calculations(
        
     # PVGIS-Datenabruf oder manuelle Ertragsberechnung
     pvgis_results_data = None
-    if project_details.get('latitude') is not None and project_details.get('longitude') is not None and results['anlage_kwp'] > 0:
+    pvgis_enabled = bool(global_constants.get('pvgis_enabled', True))
+    
+    if (pvgis_enabled and 
+        project_details.get('latitude') is not None and 
+        project_details.get('longitude') is not None and 
+        results['anlage_kwp'] > 0):
         try:
             lat = float(project_details['latitude'])
             lon = float(project_details['longitude'])
@@ -1706,6 +1715,9 @@ def perform_calculations(
         except (ValueError, TypeError) as e_coords:
             errors_list.append((texts.get("error_geocoding_conversion_calc", "Fehler Konvertierung Geodaten für PVGIS.") or "") + f" Details: {e_coords}")
             pvgis_results_data = None # Sicherstellen, dass es None ist bei Fehler
+    elif not pvgis_enabled:
+        # PVGIS ist deaktiviert - verwende manuelle Berechnung ohne Meldung
+        pvgis_results_data = None
 
     annual_pv_production_kwh_base, monthly_pv_production_kwh_base = 0.0, [0.0]*12
     results['pvgis_data_used'] = False # Standardmäßig auf False setzen
@@ -1997,6 +2009,9 @@ def perform_calculations(
     results['vat_rate_percent'] = vat_rate_percent # MwSt.-Satz
     results['total_investment_brutto'] = total_investment_netto * (1 + vat_rate_percent / 100.0)
     # if app_debug_mode_is_enabled: print(f"CALC: Endgültige Kosten: base_matrix={results['base_matrix_price_netto']:.2f}, total_additional={total_additional_costs_netto:.2f}, subtotal_netto={subtotal_netto:.2f}, total_investment_netto={total_investment_netto:.2f}, c={results['total_investment_brutto']:.2f}") # Bereinigt
+    
+    # Bruttoinvestition für erweiterte Berechnungen definieren
+    total_investment_brutto = results['total_investment_brutto']
 
     # --- Wirtschaftlichkeitsberechnung (Jahr 1) ---
     annual_electricity_cost_savings_self_consumption_year1 = eigenverbrauch_pro_jahr_kwh * electricity_price_kwh
@@ -2020,6 +2035,9 @@ def perform_calculations(
     results['einspeiseverguetung_eur_per_kwh'] = einspeiseverguetung_ct_per_kwh / 100.0
     annual_feed_in_revenue_year1 = netzeinspeisung_kwh * results['einspeiseverguetung_eur_per_kwh']
     results['annual_feed_in_revenue_year1'] = annual_feed_in_revenue_year1
+    
+    # Einspeisevergütung für erweiterte Berechnungen definieren
+    feed_in_tariff_effective = results['einspeiseverguetung_eur_per_kwh']
 
     # Steuerlicher Vorteil (optional, falls gewerblich)
     tax_benefit_feed_in_year1 = 0.0
@@ -2048,11 +2066,14 @@ def perform_calculations(
     if maintenance_fixed_pa > 0 or maintenance_variable_pa_kwp > 0: # Wenn spezifische Werte da sind
         annual_maintenance_costs_eur_year1_calc = maintenance_fixed_pa + (maintenance_variable_pa_kwp * results['anlage_kwp'])
     else: # Fallback auf Prozentsatz der Investition
-        annual_maintenance_costs_eur_year1_calc = total_investment_netto * maintenance_base_percent_of_invest
+        annual_maintenance_costs_eur_year1_calc = base_matrix_price_netto * maintenance_base_percent_of_invest
         # if app_debug_mode_is_enabled: # Bereinigt
             # if (maintenance_increase_pa_rate * 100) == inflation_rate_percent: errors_list.append(texts.get("info_maintenance_increase_uses_inflation", "Info: Steigerung Wartungskosten an Inflationsrate gekoppelt."))
             # if maintenance_base_percent_of_invest * 100 > 0 : errors_list.append(texts.get("info_maintenance_fallback_used", "Info: Detaillierte Wartungskosten nicht gesetzt, Fallback auf % der Investition."))
     results['annual_maintenance_costs_eur_year1'] = annual_maintenance_costs_eur_year1_calc
+    
+    # Wartungskosten für erweiterte Berechnungen definieren
+    maintenance_cost_fixed_pa = annual_maintenance_costs_eur_year1_calc
 
     for year_idx in range(1, results['simulation_period_years_effective'] + 1):
         current_year_production = annual_pv_production_kwh * (annual_degredation_factor**(year_idx - 1))
@@ -2349,6 +2370,40 @@ def perform_calculations(
     # if app_debug_mode_is_enabled: print(f"--- CALCULATIONS.PY: Berechnungen abgeschlossen. Ergebnisse (Auszug): {json.dumps({k: v for k,v in results.items() if not isinstance(v, list) or len(v) < 5}, indent=2, ensure_ascii=False)}") # Bereinigt
     # if app_debug_mode_is_enabled and errors_list: print(f"CALC: Gesammelte Fehler/Hinweise: {errors_list}") # Bereinigt
 
+    # *** BACKUP-SYSTEM: Speichere Ergebnisse in Session State mit Zeitstempel ***
+    try:
+        import streamlit as st
+        if hasattr(st, 'session_state'):
+            # Zeitstempel für dieses Berechnungsergebnis
+            timestamp = datetime.now().isoformat()
+            
+            # Speichere Hauptergebnisse
+            st.session_state.calculation_results = results.copy()
+            
+            # Erstelle Backup-Kopie mit Zeitstempel
+            backup_data = {
+                'results': results.copy(),
+                'timestamp': timestamp,
+                'project_data_summary': {
+                    'anlage_kwp': results.get('anlage_kwp', 0),
+                    'total_investment_brutto': results.get('total_investment_brutto', 0),
+                    'annual_pv_production_kwh': results.get('annual_pv_production_kwh', 0)
+                }
+            }
+            st.session_state.calculation_results_backup = backup_data
+            
+            # Speichere zusätzlich einen Timestamp für Debugging
+            st.session_state.calculation_timestamp = timestamp
+            
+            if app_debug_mode_is_enabled:
+                print(f"CALC: Berechnungsergebnisse in Session State gespeichert (Zeitstempel: {timestamp})")
+    except ImportError:
+        # Streamlit nicht verfügbar (z.B. bei direkter Ausführung)
+        pass
+    except Exception as e:
+        if app_debug_mode_is_enabled:
+            print(f"CALC: Fehler beim Speichern in Session State: {e}")
+
     return results
 
 # --- Testlauf für calculations.py (optional, nur für direkte Ausführung) ---
@@ -2359,7 +2414,7 @@ if __name__ == "__main__":
         'project_details': {
             'annual_consumption_kwh_yr': 4500, 'electricity_price_kwh': 0.35,
             'module_quantity': 20, 'selected_module_id': 1, 'selected_inverter_id': 1,
-            'include_storage': True, 'selected_storage_id': 1, 'selected_storage_storage_power_kw': 5.0,
+            'include_storage': False, 'selected_storage_id': 1, 'selected_storage_storage_power_kw': 5.0,
             'selected_storage_name': 'TestSpeicher 5kWh', 
             'roof_orientation': 'Süd', 'roof_inclination_deg': 35, 'latitude': 48.13, 'longitude': 11.57, 
             'feed_in_type': 'Teileinspeisung'
@@ -2597,7 +2652,7 @@ def calculate_offer_details(customer_id: Optional[int] = None, project_data: Opt
             # Finanzielle Details
             'financing_options': {
                 'cash_payment': results.get('total_investment_brutto', 0),
-                'financing_available': True,
+                'financing_available': False,
                 'monthly_rate_estimate': results.get('total_investment_brutto', 0) / 240 if results.get('total_investment_brutto', 0) > 0 else 0
             },
             
