@@ -1,0 +1,114 @@
+Text: Analyse:
+Position: (62.692909240722656, 352.5440673828125, 104.37291717529297, 366.3140869140625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  Dieses Kreisdiagramm visualisiert, welcher Anteil Ihres Stromverbrauchs durch die PV-Anlage
+Position: (104.37291717529297, 352.49407958984375, 523.3828125, 366.23406982421875)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: gedeckt wird und welcher Anteil weiterhin aus dem Netz bezogen werden muss.
+Position: (62.692909240722656, 364.49407958984375, 416.7228088378906, 378.23406982421875)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Kennzahl
+Position: (133.68051147460938, 388.2133483886719, 178.13050842285156, 401.9833679199219)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 16777215
+----------------------------------------
+Text: Wert
+Position: (286.52783203125, 388.2133483886719, 308.7478332519531, 401.9833679199219)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 16777215
+----------------------------------------
+Text: Bewertung
+Position: (413.5350646972656, 388.2133483886719, 465.20501708984375, 401.9833679199219)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 16777215
+----------------------------------------
+Text: PV-Deckung
+Position: (78.86614227294922, 412.2383728027344, 129.38314819335938, 424.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: 85.4%
+Position: (320.81573486328125, 412.2383728027344, 346.3307800292969, 424.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Unabhängigkeit vom Netz
+Position: (362.33074951171875, 412.2383728027344, 465.3717346191406, 424.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Netzbezug
+Position: (78.86614227294922, 436.2383728027344, 121.88614654541016, 448.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: 14.6%
+Position: (320.81573486328125, 436.2383728027344, 346.3307800292969, 448.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Restlicher Strombedarf
+Position: (362.33074951171875, 436.2383728027344, 454.35577392578125, 448.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Autarkiegrad
+Position: (78.86614227294922, 460.2383728027344, 129.88714599609375, 472.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: 85.4%
+Position: (320.81573486328125, 460.2383728027344, 346.3307800292969, 472.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Energieunabhängigkeit
+Position: (362.33074951171875, 460.2383728027344, 454.3826904296875, 472.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Eingesparte kWh
+Position: (78.86614227294922, 484.2383728027344, 147.39215087890625, 496.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: 0 kWh
+Position: (320.8247375488281, 484.2383728027344, 346.33074951171875, 496.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Selbst genutzter Solarstrom
+Position: (362.33074951171875, 484.2383728027344, 473.372802734375, 496.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Nutzung PV-Strom (Jahr 1)
+Position: (227.66131591796875, 538.9937744140625, 367.6142883300781, 554.1408081054688)
+Schriftart: Helvetica-Bold
+Schriftgröße: 11.0
+Farbe: 3355443
+----------------------------------------

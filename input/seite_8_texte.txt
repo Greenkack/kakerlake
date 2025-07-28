@@ -1,0 +1,72 @@
+Text: Energienetze Deutschland Gmbh
+Position: (56.692909240722656, 75.40937042236328, 197.7228546142578, 87.8023681640625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 13158
+----------------------------------------
+Text: Angebot 202507261219
+Position: (439.5376892089844, 75.40937042236328, 538.5828247070312, 87.8023681640625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 13158
+----------------------------------------
+Text: {project_id}    {current_date}
+Position: (56.692909240722656, 829.0778198242188, 131.8448944091797, 840.0938110351562)
+Schriftart: Helvetica-Bold
+Schriftgröße: 8.0
+Farbe: 16777215
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 108.47056579589844, 76.39090728759766, 125.8045654296875)
+Schriftart: ZapfDingbats
+Schriftgröße: 18.0
+Farbe: 13158
+----------------------------------------
+Text:  Das ist ein Testbereich
+Position: (76.39090728759766, 103.95256042480469, 277.4689025878906, 128.73855590820312)
+Schriftart: Helvetica-Bold
+Schriftgröße: 18.0
+Farbe: 2899536
+----------------------------------------
+Text: Dieser Testbereich ist nur zum schreiben, Strichen sind verboten!
+Position: (62.692909240722656, 126.06256103515625, 352.24285888671875, 139.8025665283203)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3426654
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 166.40914916992188, 76.39090728759766, 183.74314880371094)
+Schriftart: ZapfDingbats
+Schriftgröße: 18.0
+Farbe: 13158
+----------------------------------------
+Text:  Testbereich 2 oder so
+Position: (76.39090728759766, 161.8911590576172, 267.46087646484375, 186.67715454101562)
+Schriftart: Helvetica-Bold
+Schriftgröße: 18.0
+Farbe: 2899536
+----------------------------------------
+Text: Strichen auch hier verboten aber rumgeilen geht ab und zu
+Position: (62.692909240722656, 184.00115966796875, 323.38287353515625, 197.7411651611328)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3426654
+----------------------------------------
+Text: Das ist der Puff
+Position: (62.692909240722656, 463.43316650390625, 131.05291748046875, 477.17315673828125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3426654
+----------------------------------------
+Text: Und das ist auch ein PPuff aber für Pokemon
+Position: (62.692909240722656, 666.9370727539062, 262.7928771972656, 680.6770629882812)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3426654
+----------------------------------------
+Text: Angebot Seite 6 von 7
+Position: (258.2778015136719, 829.037841796875, 336.9977722167969, 840.0298461914062)
+Schriftart: Helvetica
+Schriftgröße: 8.0
+Farbe: 16777215
+----------------------------------------

@@ -1,0 +1,78 @@
+Text: {company_name}
+Position: (62.692909240722656, 76.11614990234375, 177.18289184570312, 89.85614776611328)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {company_address_street}
+Position: (62.692909240722656, 88.11614990234375, 146.62290954589844, 101.85614776611328)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 82178 Puchheim
+Position: (62.692909240722656, 100.11614990234375, 137.73292541503906, 113.85614776611328)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {customer_name}
+Position: (62.692909240722656, 154.6358642578125, 106.03291320800781, 168.37586975097656)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {customer_name}
+Position: (62.692909240722656, 166.6358642578125, 163.2829132080078, 180.37586975097656)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {customer_address_street}
+Position: (62.692909240722656, 178.6358642578125, 138.84291076660156, 192.37586975097656)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {customer_address_city}
+Position: (62.692909240722656, 190.6358642578125, 156.63290405273438, 204.37586975097656)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {current_date}
+Position: (482.5426940917969, 230.9822998046875, 532.5827026367188, 244.72230529785156)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Ihr persönliches Angebot für eine Photovoltaikanlage, Nr. {project_id}
+Position: (62.692909240722656, 257.2054443359375, 401.12286376953125, 270.9754638671875)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Sehr geehrter {customer_name},
+Position: (62.692909240722656, 297.42694091796875, 225.93287658691406, 312.54095458984375)
+Schriftart: Helvetica
+Schriftgröße: 11.0
+Farbe: 3355443
+----------------------------------------
+Text: vielen Dank für Ihr Interesse an nachhaltiger Solarenergie.
+Position: (62.692909240722656, 346.4427490234375, 346.98785400390625, 361.5567626953125)
+Schriftart: Helvetica
+Schriftgröße: 11.0
+Farbe: 3355443
+----------------------------------------
+Text: Mit freundlichen Grüßen
+Position: (62.692909240722656, 404.0373840332031, 169.95291137695312, 417.7773742675781)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {company_name}
+Position: (62.692909240722656, 424.5413818359375, 177.18289184570312, 438.2813720703125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------

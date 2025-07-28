@@ -1,0 +1,90 @@
+Text: Angebot für {customer_name}
+Position: (74.91778564453125, 195.0511474609375, 520.3577880859375, 228.09913635253906)
+Schriftart: Helvetica-Bold
+Schriftgröße: 24.0
+Farbe: 5210557
+----------------------------------------
+Text: {company_name}
+Position: (243.12930297851562, 266.6208801269531, 352.14630126953125, 279.0138854980469)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: {company_address_street}
+Position: (259.8692932128906, 277.5758972167969, 335.4062805175781, 289.94189453125)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 82178 Puchheim
+Position: (263.8697814941406, 288.5758972167969, 331.40576171875, 300.94189453125)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Tel.: {company_phone}
+Position: (257.6102600097656, 299.5758972167969, 337.66522216796875, 311.94189453125)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Mail: {company_email}
+Position: (234.54324340820312, 310.5758972167969, 360.732177734375, 322.94189453125)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Web: {company_website}
+Position: (234.36322021484375, 3.215758972167969, 360.91217041015625, 333.94189453125)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: StNr/USt-ID: {company_tax_id} 117/122/82217
+Position: (211.3411865234375, 332.5758972167969, 383.9342041015625, 344.94189453125)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: {id}
+Position: (62.692909240722656, 357.674072265625, 106.03291320800781, 371.4140625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {last_name} [first_name] 
+Position: (62.692909240722656, 369.674072265625, 163.2829132080078, 383.4140625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {customer_address_street}
+Position: (62.692909240722656, 381.674072265625, 138.84291076660156, 395.4140625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {customer_address_city}
+Position: (62.692909240722656, 393.674072265625, 156.63290405273438, 407.4140625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Angebotsnummer: 
+Position: (385.8526916503906, 434.02056884765625, 470.3326416015625, 447.76055908203125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: {project_id}
+Position: (470.3326416015625, 434.070556640625, 532.5826416015625, 447.840576171875)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Datum: {current_date}
+Position: (447.53271484375, 446.02056884765625, 532.5827026367188, 459.76055908203125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------

@@ -1,0 +1,114 @@
+Text: Analyse:
+Position: (62.692909240722656, 352.5440673828125, 104.37291717529297, 366.3140869140625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  Diese Darstellung zeigt die Verteilung Ihres produzierten Solarstroms: Wieviel direkt verbraucht,
+Position: (104.37291717529297, 352.49407958984375, 531.1828002929688, 366.23406982421875)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: wieviel ins Netz eingespeist wird und welche Erträge dabei entstehen.
+Position: (62.692909240722656, 364.49407958984375, 371.7128601074219, 378.23406982421875)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Kennzahl
+Position: (133.68051147460938, 388.2133483886719, 178.13050842285156, 401.9833679199219)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 16777215
+----------------------------------------
+Text: Wert
+Position: (286.52783203125, 388.2133483886719, 308.7478332519531, 401.9833679199219)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 16777215
+----------------------------------------
+Text: Bewertung
+Position: (413.5350646972656, 388.2133483886719, 465.20501708984375, 401.9833679199219)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 16777215
+----------------------------------------
+Text: Eigenverbrauch
+Position: (78.86614227294922, 412.2383728027344, 141.89315795898438, 424.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: 0.0%
+Position: (325.8197326660156, 412.2383728027344, 346.3307800292969, 424.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Direkt genutzter PV-Strom
+Position: (362.33074951171875, 412.2383728027344, 467.3608093261719, 424.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Einspeisung
+Position: (78.86614227294922, 436.2383728027344, 127.88914489746094, 448.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: 100.0%
+Position: (315.8117370605469, 436.2383728027344, 346.3307800292969, 448.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Ins Netz verkaufter Strom
+Position: (362.33074951171875, 436.2383728027344, 464.3638610839844, 448.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Einspeisevergütung
+Position: (78.86614227294922, 460.2383728027344, 157.90414428710938, 472.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: 0.08 €/kWh
+Position: (300.8087463378906, 460.2383728027344, 346.33074951171875, 472.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Vergütung pro kWh
+Position: (362.33074951171875, 460.2383728027344, 439.86578369140625, 472.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Jährliche Einspeisung
+Position: (78.86614227294922, 484.2383728027344, 166.400146484375, 496.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: 0 €
+Position: (333.82073974609375, 484.2383728027344, 346.33074951171875, 496.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Einnahmen durch Verkauf
+Position: (362.33074951171875, 484.2383728027344, 466.3797607421875, 496.6043701171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 0
+----------------------------------------
+Text: Tagesproduktion (3D)
+Position: (240.80081176757812, 538.9937744140625, 354.4747314453125, 554.1408081054688)
+Schriftart: Helvetica-Bold
+Schriftgröße: 11.0
+Farbe: 3355443
+----------------------------------------

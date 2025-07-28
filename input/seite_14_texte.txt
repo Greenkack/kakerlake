@@ -1,0 +1,246 @@
+Text: Batteriespeicher: ViessmannSpeicher Vitocharge VX3 A10 10,0 kWh Speicherturm
+Position: (62.692909240722656, 76.09614562988281, 491.846923828125, 91.24314880371094)
+Schriftart: Helvetica-Bold
+Schriftgröße: 11.0
+Farbe: 3355443
+----------------------------------------
+Text: Brand
+Position: (62.36220169067383, 102.15738677978516, 88.36320495605469, 114.55038452148438)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: ViessmannSpeicher
+Position: (181.87091064453125, 102.11238098144531, 261.89892578125, 114.47838592529297)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Model Name
+Position: (62.36220169067383, 121.66138458251953, 115.37220764160156, 134.05438232421875)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Vitocharge VX3 A10 10,0 kWh
+Position: (181.87091064453125, 121.61637878417969, 303.43389892578125, 133.9823760986328)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Speicherturm
+Position: (181.87091064453125, 132.6163787841797, 235.38491821289062, 144.9823760986328)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Produktgarantie (Jahre)
+Position: (62.36220169067383, 152.16529846191406, 163.8822021484375, 164.5583038330078)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 10.0 Jahre
+Position: (181.87091064453125, 152.12030029296875, 224.3959197998047, 164.48629760742188)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Nutzbare
+Position: (62.36220169067383, 171.6692352294922, 100.86419677734375, 184.06224060058594)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Speicherkapazität (kWh)
+Position: (62.36220169067383, 182.6692352294922, 166.3842010498047, 195.06224060058594)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 10,0 kWh
+Position: (181.87091064453125, 171.62423706054688, 219.8869171142578, 183.990234375)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Max.
+Position: (62.36220169067383, 202.1731719970703, 82.36920166015625, 214.56617736816406)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Lade-/Entladeleistung
+Position: (62.36220169067383, 213.1731719970703, 155.88119506835938, 225.56617736816406)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: (kW)
+Position: (62.36220169067383, 224.1731719970703, 81.85620880126953, 236.56617736816406)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 0,0 kW
+Position: (181.87091064453125, 202.128173828125, 209.87892150878906, 214.49417114257812)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Max. Ladezyklen
+Position: (62.36220169067383, 243.67710876464844, 133.39019775390625, 256.0700988769531)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 5.000 Zyklen
+Position: (181.87091064453125, 243.63211059570312, 233.3959197998047, 255.99810791015625)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: gute speicher vlalla
+Position: (62.692909240722656, 264.66839599609375, 131.1649169921875, 275.5003967285156)
+Schriftart: Helvetica-Oblique
+Schriftgröße: 8.0
+Farbe: 3355443
+----------------------------------------
+Text: 1. Detaillierte Kostenaufstellung
+Position: (62.692909240722656, 322.29736328125, 306.3089294433594, 344.329345703125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 13158
+----------------------------------------
+Text: Total Investment Netto
+Position: (65.19684600830078, 376.8030700683594, 162.20785522460938, 389.1960754394531)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 15.000,00 €
+Position: (482.54071044921875, 376.8030700683594, 530.0787353515625, 389.1960754394531)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 1. Wirtschaftlichkeit im Überblick
+Position: (62.692909240722656, 426.9980773925781, 314.32489013671875, 449.0300598144531)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 13158
+----------------------------------------
+Text: Gesamtinvestition (Brutto)
+Position: (65.19684600830078, 481.50384521484375, 178.70484924316406, 493.8968505859375)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: k.A.
+Position: (514.5716552734375, 481.4588623046875, 530.0786743164062, 493.8248596191406)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Finanzieller Vorteil (Jahr 1, ca.)
+Position: (65.19684600830078, 503.84246826171875, 197.7488250732422, 516.2354736328125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: k.A.
+Position: (514.5716552734375, 503.7974853515625, 530.0786743164062, 516.1634521484375)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Amortisationszeit (ca.)
+Position: (65.19684600830078, 526.1810302734375, 161.7128448486328, 538.5740356445312)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 10.2 Jahre
+Position: (487.5537109375, 526.1360473632812, 530.0787353515625, 538.5020141601562)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Einfache Rendite (Jahr 1, ca.)
+Position: (65.19684600830078, 548.5195922851562, 190.7378387451172, 560.91259765625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: k.A.
+Position: (514.5716552734375, 548.474609375, 530.0786743164062, 560.840576171875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Stromgestehungskosten (LCOE, ca.)
+Position: (65.19684600830078, 570.8582153320312, 2.2172483825683594, 583.251220703125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: k.A.
+Position: (514.5716552734375, 570.813232421875, 530.0786743164062, 583.17919921875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Kapitalwert über Laufzeit (NPV, ca.)
+Position: (65.19684600830078, 593.19677734375, 216.72984313964844, 605.5897827148438)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: k.A.
+Position: (514.5716552734375, 593.1517944335938, 530.0786743164062, 605.5177612304688)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Interner Zinsfuß (IRR, ca.)
+Position: (65.19684600830078, 615.5353393554688, 175.2128448486328, 627.9283447265625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: k.A.
+Position: (514.5716552734375, 615.4903564453125, 530.0786743164062, 627.8563232421875)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Photovoltaik-Angebot • s.Energy
+Position: (56.692909240722656, 41.34868240356445, 185.90586853027344, 53.714683532714844)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Seite 4
+Position: (510.5657043457031, 41.34868240356445, 538.5828247070312, 53.714683532714844)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 8421504
+----------------------------------------
+Text: Wirtschaftlichkeit
+Position: (471.07366943359375, 49.68718338012695, 538.5827026367188, 62.053184509277344)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 8421504
+----------------------------------------
+Text: | Angebot 28.Jun.2025 | Seite 4 von 0 |
+Position: (228.6938018798828, 801.4400024414062, 366.58172607421875, 812.27197265625)
+Schriftart: Helvetica-Oblique
+Schriftgröße: 8.0
+Farbe: 8421504
+----------------------------------------
+Text: s.Energy | Zonguldak | 67000 Zonguldak
+Position: (56.692909240722656, 774.1285400390625, 182.5108642578125, 783.74658203125)
+Schriftart: Helvetica
+Schriftgröße: 7.0
+Farbe: 8421504
+----------------------------------------

@@ -1,0 +1,276 @@
+Text: 1. Projektübersicht & Eckdaten
+Position: (62.692909240722656, 75.74614715576172, 298.3249206542969, 97.77815246582031)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 13158
+----------------------------------------
+Text: Anlagengröße
+Position: (65.19684600830078, 130.2518310546875, 125.70384979248047, 142.64483642578125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 8,50 kWp
+Position: (306.1417236328125, 130.2068328857422, 344.15771484375, 142.5728302001953)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Anzahl Module
+Position: (65.19684600830078, 152.5904083251953, 128.7008514404297, 164.98341369628906)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 60
+Position: (306.1417236328125, 152.54541015625, 316.14971923828125, 164.91140747070312)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Jährliche PV-Produktion (ca.)
+Position: (65.19684600830078, 174.92898559570312, 190.7288360595703, 187.32199096679688)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 8.500 kWh
+Position: (306.1417236328125, 174.8839874267578, 349.1617126464844, 187.24998474121094)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Autarkiegrad (ca.)
+Position: (65.19684600830078, 197.267578125, 141.71484375, 209.66058349609375)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: -
+Position: (306.1417236328125, 197.2225799560547, 309.13873291015625, 209.5885772705078)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Speicherkapazität
+Position: (65.19684600830078, 219.6061553955078, 141.72384643554688, 231.99916076660156)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: -
+Position: (306.1417236328125, 219.5611572265625, 309.13873291015625, 231.92715454101562)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 1. Angebotene Systemkomponenten
+Position: (62.692909240722656, 269.80126953125, 339.18890380859375, 291.833251953125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 13158
+----------------------------------------
+Text: Nachfolgend die Details zu den Kernkomponenten Ihrer Anlage:
+Position: (62.692909240722656, 318.51776123046875, 345.61285400390625, 332.25775146484375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: PV-Module: ViessmannPV Vitovolt 300-DG M440HC
+Position: (62.692909240722656, 353.1748962402344, 330.42181396484375, 368.3218994140625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 11.0
+Farbe: 3355443
+----------------------------------------
+Text: Brand
+Position: (62.36220169067383, 379.23614501953125, 88.36320495605469, 391.629150390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: ViessmannPV
+Position: (181.87091064453125, 379.191162109375, 238.3909149169922, 391.5571594238281)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Model Name
+Position: (62.36220169067383, 398.7400207519531, 115.37220764160156, 411.1330261230469)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Vitovolt 300-DG M440HC
+Position: (181.87091064453125, 398.6950378417969, 283.39990234375, 411.06103515625)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Produktgarantie (Jahre)
+Position: (62.36220169067383, 418.2439270019531, 163.8822021484375, 430.6369323730469)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: {roof_angle}.0 Jahre
+Position: (181.87091064453125, 418.1989440917969, 224.3959197998047, 430.56494140625)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Nennleistung pro Modul
+Position: (62.36220169067383, 437.7478942871094, 165.36720275878906, 450.1408996582031)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: (Wp)
+Position: (62.36220169067383, 448.7478942871094, 82.35120391845703, 461.1408996582031)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 440 Wp
+Position: (181.87091064453125, 437.7029113769531, 212.88491821289062, 450.06890869140625)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Modulwirkungsgrad (%)
+Position: (62.36220169067383, 468.2518310546875, 164.36819458007812, 480.64483642578125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 22,0 %
+Position: (181.87091064453125, 468.20684814453125, 209.88792419433594, 480.5728454589844)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Länge (m)
+Position: (62.36220169067383, 487.75579833984375, 105.36420440673828, 500.1488037109375)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 1,762 m
+Position: (181.87091064453125, 487.7108154296875, 214.38790893554688, 500.0768127441406)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Breite (m)
+Position: (62.36220169067383, 507.25970458984375, 104.36520385742188, 519.6527099609375)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 1,134 m
+Position: (181.87091064453125, 507.2147216796875, 214.38790893554688, 519.5806884765625)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Gewicht (kg)
+Position: (62.36220169067383, 526.763671875, 116.37120819091797, 539.1566772460938)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 24,5 kg
+Position: (181.87091064453125, 526.7186889648438, 211.3909149169922, 539.0846557617188)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: gute marke diese
+Position: (62.692909240722656, 547.7549438476562, 124.05291748046875, 558.5869140625)
+Schriftart: Helvetica-Oblique
+Schriftgröße: 8.0
+Farbe: 3355443
+----------------------------------------
+Text: Wechselrichter: ViessmannWR Vitocharge VX3 Hybridwechselrichter 8.0A
+Position: (62.692909240722656, 585.8914794921875, 449.6509094238281, 601.0385131835938)
+Schriftart: Helvetica-Bold
+Schriftgröße: 11.0
+Farbe: 3355443
+----------------------------------------
+Text: Brand
+Position: (62.36220169067383, 611.95263671875, 88.36320495605469, 624.3456420898438)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: ViessmannWR
+Position: (181.87091064453125, 611.9076538085938, 241.37892150878906, 624.2736206054688)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Model Name
+Position: (62.36220169067383, 631.45654296875, 115.37220764160156, 643.8495483398438)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Vitocharge VX3 Hybridwechselrichter
+Position: (181.87091064453125, 631.4115600585938, 330.4159240722656, 643.7775268554688)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 8.0A
+Position: (181.87091064453125, 642.4115600585938, 200.38392639160156, 654.7775268554688)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Produktgarantie (Jahre)
+Position: (62.36220169067383, 661.9605102539062, 163.8822021484375, 674.353515625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 10.0 Jahre
+Position: (181.87091064453125, 661.91552734375, 224.3959197998047, 674.281494140625)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: AC-Nennleistung (kW)
+Position: (62.36220169067383, 681.4644165039062, 157.35720825195312, 693.857421875)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 8.000,0 kW
+Position: (181.87091064453125, 681.41943359375, 227.39291381835938, 693.785400390625)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Max. europ.
+Position: (62.36220169067383, 700.9683837890625, 112.37520599365234, 713.3613891601562)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Wirkungsgrad (%)
+Position: (62.36220169067383, 711.9683837890625, 139.36619567871094, 724.3613891601562)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 0,0 %
+Position: (181.87091064453125, 700.9234008789062, 204.88392639160156, 713.2893676757812)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 0
+Position: (62.692909240722656, 732.959716796875, 67.14090728759766, 743.7916870117188)
+Schriftart: Helvetica-Oblique
+Schriftgröße: 8.0
+Farbe: 3355443
+----------------------------------------

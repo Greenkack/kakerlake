@@ -1,0 +1,240 @@
+Text: Haben Sie gewusst?
+Position: (208.1375732421875, 311.0127258300781, 299.08074951171875, 324.18682861328125)
+Schriftart: Roboto-Bold
+Schriftgröße: 9.989105224609375
+Farbe: 3487029
+----------------------------------------
+Text:  
+Position: (299.0689697265625, 313.1092834472656, 301.05804443359375, 323.6446228027344)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: Ein durchschnittliches Elektroauto ist 3-4 mal effizienter als ein Auto mit
+Position: (208.1375732421875, 332.5928955078125, 467.010009765625, 343.12823486328125)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: Verbrennungsmotor.
+Position: (208.1375732421875, 342.334716796875, 281.2934875488281, 352.87005615234375)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: {co2_savings_km_equivalent} km
+Position: (124.5945053100586, 230.85418701171875, 220.6653289794922, 257.2024230957031)
+Schriftart: Roboto-Bold
+Schriftgröße: 19.97821044921875
+Farbe: 3487029
+----------------------------------------
+Text: fahren Sie mit Ihrem Auto {co2_savings_km_equivalent} km um die Welt
+Position: (124.5945053100586, 272.9463806152344, 388.13336181640625, 288.75927734375)
+Schriftart: Roboto-Regular
+Schriftgröße: 11.989923477172852
+Farbe: 3487029
+----------------------------------------
+Text: Haben Sie gewusst?
+Position: (208.1375732421875, 465.38299560546875, 299.08074951171875, 478.5570983886719)
+Schriftart: Roboto-Bold
+Schriftgröße: 9.989105224609375
+Farbe: 3487029
+----------------------------------------
+Text:  
+Position: (299.0689697265625, 467.47955322265625, 301.05804443359375, 478.014892578125)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: In Deutschland liegen die jährlichen durchschnittlichen pro Kopf
+Position: (208.1375732421875, 486.9631652832031, 437.3605041503906, 497.4985046386719)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: Emissionen bei 7.69 Tonnen CO . Durch die Reduktion des CO -
+Position: (208.1375732421875, 496.7049865722656, 434.540283203125, 507.2403259277344)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: Fußabdrucks tragen wir dazu bei, dass die globale Klimaerwärmung so
+Position: (208.1375732421875, 506.44677734375, 461.2735595703125, 516.9821166992188)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: gering wie möglich ausfällt.
+Position: (208.1375732421875, 516.1885986328125, 306.9931335449219, 526.7239379882812)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: 38%
+Position: (124.5945053100586, 385.97381591796875, 162.27940368652344, 412.3220520019531)
+Schriftart: Roboto-Bold
+Schriftgröße: 19.97821044921875
+Farbe: 3487029
+----------------------------------------
+Text: reduzieren Sie Ihren CO -Fußabdruck um 38%
+Position: (124.5945053100586, 428.0660400390625, 368.3442077636719, 443.8789367675781)
+Schriftart: Roboto-Regular
+Schriftgröße: 11.989923477172852
+Farbe: 3487029
+----------------------------------------
+Text: Haben Sie gewusst?
+Position: (208.1375732421875, 636.98876953125, 299.08074951171875, 650.1629028320312)
+Schriftart: Roboto-Bold
+Schriftgröße: 9.989105224609375
+Farbe: 3487029
+----------------------------------------
+Text:  
+Position: (299.0689697265625, 639.0853271484375, 301.05804443359375, 649.6206665039062)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: Die tropischen Wälder der Amazonas-Region speichern bis zu 140
+Position: (208.1375732421875, 658.5689697265625, 443.519775390625, 669.1043090820312)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: Milliarden Tonnen CO  und gehören damit zu den größten CO -Senken
+Position: (208.1375732421875, 668.310791015625, 458.034912109375, 678.8461303710938)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: unseres Planeten.
+Position: (208.1375732421875, 678.0525512695312, 272.60260009765625, 688.587890625)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: 244
+Position: (124.5945053100586, 557.57958984375, 158.98300170898438, 583.9277954101562)
+Schriftart: Roboto-Bold
+Schriftgröße: 19.97821044921875
+Farbe: 3487029
+----------------------------------------
+Text: sparen Sie gleich viel CO , wie 244 Bäume pro Jahr aufnehmen
+Position: (124.5945053100586, 599.6718139648438, 461.5099182128906, 615.4846801757812)
+Schriftart: Roboto-Regular
+Schriftgröße: 11.989923477172852
+Farbe: 3487029
+----------------------------------------
+Text: CO -BILANZ
+Position: (39.64636993408203, 72.60176086425781, 193.51998901367188, 109.49519348144531)
+Schriftart: Roboto-Medium
+Schriftgröße: 27.97399139404297
+Farbe: 3487029
+----------------------------------------
+Text: Mit Ihrer jährlichen CO -Ersparnis von 3.053,{module_quantity} kg...
+Position: (39.64636993408203, 187.07977294921875, 408.1812744140625, 208.1603240966797)
+Schriftart: Roboto-Regular
+Schriftgröße: 15.9840669631958
+Farbe: 3487029
+----------------------------------------
+Text: 2
+Position: (76.5177230834961, 85.17353820800781, 88.43570709228516, 112.84608459472656)
+Schriftart: Roboto-Medium
+Schriftgröße: 20.98236656188965
+Farbe: 3487029
+----------------------------------------
+Text: EIN WICHTIGER BEITRAG FÜR DIE UMWELT
+Position: (54.93820571899414, 140.46725463867188, 329.5404968261719, 158.90902709960938)
+Schriftart: Roboto-Bold
+Schriftgröße: 13.983247756958008
+Farbe: 3487029
+----------------------------------------
+Text: 2
+Position: (199.6720428466797, 194.2625274658203, 206.42236328125, 210.07540893554688)
+Schriftart: Roboto-Regular
+Schriftgröße: 11.989923477172852
+Farbe: 3487029
+----------------------------------------
+Text: 2
+Position: (250.00863647460938, 433.4550476074219, 255.07138061523438, 445.3147277832031)
+Schriftart: Roboto-Regular
+Schriftgröße: 8.992443084716797
+Farbe: 3487029
+----------------------------------------
+Text: 2
+Position: (3.21573486328125, 500.2924499511719, 324.9486389160156, 508.1988830566406)
+Schriftart: Roboto-Regular
+Schriftgröße: 5.994961738586426
+Farbe: 3487029
+----------------------------------------
+Text: 2
+Position: (428.97930908203125, 500.2924499511719, 432.3544616699219, 508.1988830566406)
+Schriftart: Roboto-Regular
+Schriftgröße: 5.994961738586426
+Farbe: 3487029
+----------------------------------------
+Text: 2
+Position: (256.72955322265625, 605.0608520507812, 261.79229736328125, 616.9204711914062)
+Schriftart: Roboto-Regular
+Schriftgröße: 8.992443084716797
+Farbe: 3487029
+----------------------------------------
+Text: 2
+Position: (284.76068115234375, 671.898193359375, 288.1358337402344, 679.8046875)
+Schriftart: Roboto-Regular
+Schriftgröße: 5.994961738586426
+Farbe: 3487029
+----------------------------------------
+Text: 2
+Position: (425.95843505859375, 671.898193359375, 429.3335876464844, 679.8046875)
+Schriftart: Roboto-Regular
+Schriftgröße: 5.994961738586426
+Farbe: 3487029
+----------------------------------------
+Text: Berechnungsgrundlagen
+Position: (39.64636993408203, 742.6499633789062, 149.2683868408203, 755.8240966796875)
+Schriftart: Roboto-Bold
+Schriftgröße: 9.989105224609375
+Farbe: 3487029
+----------------------------------------
+Text:  
+Position: (149.2651824951172, 744.7465209960938, 151.2542724609375, 755.2818603515625)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: Der dargestellte Vergleich basiert auf IEA: "Lebenszyklusanalyse für CO -Emissionen der Photovoltaik, Szenario BAU, 2015" und 
+Position: (39.64636993408203, 764.2301635742188, 496.4587097167969, 774.7655029296875)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: EK: "Quantifizierung der Kohlenstoffintensität der Stromerzeugung und -nutzung in Europa, 20{module_quantity}" (Titel übersetzt)
+Position: (39.64636993408203, 773.9719848632812, 445.9670715332031, 784.50732421875)
+Schriftart: Roboto-Regular
+Schriftgröße: 7.98828649520874
+Farbe: 3487029
+----------------------------------------
+Text: 2
+Position: (294.0341491699219, 767.817626953125, 297.4093017578125, 775.7240600585938)
+Schriftart: Roboto-Regular
+Schriftgröße: 5.994961738586426
+Farbe: 3487029
+----------------------------------------
+Text: {project_id}
+Position: (39.658077239990234, 814.5894775390625, 72.79461669921875, 827.7636108398438)
+Schriftart: Roboto-Bold
+Schriftgröße: 9.989105224609375
+Farbe: 16777215
+----------------------------------------
+Text: {current_date}
+Position: (285.26416015625, 814.5894775390625, 336.9228210449219, 827.7636108398438)
+Schriftart: Roboto-Bold
+Schriftgröße: 9.989105224609375
+Farbe: 16777215
+----------------------------------------
+Text: 5
+Position: (549.3937377929688, 814.5894775390625, 555.1275024414062, 827.7636108398438)
+Schriftart: Roboto-Bold
+Schriftgröße: 9.989105224609375
+Farbe: 16777215
+----------------------------------------

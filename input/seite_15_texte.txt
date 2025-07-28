@@ -1,0 +1,180 @@
+Text: Batteriespeicher: FoxSpeicher ECS4100 -H2 8,06 kWh Stromspeicher
+Position: (62.692909240722656, 76.09614562988281, 423.3719177246094, 91.24314880371094)
+Schriftart: Helvetica-Bold
+Schriftgröße: 11.0
+Farbe: 3355443
+----------------------------------------
+Text: Brand
+Position: (62.36220169067383, 102.15738677978516, 88.36320495605469, 114.55038452148438)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: FoxSpeicher
+Position: (255.11810302734375, 102.11238098144531, 305.6351318359375, 114.47838592529297)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Model Name
+Position: (62.36220169067383, 121.6613540649414, 115.37220764160156, 134.05435180664062)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: ECS4100 -H2 8,06 kWh Stromspeicher
+Position: (255.11810302734375, 121.61634826660156, 411.673095703125, 133.9823455810547)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Produktgarantie (Jahre)
+Position: (62.36220169067383, 141.16529846191406, 163.8822021484375, 153.5583038330078)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 10.0 Jahre
+Position: (255.11810302734375, 141.12030029296875, 297.6430969238281, 153.48629760742188)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Nutzbare Speicherkapazität (kWh)
+Position: (62.36220169067383, 160.6692352294922, 207.38818359375, 173.06224060058594)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 8,1 kWh
+Position: (255.11810302734375, 160.62423706054688, 288.1300964355469, 172.990234375)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Max. Lade-/Entladeleistung (kW)
+Position: (62.36220169067383, 180.1731719970703, 200.3861846923828, 192.56617736816406)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 0,0 kW
+Position: (255.11810302734375, 180.128173828125, 283.1260986328125, 192.49417114257812)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Max. Ladezyklen
+Position: (62.36220169067383, 199.67710876464844, 133.39019775390625, 212.0701141357422)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 5.000 Zyklen
+Position: (255.11810302734375, 199.63211059570312, 306.6430969238281, 211.99810791015625)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 0
+Position: (62.692909240722656, 220.66839599609375, 67.14090728759766, 231.50039672851562)
+Schriftart: Helvetica-Oblique
+Schriftgröße: 8.0
+Farbe: 3355443
+----------------------------------------
+Text: Optionale Komponenten
+Position: (62.692909240722656, 272.8380432128906, 213.64889526367188, 290.7390441894531)
+Schriftart: Helvetica-Bold
+Schriftgröße: 13.0
+Farbe: 5210557
+----------------------------------------
+Text: Fehler in Sektion '2. Angebotene Systemkomponenten': name 'KeepInFrame' is not defined
+Position: (62.692909240722656, 303.1712646484375, 466.0928039550781, 316.9112548828125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 2. Detaillierte Kostenaufstellung
+Position: (62.692909240722656, 362.9902648925781, 306.3089294433594, 385.0222473144531)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------
+Text: Grundpreis lt. Matrix (Netto)
+Position: (65.19684600830078, 417.4959716796875, 184.7078399658203, 429.88897705078125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 23.906,80 €
+Position: (482.54071044921875, 417.45098876953125, 530.0787353515625, 429.8169860839844)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Cost Scaffolding Netto
+Position: (65.19684600830078, 439.83453369140625, 162.1988525390625, 452.2275390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 1.000,00 €
+Position: (487.544677734375, 439.78955078125, 530.0787353515625, 452.1555480957031)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Subtotal Netto
+Position: (65.19684600830078, 462.173095703125, 126.69385528564453, 474.56610107421875)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 24.906,80 €
+Position: (482.54071044921875, 462.173095703125, 530.0787353515625, 474.56610107421875)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Total Investment Netto
+Position: (65.19684600830078, 484.5116882324219, 162.20785522460938, 496.9046936035156)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 24.906,80 €
+Position: (482.54071044921875, 484.5116882324219, 530.0787353515625, 496.9046936035156)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Mehrwertsteuersatz (%)
+Position: (65.19684600830078, 506.85028076171875, 166.2128448486328, 519.2432861328125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 0,0 €
+Position: (510.06268310546875, 506.8052978515625, 530.0787353515625, 519.1712646484375)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Gesamtinvestition Brutto
+Position: (65.19684600830078, 529.1888427734375, 172.71084594726562, 541.5818481445312)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 24.906,80 €
+Position: (482.54071044921875, 529.1888427734375, 530.0787353515625, 541.5818481445312)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: 2. Wirtschaftlichkeit im Überblick
+Position: (62.692909240722656, 579.3839721679688, 314.32489013671875, 601.4159545898438)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------

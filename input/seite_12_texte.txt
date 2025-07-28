@@ -1,0 +1,66 @@
+Text: Energienetze Deutschland Gmbh
+Position: (56.692909240722656, 75.40937042236328, 197.7228546142578, 87.8023681640625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 13158
+----------------------------------------
+Text: Angebot 202507261219
+Position: (439.5376892089844, 75.40937042236328, 538.5828247070312, 87.8023681640625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 9.0
+Farbe: 13158
+----------------------------------------
+Text: {project_id}    {current_date}
+Position: (56.692909240722656, 829.0778198242188, 131.8448944091797, 840.0938110351562)
+Schriftart: Helvetica-Bold
+Schriftgröße: 8.0
+Farbe: 16777215
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 108.47056579589844, 76.39090728759766, 125.8045654296875)
+Schriftart: ZapfDingbats
+Schriftgröße: 18.0
+Farbe: 13158
+----------------------------------------
+Text:  Ertrag vs. Verbrauch
+Position: (76.39090728759766, 103.95256042480469, 258.46087646484375, 128.73855590820312)
+Schriftart: Helvetica-Bold
+Schriftgröße: 18.0
+Farbe: 2899536
+----------------------------------------
+Text: Hier sehen Sie den Vergleich zwischen PV-Produktion und Ihrem Stromverbrauch und deine Mama
+Position: (62.692909240722656, 412.76678466796875, 502.312744140625, 426.50677490234375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3426654
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 453.1133728027344, 76.39090728759766, 470.4473876953125)
+Schriftart: ZapfDingbats
+Schriftgröße: 18.0
+Farbe: 13158
+----------------------------------------
+Text:  Rechtliche Hinweise & AGB
+Position: (76.39090728759766, 448.5953674316406, 318.45489501953125, 473.3813781738281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 18.0
+Farbe: 2899536
+----------------------------------------
+Text: Allgemeine Geschäftsbedingungen und Datenschutzhinweise.
+Position: (62.692909240722656, 470.70538330078125, 337.2728576660156, 484.44537353515625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3426654
+----------------------------------------
+Text: Bitte beachten Sie, dass dieses Angebot unverbindlich ist und unter demVorbehalt der Verfügbarkeit der
+Position: (62.692909240722656, 485.70538330078125, 523.4827880859375, 499.44537353515625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3426654
+----------------------------------------
+Text: Komponenten steht.
+Position: (62.692909240722656, 500.70538330078125, 152.19290161132812, 514.4453735351562)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3426654
+----------------------------------------
