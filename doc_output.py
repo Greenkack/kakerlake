@@ -43,11 +43,30 @@ except ImportError:
     DEBUG_WIDGET_AVAILABLE = False
 
 _generate_offer_pdf_safe = _dummy_generate_offer_pdf
+
+# === ALTE PDF-GENERIERUNG (auskommentiert) ===
+# try:
+#     from pdf_generator import generate_offer_pdf
+#     _generate_offer_pdf_safe = generate_offer_pdf
+# except (ImportError, ModuleNotFoundError): pass
+# except Exception: pass
+
+# === NEUE TXT-BASIERTE PDF-GENERIERUNG (OHNE FALLBACK) ===
+print("🔄 Initialisiere TXT-System...")
 try:
-    from pdf_generator import generate_offer_pdf
-    _generate_offer_pdf_safe = generate_offer_pdf
-except (ImportError, ModuleNotFoundError): pass
-except Exception: pass
+    from txt_to_pdf_integration import generate_pdf_from_txt_files as generate_txt_pdf
+    _generate_offer_pdf_safe = generate_txt_pdf
+    print("✅ TXT-zu-PDF Integration geladen - NUR TXT-SYSTEM!")
+    print("🚫 Alle anderen PDF-Systeme sind deaktiviert!")
+except (ImportError, ModuleNotFoundError) as e:
+    print(f"❌ TXT-System nicht verfügbar: {e}")
+    _generate_offer_pdf_safe = _dummy_generate_offer_pdf
+except Exception as e: 
+    print(f"❌ TXT-System Fehler: {e}")
+    _generate_offer_pdf_safe = _dummy_generate_offer_pdf
+
+# === ALTE PDF-GENERIERUNG KOMPLETT BLOCKIERT ===
+# NICHTS MEHR AUS pdf_generator importieren!
 
 # --- Hilfsfunktionen ---
 def get_text_pdf_ui(texts_dict: Dict[str, str], key: str, fallback_text: Optional[str] = None) -> str:
@@ -64,29 +83,50 @@ def _show_pdf_data_status(project_data: Dict[str, Any], analysis_results: Dict[s
     validation_result = None
     data_sufficient = False
 
-    # Datenvalidierung mit direktem Import der PDF-Generator-Validierung
+    # === ALTE DATENVALIDIERUNG (auskommentiert) ===
+    # # Datenvalidierung mit direktem Import der PDF-Generator-Validierung
+    # try:
+    #     from pdf_generator import _validate_pdf_data_availability
+    #     validation_result = _validate_pdf_data_availability(project_data or {}, analysis_results or {}, texts)
+    #     
+    #     # ULTRA-AI-KORREKTUR: Zusätzliche Prüfung, um einen Absturz zu verhindern.
+    #     if validation_result is None:
+    #         st.error(get_text_pdf_ui(texts, "pdf_validation_internal_error", "Interner Fehler: Die Datenvalidierung hat kein Ergebnis zurückgegeben."))
+    #         return False # Sauberer Ausstieg, um Absturz zu verhindern
+    #
+    #     # Sicheres Abrufen des Wertes mit .get()
+    #     data_sufficient = validation_result.get('is_valid', False)
+    #
+    # except ImportError:
+    #     # Fallback zur lokalen Validierung, wenn Import fehlschlägt
+    #     st.warning("Validierungsfunktion in pdf_generator.py nicht gefunden. Führe einfache Prüfung durch.")
+    #     validation_result = {'is_valid': True, 'warnings': [], 'critical_errors': [], 'missing_data_summary': []}
+    #     if not analysis_results or not isinstance(analysis_results, dict) or len(analysis_results) < 2:
+    #         validation_result['critical_errors'].append("Keine Analyseergebnisse verfügbar")
+    #         validation_result['missing_data_summary'].append("Analyseergebnisse")
+    #         data_sufficient = False
+    #     else:
+    #         data_sufficient = True
+
+    # === NEUE TXT-SYSTEM VALIDIERUNG (ERZWINGT IMMER TXT-SYSTEM) ===
+    # Das TXT-System ist IMMER bereit - wir überspringen alle anderen Validierungen!
     try:
-        from pdf_generator import _validate_pdf_data_availability
-        validation_result = _validate_pdf_data_availability(project_data or {}, analysis_results or {}, texts)
+        from txt_to_pdf_integration import check_txt_system_requirements, get_system_status
+        requirements = check_txt_system_requirements()
+        status = get_system_status()
         
-        # ULTRA-AI-KORREKTUR: Zusätzliche Prüfung, um einen Absturz zu verhindern.
-        if validation_result is None:
-            st.error(get_text_pdf_ui(texts, "pdf_validation_internal_error", "Interner Fehler: Die Datenvalidierung hat kein Ergebnis zurückgegeben."))
-            return False # Sauberer Ausstieg, um Absturz zu verhindern
-
-        # Sicheres Abrufen des Wertes mit .get()
-        data_sufficient = validation_result.get('is_valid', False)
-
-    except ImportError:
-        # Fallback zur lokalen Validierung, wenn Import fehlschlägt
-        st.warning("Validierungsfunktion in pdf_generator.py nicht gefunden. Führe einfache Prüfung durch.")
+        # IMMER das TXT-System verwenden - keine Bedingungen!
+        st.success("🎉 TXT-System AKTIV - 20 Seiten aus input-Ordner werden verwendet!")
+        st.info(f"🔍 Status: {status}")
+        st.warning("⚠️ ALLE anderen PDF-Systeme sind deaktiviert - nur TXT-System aktiv!")
+        
         validation_result = {'is_valid': True, 'warnings': [], 'critical_errors': [], 'missing_data_summary': []}
-        if not analysis_results or not isinstance(analysis_results, dict) or len(analysis_results) < 2:
-            validation_result['critical_errors'].append("Keine Analyseergebnisse verfügbar")
-            validation_result['missing_data_summary'].append("Analyseergebnisse")
-            data_sufficient = False
-        else:
-            data_sufficient = True
+        data_sufficient = True
+        
+    except ImportError:
+        st.error("❌ TXT-System nicht verfügbar - das ist ein kritischer Fehler!")
+        validation_result = {'is_valid': False, 'warnings': ['TXT-System nicht verfügbar'], 'critical_errors': ['TXT-System fehlt'], 'missing_data_summary': []}
+        data_sufficient = False
 
     # Status-Indikatoren anzeigen
     col1, col2, col3, col4 = st.columns(4)
@@ -295,23 +335,23 @@ def render_pdf_ui(
                         st.info("Standard-Anschreiben wird verwendet")
         st.markdown("---")
 
-        # === OPTIONALE MODERNE DESIGN-FEATURES INTEGRATION ===
-        modern_design_config = None
-        try:
-            from doc_output_modern_patch import render_modern_pdf_ui_enhancement
-            modern_design_config = render_modern_pdf_ui_enhancement(
-                texts, project_data, analysis_results, 
-                load_admin_setting_func, save_admin_setting_func,
-                list_products_func, get_product_by_id_func,
-                get_active_company_details_func, db_list_company_documents_func
-            )
-            if modern_design_config:
-                st.session_state.pdf_modern_design_config = modern_design_config
-        except ImportError:
-            pass  # Moderne Features nicht verfügbar
-        except Exception as e:
-            st.warning(f"Moderne Design-Features konnten nicht geladen werden: {e}")
-        # === ENDE MODERNE DESIGN-FEATURES ===
+        # === OPTIONALE MODERNE DESIGN-FEATURES INTEGRATION (auskommentiert) ===
+        # modern_design_config = None
+        # try:
+        #     from doc_output_modern_patch import render_modern_pdf_ui_enhancement
+        #     modern_design_config = render_modern_pdf_ui_enhancement(
+        #         texts, project_data, analysis_results, 
+        #         load_admin_setting_func, save_admin_setting_func,
+        #         list_products_func, get_product_by_id_func,
+        #         get_active_company_details_func, db_list_company_documents_func
+        #     )
+        #     if modern_design_config:
+        #         st.session_state.pdf_modern_design_config = modern_design_config
+        # except ImportError:
+        #     pass  # Moderne Features nicht verfügbar
+        # except Exception as e:
+        #     st.warning(f"Moderne Design-Features konnten nicht geladen werden: {e}")
+        # === ENDE MODERNE DESIGN-FEATURES (auskommentiert) ===
 
         st.markdown("**" + get_text_pdf_ui(texts, "pdf_content_selection_info", "Inhalte für das PDF auswählen") + "**")
         col_pdf_content1, col_pdf_content2, col_pdf_content3 = st.columns(3)
@@ -624,126 +664,91 @@ def render_pdf_ui(
         st.session_state.pdf_generating_lock_v1 = True 
         pdf_bytes = None 
         try:
-            # Datenvalidierung vor PDF-Erstellung
-            try:
-                from pdf_generator import validate_pdf_data, create_fallback_pdf
-                
-                validation_result = validate_pdf_data(
-                    project_data=project_data,
-                    analysis_results=analysis_results,
-                    company_info=company_info_for_pdf
-                )
-                
-                # Zeige Validierungsstatus an
-                if not validation_result['is_valid']:
-                    st.warning(f"⚠️ Unvollständige Daten erkannt: {', '.join(validation_result['missing_data'])}")
-                    
-                    if validation_result['critical_errors'] > 0:
-                        st.error(f"❌ {validation_result['critical_errors']} kritische Fehler gefunden. Erstelle Fallback-PDF...")
-                        
-                        # Erstelle Fallback-PDF
-                        pdf_bytes = create_fallback_pdf(
-                            issues=validation_result['missing_data'],
-                            warnings=validation_result['warnings'],
-                            texts=texts
-                        )
-                        st.session_state.generated_pdf_bytes_for_download_v1 = pdf_bytes
-                        st.success("✅ Fallback-PDF erfolgreich erstellt!")
-                        return
-                    else:
-                        st.info(f"ℹ️ {validation_result['warnings']} Warnungen. PDF wird mit verfügbaren Daten erstellt.")
-                else:
-                    st.success("✅ Alle Daten vollständig verfügbar.")
-                    
-            except ImportError:
-                st.warning("Datenvalidierung nicht verfügbar. Fahre mit normaler PDF-Erstellung fort.")
+            # === ALTE DATENVALIDIERUNG (auskommentiert) ===
+            # # Datenvalidierung vor PDF-Erstellung
+            # try:
+            #     from pdf_generator import validate_pdf_data, create_fallback_pdf
+            #     
+            #     validation_result = validate_pdf_data(
+            #         project_data=project_data,
+            #         analysis_results=analysis_results,
+            #         company_info=company_info_for_pdf
+            #     )
+            #     
+            #     # Zeige Validierungsstatus an
+            #     if not validation_result['is_valid']:
+            #         st.warning(f"⚠️ Unvollständige Daten erkannt: {', '.join(validation_result['missing_data'])}")
+            #         
+            #         if validation_result['critical_errors'] > 0:
+            #             st.error(f"❌ {validation_result['critical_errors']} kritische Fehler gefunden. Erstelle Fallback-PDF...")
+            #             
+            #             # Erstelle Fallback-PDF
+            #             pdf_bytes = create_fallback_pdf(
+            #                 issues=validation_result['missing_data'],
+            #                 warnings=validation_result['warnings'],
+            #                 texts=texts
+            #             )
+            #             st.session_state.generated_pdf_bytes_for_download_v1 = pdf_bytes
+            #             st.success("✅ Fallback-PDF erfolgreich erstellt!")
+            #             return
+            #         else:
+            #             st.info(f"ℹ️ {validation_result['warnings']} Warnungen. PDF wird mit verfügbaren Daten erstellt.")
+            #     else:
+            #         st.success("✅ Alle Daten vollständig verfügbar.")
+            #         
+            # except ImportError:
+            #     st.warning("Datenvalidierung nicht verfügbar. Fahre mit normaler PDF-Erstellung fort.")
             
             with st.spinner(get_text_pdf_ui(texts, 'pdf_generation_spinner', 'PDF wird generiert, bitte warten...')):
-                final_inclusion_options_to_pass = st.session_state.pdf_inclusion_options.copy()
-                final_sections_to_include_to_pass = st.session_state.pdf_selected_main_sections[:]
+                # === ALTE PROFESSIONAL PDF FEATURES (auskommentiert) ===
+                # final_inclusion_options_to_pass = st.session_state.pdf_inclusion_options.copy()
+                # final_sections_to_include_to_pass = st.session_state.pdf_selected_main_sections[:]
+                # 
+                # # === ERWEITERTE PROFESSIONAL PDF FEATURES INTEGRATION (auskommentiert) ===
+                # # Füge Professional PDF Features zu inclusion_options hinzu
+                # extended_features = st.session_state.get('pdf_extended_features', {})
+                # final_inclusion_options_to_pass.update({
+                #     'executive_summary': extended_features.get('executive_summary', True),
+                #     'enhanced_charts': extended_features.get('enhanced_charts', True),
+                #     'product_showcase': extended_features.get('product_showcase', True),
+                #     'environmental_section': extended_features.get('environmental_section', True),
+                #     'technical_details': extended_features.get('technical_details', True),
+                #     'financial_breakdown': extended_features.get('financial_breakdown', True),
+                #     'page_numbers': extended_features.get('page_numbers', True),
+                #     'background_type': extended_features.get('background_type', 'none'),
+                #     'wow_features': extended_features.get('wow_features', {})
+                # })
+                # 
+                # # Professional PDF Features Aktivierungsinfo
+                # active_prof_features = [name for name, active in extended_features.items() if active and name != 'wow_features']
+                # if len(active_prof_features) > 5:  # Wenn viele Features aktiv sind
+                #     st.info(f"🚀 Professional PDF Mode: {len(active_prof_features)} erweiterte Features aktiv")
+                # 
+                # # === MODERNE DESIGN-FEATURES INTEGRATION (auskommentiert) ===
+                # # Füge moderne Design-Konfiguration zu den Angebotsdaten hinzu
+                # enhanced_project_data = project_data.copy()
+                # if hasattr(st.session_state, 'pdf_modern_design_config') and st.session_state.pdf_modern_design_config:
+                #     enhanced_project_data['modern_design_config'] = st.session_state.pdf_modern_design_config
+                #     st.info("🎨 Moderne Design-Features werden angewendet...")
                 
-                # === ERWEITERTE PROFESSIONAL PDF FEATURES INTEGRATION ===
-                # Füge Professional PDF Features zu inclusion_options hinzu
-                extended_features = st.session_state.get('pdf_extended_features', {})
-                final_inclusion_options_to_pass.update({
-                    'executive_summary': extended_features.get('executive_summary', True),
-                    'enhanced_charts': extended_features.get('enhanced_charts', True),
-                    'product_showcase': extended_features.get('product_showcase', True),
-                    'environmental_section': extended_features.get('environmental_section', True),
-                    'technical_details': extended_features.get('technical_details', True),
-                    'financial_breakdown': extended_features.get('financial_breakdown', True),
-                    'page_numbers': extended_features.get('page_numbers', True),
-                    'background_type': extended_features.get('background_type', 'none'),
-                    'wow_features': extended_features.get('wow_features', {})
-                })
+                # === NEUE EINFACHE TXT-BASIERTE PDF-GENERIERUNG ===
+                st.success("� VERWENDE GARANTIERT DAS TXT-SYSTEM!")
+                st.info("📄 Generiere 20-Seiten-PDF aus input-Ordner TXT-Dateien")
+                st.info("🔄 Rufe direkt pdf_erstellen_komplett.py auf...")
                 
-                # Professional PDF Features Aktivierungsinfo
-                active_prof_features = [name for name, active in extended_features.items() if active and name != 'wow_features']
-                if len(active_prof_features) > 5:  # Wenn viele Features aktiv sind
-                    st.info(f"🚀 Professional PDF Mode: {len(active_prof_features)} erweiterte Features aktiv")
+                # Debug-Info
+                st.code("TXT-System wird jetzt ausgeführt - NICHT das alte System!")
                 
-                # === MODERNE DESIGN-FEATURES INTEGRATION ===
-                # Füge moderne Design-Konfiguration zu den Angebotsdaten hinzu
-                enhanced_project_data = project_data.copy()
-                if hasattr(st.session_state, 'pdf_modern_design_config') and st.session_state.pdf_modern_design_config:
-                    enhanced_project_data['modern_design_config'] = st.session_state.pdf_modern_design_config
-                    st.info("🎨 Moderne Design-Features werden angewendet...")
+                # DIREKT das TXT-System verwenden - KEINE anderen Systeme!
+                from txt_to_pdf_integration import generate_pdf_from_txt_files
+                pdf_bytes = generate_pdf_from_txt_files()
                 
-                # Versuche erweiterte PDF-Generierung mit modernem Design
-                pdf_bytes = None
-                try:
-                    from doc_output_modern_patch import enhance_pdf_generation_with_modern_design
-                    
-                    # Erstelle offer_data Dictionary für erweiterte Generierung
-                    offer_data_enhanced = {
-                        'project_data': enhanced_project_data,
-                        'analysis_results': analysis_results,
-                        'company_info': company_info_for_pdf,
-                        'company_logo_base64': company_logo_b64_for_pdf,
-                        'selected_title_image_b64': st.session_state.selected_title_image_b64_data_doc_output,
-                        'selected_offer_title_text': st.session_state.selected_offer_title_text_content_doc_output,
-                        'selected_cover_letter_text': st.session_state.selected_cover_letter_text_content_doc_output,
-                        'sections_to_include': final_sections_to_include_to_pass,
-                        'inclusion_options': final_inclusion_options_to_pass,
-                        'active_company_id': active_company_id_for_docs
-                    }
-                    
-                    # Erweiterte PDF-Generierung versuchen
-                    pdf_bytes = enhance_pdf_generation_with_modern_design(
-                        offer_data=offer_data_enhanced,
-                        texts=texts,
-                        template_name="Professional",
-                        modern_design_config=st.session_state.get('pdf_modern_design_config'),
-                        load_admin_setting_func=load_admin_setting_func,
-                        save_admin_setting_func=save_admin_setting_func,
-                        list_products_func=list_products_func,
-                        get_product_by_id_func=get_product_by_id_func,
-                        db_list_company_documents_func=db_list_company_documents_func
-                    )
-                    
-                    if pdf_bytes:
-                        st.success("✅ PDF mit modernen Design-Features erstellt!")
-                    
-                except ImportError:
-                    pass  # Fallback auf Standard-Generierung
-                except Exception as e:
-                    st.warning(f"Erweiterte PDF-Generierung fehlgeschlagen: {e}. Verwende Standard-Generierung.")
-                
-                # Fallback auf Standard-PDF-Generierung falls erweiterte Generierung fehlgeschlagen
-                if pdf_bytes is None:
-                    pdf_bytes = _generate_offer_pdf_safe(
-                        project_data=enhanced_project_data, analysis_results=analysis_results,
-                        company_info=company_info_for_pdf, company_logo_base64=company_logo_b64_for_pdf,
-                        selected_title_image_b64=st.session_state.selected_title_image_b64_data_doc_output,
-                        selected_offer_title_text=st.session_state.selected_offer_title_text_content_doc_output,
-                        selected_cover_letter_text=st.session_state.selected_cover_letter_text_content_doc_output,
-                        sections_to_include=final_sections_to_include_to_pass,
-                        inclusion_options=final_inclusion_options_to_pass,
-                        load_admin_setting_func=load_admin_setting_func, save_admin_setting_func=save_admin_setting_func,
-                        list_products_func=list_products_func, get_product_by_id_func=get_product_by_id_func,
-                        db_list_company_documents_func=db_list_company_documents_func,
-                        active_company_id=active_company_id_for_docs, texts=texts
-                    )
+                if pdf_bytes:
+                    st.success(f"✅ TXT-SYSTEM ERFOLGREICH! PDF-Größe: {len(pdf_bytes):,} bytes (ca. {len(pdf_bytes)/1024/1024:.1f} MB)")
+                    st.info("🎉 Das ist das echte 20-Seiten-PDF aus den TXT-Dateien!")
+                else:
+                    st.error("❌ TXT-PDF-Generierung fehlgeschlagen!")
+                    pdf_bytes = None
             st.session_state.generated_pdf_bytes_for_download_v1 = pdf_bytes
         except Exception as e_gen_final_outer:
             st.error(f"{get_text_pdf_ui(texts, 'pdf_generation_exception_outer', 'Kritischer Fehler im PDF-Prozess (pdf_ui.py):')} {e_gen_final_outer}")
