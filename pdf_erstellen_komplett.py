@@ -2,31 +2,31 @@ import fitz, os, glob, re, ast
 
 # Pfade
 BASE_DIR   = os.getcwd()                     # C:\123456\12345
-DATA_DIR   = os.path.join(BASE_DIR, "input") # enthält seite_*_*.txt und seite_*_bild_*.*
+DATA_DIR   = os.path.join(BASE_DIR, "input") # enthält seite_*_*.txt und seite_*_bild_*.* 
 OUTPUT_PDF = os.path.join(BASE_DIR, "recreated_full.pdf")
 
 # Neues PDF
 doc = fitz.open()
 
-# 0) Liste aller Seiten-Nummern
-detail_files = glob.glob(os.path.join(DATA_DIR, "seite_*_details.txt"))
+# 0) dynamisch: Liste aller Seiten-Nummern aus **allen** seite_N_*.*-Dateien
+all_files = glob.glob(os.path.join(DATA_DIR, "seite_*_*.*"))
 page_nums = sorted({
-    int(re.search(r"seite_(\d+)_details\.txt", os.path.basename(f)).group(1))
-    for f in detail_files
+    int(re.search(r"seite_(\d+)_", os.path.basename(f)).group(1))
+    for f in all_files
 })
 
 for p in page_nums:
     # A) Seitengröße lesen
     rect = None
-    with open(os.path.join(DATA_DIR, f"seite_{p}_details.txt"), encoding="utf-8") as f:
-        for line in f:
+    with open(os.path.join(DATA_DIR, f"seite_{p}_details.txt"), encoding="utf-8") as f_det:
+        for line in f_det:
             if line.startswith("Seitengröße:"):
                 m = re.search(r"Rect\(([^,]+), ([^,]+), ([^,]+), ([^)]+)\)", line)
                 x0, y0, x1, y1 = map(float, m.groups())
                 rect = fitz.Rect(x0, y0, x1, y1)
                 break
     if rect is None:
-        continue
+        continue  # wenn Du hier lieber A4-Fallback möchtest, ersetze continue durch rect = fitz.Rect(0,0,595,842)
 
     # Neue Seite in exakter Größe
     page = doc.new_page(width=rect.width, height=rect.height)
@@ -48,15 +48,13 @@ for p in page_nums:
                     d["color"] = int(L.split("Farbe:",1)[1].strip())
             if "text" in d and "bbox" in d:
                 x0, y0, x1, y1 = d["bbox"]
-                # RGB 0–255 → 0–1
-                r = (d["color"] >> 16 & 255) / 255
-                g = (d["color"] >> 8  & 255) / 255
-                b = (d["color"]       & 255) / 255
-                # Zeichne den Text oben-links im Textfeld
+                r = (d["color"] >> 16 & 255)/255
+                g = (d["color"] >>  8 & 255)/255
+                b = (d["color"]      & 255)/255
                 page.insert_text(
                     (x0, y0),
                     d["text"],
-                    fontname="helv",          # Fallback auf Helvetica
+                    fontname="helv",          
                     fontsize=d.get("size", 12),
                     color=(r, g, b)
                 )
@@ -80,19 +78,15 @@ for p in page_nums:
     if os.path.exists(form_path):
         for L in open(form_path, encoding="utf-8"):
             L = L.strip()
-            # Linie
             if L.startswith("Linie von"):
                 pts = re.findall(r"\(([^,]+), ([^)]+)\)", L)
-                p1 = tuple(map(float, pts[0]))
-                p2 = tuple(map(float, pts[1]))
+                p1 = tuple(map(float, pts[0])); p2 = tuple(map(float, pts[1]))
                 page.draw_line(p1, p2, color=(0,0,0), width=0.5)
-            # Rechteck
             elif L.startswith("Rechteck:"):
                 m = re.search(r"Rect\(([^)]+)\)", L)
                 if m:
                     vals = [float(v) for v in m.group(1).split(",")]
                     page.draw_rect(fitz.Rect(*vals), color=(0,0,0), width=0.5)
-            # Bezier‑Kurve
             elif L.startswith("Bezier-Kurve:"):
                 pts = re.findall(r"Point\(([^)]+)\)", L)
                 P = [tuple(map(float, pt.split(", "))) for pt in pts]
@@ -115,4 +109,4 @@ for p in page_nums:
 
 # 4) PDF speichern
 doc.save(OUTPUT_PDF)
-print("✅ Fertig – Deine PDF liegt hier:", OUTPUT_PDF)
+print("Fertig - Deine PDF liegt hier:", OUTPUT_PDF)
