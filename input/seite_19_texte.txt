@@ -1,0 +1,246 @@
+Text: • Elektrische Installation durch Elektromeister
+Position: (62.692909240722656, 88.11614990234375, 262.9228820800781, 101.85614776611328)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Sicherheitsprüfung nach VDE-Norm
+Position: (62.692909240722656, 100.11614990234375, 227.9128875732422, 113.85614776611328)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 3. Inbetriebnahme & Übergabe
+Position: (62.692909240722656, 124.16615295410156, 207.17291259765625, 137.9361572265625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Funktionstest und Messung
+Position: (62.692909240722656, 136.11614990234375, 191.25289916992188, 149.8561553955078)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Einweisung in die Bedienung
+Position: (62.692909240722656, 148.11614990234375, 197.37289428710938, 161.8561553955078)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Übergabe aller Unterlagen
+Position: (62.692909240722656, 160.11614990234375, 186.24290466308594, 173.8561553955078)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 2. Wartung & Langzeitservice
+Position: (62.692909240722656, 205.76190185546875, 285.86090087890625, 227.7938995361328)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------
+Text: Wartung & Langzeitservice für maximale Erträge:
+Position: (62.692909240722656, 254.5283660888672, 296.6428527832031, 268.2983703613281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Wartungsleistungen:
+Position: (62.692909240722656, 278.5283508300781, 162.14291381835938, 292.2983703613281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Jährliche Sichtprüfung der Module
+Position: (62.692909240722656, 290.4783630371094, 220.702880859375, 304.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Überprüfung der elektrischen Verbindungen
+Position: (62.692909240722656, 302.4783630371094, 262.952880859375, 316.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Funktionstest des Wechselrichters
+Position: (62.692909240722656, 314.4783630371094, 2.2124288940429688, 328.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Reinigung bei Bedarf
+Position: (62.692909240722656, 326.4783630371094, 162.3529052734375, 340.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Ertragskontrolle und Optimierung
+Position: (62.692909240722656, 338.4783630371094, 215.69290161132812, 352.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 24/7 Monitoring:
+Position: (62.692909240722656, 362.5283508300781, 139.92291259765625, 376.2983703613281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Online-Überwachung der Anlagenleistung
+Position: (62.692909240722656, 374.4783630371094, 254.05288696289062, 388.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Automatische Störungsmeldung
+Position: (62.692909240722656, 386.4783630371094, 210.70291137695312, 400.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Ferndiagnose und schnelle Hilfe
+Position: (62.692909240722656, 398.4783630371094, 211.81289672851562, 412.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Wartungsvertrag verfügbar
+Position: (62.692909240722656, 422.5283508300781, 191.6029052734375, 436.2983703613281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  - Sprechen Sie uns an!
+Position: (191.6029052734375, 422.4783630371094, 296.1028747558594, 436.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 2. Flexible Finanzierungslösungen
+Position: (62.692909240722656, 468.12408447265625, 324.10089111328125, 490.15606689453125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------
+Text: Flexible Finanzierungsmöglichkeiten:
+Position: (62.692909240722656, 516.8905639648438, 241.07289123535156, 530.6605834960938)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 543.4005737304688, 70.30290985107422, 553.0305786132812)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.30290985107422, 540.840576171875, 73.0829086303711, 554.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: KfW-Förderung
+Position: (73.0829086303711, 540.8905639648438, 146.4029083251953, 554.6605834960938)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Zinsgünstige Darlehen bis 150.000€
+Position: (62.692909240722656, 552.840576171875, 229.05288696289062, 566.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Tilgungszuschüsse möglich
+Position: (62.692909240722656, 564.840576171875, 191.23291015625, 578.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Wir unterstützen bei der Antragstellung
+Position: (62.692909240722656, 576.840576171875, 241.8228759765625, 590.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 603.4005737304688, 70.30290985107422, 613.0305786132812)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.30290985107422, 600.840576171875, 73.0829086303711, 614.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Bankfinanzierung
+Position: (73.0829086303711, 600.8905639648438, 156.98292541503906, 614.6605834960938)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Partnerschaften mit regionalen Banken
+Position: (62.692909240722656, 612.840576171875, 241.8328857421875, 626.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Attraktive Konditionen für Solaranlagen
+Position: (62.692909240722656, 624.840576171875, 242.39288330078125, 638.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Laufzeiten bis 20 Jahre
+Position: (62.692909240722656, 636.840576171875, 172.3629150390625, 650.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 663.4005737304688, 70.30290985107422, 673.0305786132812)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.30290985107422, 660.840576171875, 73.0829086303711, 674.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Leasing & Pacht
+Position: (73.0829086303711, 660.8905639648438, 150.88291931152344, 674.6605834960938)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Keine Anfangsinvestition
+Position: (62.692909240722656, 672.840576171875, 178.472900390625, 686.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Monatliche Raten ab 89€
+Position: (62.692909240722656, 684.840576171875, 180.14288330078125, 698.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Rundum-Sorglos-Paket inklusive
+Position: (62.692909240722656, 696.840576171875, 214.01290893554688, 710.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Gerne erstellen wir Ihnen ein individuelles Finanzierungskonzept!
+Position: (62.692909240722656, 720.840576171875, 351.14288330078125, 734.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------

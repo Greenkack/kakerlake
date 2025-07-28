@@ -1,0 +1,12 @@
+Text: 3. Zukunftsaspekte
+Position: (62.692909240722656, 75.74614715576172, 207.62094116210938, 97.77815246582031)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------
+Text: Keine spezifischen Zukunftsaspekte für dieses Angebot ausgewählt.
+Position: (62.692909240722656, 124.46258544921875, 364.5128479003906, 138.2025909423828)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------

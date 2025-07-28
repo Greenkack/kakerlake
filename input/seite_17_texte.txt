@@ -1,0 +1,330 @@
+Text: 2. Umfassender Versicherungsschutz
+Position: (62.692909240722656, 75.74614715576172, 348.11688232421875, 97.77815246582031)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------
+Text: Umfassender Versicherungsschutz für Ihre Investition:
+Position: (62.692909240722656, 124.51258850097656, 323.3128662109375, 138.2825927734375)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: II
+Position: (62.692909240722656, 151.0225830078125, 77.91291046142578, 160.652587890625)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (77.91291046142578, 148.46258544921875, 80.69290924072266, 162.2025909423828)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Photovoltaik-Versicherung
+Position: (80.69290924072266, 148.51258850097656, 207.94288635253906, 162.2825927734375)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Schutz vor Sturm, Hagel, Blitzschlag
+Position: (62.692909240722656, 160.46258544921875, 230.69290161132812, 174.2025909423828)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Diebstahl- und Vandalismus-Schutz
+Position: (62.692909240722656, 172.46258544921875, 227.36288452148438, 186.2025909423828)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Elektronikversicherung für Wechselrichter
+Position: (62.692909240722656, 184.46258544921875, 253.46290588378906, 198.2025909423828)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 211.0225830078125, 70.30290985107422, 220.652587890625)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.30290985107422, 208.46258544921875, 73.0829086303711, 222.2025909423828)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Ertragsausfallversicherung
+Position: (73.0829086303711, 208.51258850097656, 202.57289123535156, 222.2825927734375)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Absicherung bei Produktionsausfall
+Position: (62.692909240722656, 220.46258544921875, 225.15289306640625, 234.2025909423828)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Ersatz entgangener EEG-Vergütung
+Position: (62.692909240722656, 232.46258544921875, 229.61288452148438, 246.2025909423828)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Mehrkosten bei Reparaturen
+Position: (62.692909240722656, 244.46258544921875, 195.69290161132812, 258.20257568359375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 271.0225830078125, 70.30290985107422, 280.652587890625)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.30290985107422, 268.46258544921875, 73.0829086303711, 282.20257568359375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Integration in bestehende Versicherungen
+Position: (73.0829086303711, 268.5125732421875, 273.13287353515625, 282.2825927734375)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Prüfung der Wohngebäudeversicherung
+Position: (62.692909240722656, 280.46258544921875, 246.28286743164062, 294.20257568359375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Anpassung bestehender Policen
+Position: (62.692909240722656, 292.46258544921875, 212.94290161132812, 306.20257568359375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Kostengünstige Ergänzungen
+Position: (62.692909240722656, 304.46258544921875, 200.16290283203125, 318.20257568359375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Wir beraten Sie gerne zu optimalen Versicherungslösungen!
+Position: (62.692909240722656, 328.46258544921875, 329.4728698730469, 342.20257568359375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 2. Herstellergarantie & Gewährleistung
+Position: (62.692909240722656, 374.1083679199219, 357.01287841796875, 396.1403503417969)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------
+Text: Garantie & Gewährleistung - Ihre Sicherheit:
+Position: (62.692909240722656, 422.874755859375, 272.75286865234375, 436.644775390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 449.384765625, 70.30290985107422, 459.0147705078125)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.30290985107422, 446.82476806640625, 73.0829086303711, 460.56475830078125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Herstellergarantien:
+Position: (73.0829086303711, 446.874755859375, 167.5529022216797, 460.644775390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • 
+Position: (62.692909240722656, 458.82476806640625, 68.97290802001953, 472.56475830078125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Module:
+Position: (68.97290802001953, 458.874755859375, 107.30291748046875, 472.644775390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  25 Jahre Leistungsgarantie
+Position: (107.30290985107422, 458.82476806640625, 230.702880859375, 472.56475830078125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • 
+Position: (62.692909240722656, 470.82476806640625, 68.97290802001953, 484.56475830078125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Wechselrichter:
+Position: (68.97290802001953, 470.874755859375, 143.99290466308594, 484.644775390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  10-20 Jahre Herstellergarantie
+Position: (143.992919921875, 470.82476806640625, 281.8228759765625, 484.56475830078125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • 
+Position: (62.692909240722656, 482.82476806640625, 68.97290802001953, 496.56475830078125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Speichersystem:
+Position: (68.97290802001953, 482.874755859375, 149.00291442871094, 496.644775390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  10 Jahre Garantie
+Position: (149.00291442871094, 482.82476806640625, 231.82290649414062, 496.56475830078125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • 
+Position: (62.692909240722656, 494.82476806640625, 68.97290802001953, 508.56475830078125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Montagesystem:
+Position: (68.97290802001953, 494.874755859375, 147.87290954589844, 508.644775390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  15 Jahre Material-/Korrosionsschutz
+Position: (147.8729248046875, 494.82476806640625, 310.702880859375, 508.56475830078125)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: II
+Position: (62.692909240722656, 521.384765625, 77.91291046142578, 531.0147705078125)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (77.91291046142578, 518.8247680664062, 80.69290924072266, 532.5647583007812)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Handwerkergewährleistung:
+Position: (80.69290924072266, 518.874755859375, 214.61289978027344, 532.644775390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • 2 Jahre auf Montage und Installation
+Position: (62.692909240722656, 530.8247680664062, 230.73287963867188, 544.5647583007812)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • 5 Jahre erweiterte Gewährleistung möglich
+Position: (62.692909240722656, 542.8247680664062, 258.4828796386719, 556.5647583007812)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Schnelle Reaktionszeiten bei Problemen
+Position: (62.692909240722656, 554.8247680664062, 248.49288940429688, 568.5647583007812)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 581.384765625, 70.30290985107422, 591.0147705078125)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.30290985107422, 578.8247680664062, 73.0829086303711, 592.5647583007812)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Service-Hotline:
+Position: (73.0829086303711, 578.874755859375, 149.21290588378906, 592.644775390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Kostenlose Beratung bei Fragen
+Position: (62.692909240722656, 590.8247680664062, 212.38290405273438, 604.5647583007812)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Ferndiagnose und Support
+Position: (62.692909240722656, 602.8247680664062, 187.37289428710938, 616.5647583007812)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Vor-Ort-Service innerhalb 48h
+Position: (62.692909240722656, 614.8247680664062, 201.79290771484375, 628.5647583007812)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Ihr Vertrauen ist unsere Verpflichtung!
+Position: (62.692909240722656, 638.874755859375, 245.5128936767578, 652.644775390625)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Photovoltaik-Angebot • Energienetze Deutschland Gmbh
+Position: (56.692909240722656, 41.34868240356445, 282.952880859375, 53.714683532714844)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 3355443
+----------------------------------------
+Text: Seite 29
+Position: (505.56170654296875, 41.34868240356445, 538.5828247070312, 53.714683532714844)
+Schriftart: Helvetica
+Schriftgröße: 9.0
+Farbe: 12632256
+----------------------------------------
+Text: | Angebot 27.Jul.2025 | Seite 29 von 0 |
+Position: (227.80580139160156, 801.4400024414062, 367.4697265625, 812.27197265625)
+Schriftart: Helvetica-Oblique
+Schriftgröße: 8.0
+Farbe: 12632256
+----------------------------------------
+Text: Energienetze Deutschland Gmbh | Fürholzener Straße 12 - 14 | 85386 Eching
+Position: (56.692909240722656, 802.4749755859375, 298.0598449707031, 812.093017578125)
+Schriftart: Helvetica
+Schriftgröße: 7.0
+Farbe: 12632256
+----------------------------------------

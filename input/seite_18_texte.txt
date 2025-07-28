@@ -1,0 +1,324 @@
+Text: Kontakt:
+Position: (62.692909240722656, 100.16615295410156, 103.24291229248047, 113.93614959716797)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 114.6761474609375, 70.30290985107422, 124.30615234375)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  Fürholzener Straße 12 - 14, 85386 Eching
+Position: (70.30290985107422, 112.11614990234375, 259.8428649902344, 125.85614776611328)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 126.6761474609375, 70.30290985107422, 136.30615234375)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  89 380 319 {roof_angle}
+Position: (70.30290985107422, 124.11614990234375, 137.02291870117188, 137.8561553955078)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: I
+Position: (62.692909240722656, 138.6761474609375, 70.30290985107422, 148.30615234375)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  info@energienetzedeutschland.de
+Position: (70.30290985107422, 136.11614990234375, 224.98287963867188, 149.8561553955078)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 2. Zertifizierungen & Qualitätsstandards
+Position: (62.692909240722656, 181.76190185546875, 365.87689208984375, 203.7938995361328)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------
+Text: Unsere Zertifizierungen & Qualitätsstandards:
+Position: (62.692909240722656, 230.5283660888672, 281.0728759765625, 244.29837036132812)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 
+Position: (62.692909240722656, 257.0383605957031, 70.24291229248047, 266.6683654785156)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.24291229248047, 254.47836303710938, 73.02291107177734, 268.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: VDE-Zertifizierung
+Position: (73.02291107177734, 254.5283660888672, 160.25291442871094, 268.2983703613281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  - Elektrotechnische Sicherheit
+Position: (160.25289916992188, 254.47836303710938, 295.3028869628906, 268.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 
+Position: (62.692909240722656, 269.0383605957031, 70.24291229248047, 278.6683654785156)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.24291229248047, 266.4783630371094, 73.02291107177734, 280.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Meisterbetrieb
+Position: (73.02291107177734, 266.5283508300781, 141.37290954589844, 280.2983703613281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  - Handwerkliche Qualität
+Position: (141.37290954589844, 266.4783630371094, 253.0728759765625, 280.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 
+Position: (62.692909240722656, 281.0383605957031, 70.24291229248047, 290.6683654785156)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.24291229248047, 278.4783630371094, 73.02291107177734, 292.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: IHK-Sachverständiger
+Position: (73.02291107177734, 278.5283508300781, 177.49290466308594, 292.2983703613281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  - Technische Expertise
+Position: (177.492919921875, 278.4783630371094, 281.972900390625, 292.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 
+Position: (62.692909240722656, 293.0383605957031, 70.24291229248047, 302.6683654785156)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.24291229248047, 290.4783630371094, 73.02291107177734, 304.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: ISO 9001
+Position: (73.02291107177734, 290.5283508300781, 115.27291107177734, 304.2983703613281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  - Qualitätsmanagementsystem
+Position: (115.27291870117188, 290.4783630371094, 253.6528778076172, 304.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 
+Position: (62.692909240722656, 305.0383605957031, 70.24291229248047, 314.6683654785156)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (70.24291229248047, 302.4783630371094, 73.02291107177734, 316.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Fachbetrieb für Photovoltaik
+Position: (73.02291107177734, 302.5283508300781, 208.6029052734375, 316.2983703613281)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  - Spezialisierung
+Position: (208.6029052734375, 302.4783630371094, 285.29290771484375, 316.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Alle Komponenten entsprechen den aktuellen DIN- und VDE-Normen.
+Position: (62.692909240722656, 326.4783630371094, 372.2728271484375, 340.2183532714844)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 2. Referenzen & Kundenerfahrungen
+Position: (62.692909240722656, 372.12408447265625, 340.0688781738281, 394.15606689453125)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------
+Text: Referenzen & Kundenerfahrungen:
+Position: (62.692909240722656, 420.89056396484375, 228.26292419433594, 434.66058349609375)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: IIIII
+Position: (62.692909240722656, 447.40057373046875, 100.74291229248047, 457.03057861328125)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (100.74291229248047, 444.840576171875, 103.52291107177734, 458.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: "Professionelle Beratung und saubere Montage. Unsere Anlage läuft seit 2 Jahren perfekt!"
+Position: (103.52291107177734, 444.89056396484375, 506.3827819824219, 458.4305725097656)
+Schriftart: Helvetica-Oblique
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: - Familie Müller, 8,5 kWp Anlage
+Position: (62.692909240722656, 456.840576171875, 207.17291259765625, 470.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: IIIII
+Position: (62.692909240722656, 483.40057373046875, 100.74291229248047, 493.03057861328125)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (100.74291229248047, 480.840576171875, 103.52291107177734, 494.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: "Von der Planung bis zur Inbetriebnahme - alles aus einer Hand und termingerecht."
+Position: (103.52291107177734, 480.89056396484375, 475.7927551269531, 494.4305725097656)
+Schriftart: Helvetica-Oblique
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: - Herr Schmidt, 12 kWp mit Speicher
+Position: (62.692909240722656, 492.840576171875, 224.95289611816406, 506.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: IIIII
+Position: (62.692909240722656, 519.4005737304688, 100.74291229248047, 529.0305786132812)
+Schriftart: ZapfDingbats
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  
+Position: (100.74291229248047, 516.840576171875, 103.52291107177734, 530.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: "Kompetente Beratung, faire Preise, einwandfreie Ausführung. Sehr empfehlenswert!"
+Position: (103.52291107177734, 516.8905639648438, 483.02276611328125, 530.4306030273438)
+Schriftart: Helvetica-Oblique
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: - Frau Weber, 6,2 kWp Anlage
+Position: (62.692909240722656, 528.840576171875, 197.74288940429688, 542.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: Über 500 zufriedene Kunden
+Position: (62.692909240722656, 552.8905639648438, 197.72291564941406, 566.6605834960938)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text:  vertrauen auf unsere Expertise.
+Position: (197.722900390625, 552.840576171875, 340.0128479003906, 566.58056640625)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 2. Professionelle Installation
+Position: (62.692909240722656, 598.4862670898438, 278.7729187011719, 620.5182495117188)
+Schriftart: Helvetica-Bold
+Schriftgröße: 16.0
+Farbe: 5210557
+----------------------------------------
+Text: Professionelle Installation - Ihr Weg zur eigenen Solaranlage:
+Position: (62.692909240722656, 647.2527465820312, 353.33282470703125, 661.0227661132812)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 1. Terminplanung & Vorbereitung
+Position: (62.692909240722656, 671.2527465820312, 2.210529022216797, 685.0227661132812)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Detaillierte Terminabsprache
+Position: (62.692909240722656, 683.2027587890625, 196.78289794921875, 696.9427490234375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Anmeldung beim Netzbetreiber
+Position: (62.692909240722656, 695.2027587890625, 206.8029022216797, 708.9427490234375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Bereitstellung aller Komponenten
+Position: (62.692909240722656, 707.2027587890625, 216.26290893554688, 720.9427490234375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: 2. Montage (1-2 Tage)
+Position: (62.692909240722656, 731.2527465820312, 164.9329071044922, 745.0227661132812)
+Schriftart: Helvetica-Bold
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
+Text: • Dachmontage durch zertifizierte Dachdecker
+Position: (62.692909240722656, 743.2027587890625, 266.26287841796875, 756.9427490234375)
+Schriftart: Helvetica
+Schriftgröße: 10.0
+Farbe: 3355443
+----------------------------------------
