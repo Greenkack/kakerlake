@@ -16,10 +16,10 @@ class DynamicDataIntegrator:
         self.data_mappings = {}
         
     def prepare_dynamic_data(self, 
-                           project_data: Dict[str, Any],
-                           analysis_results: Dict[str, Any], 
-                           company_info: Dict[str, Any],
-                           customer_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            project_data: Dict[str, Any],
+            analysis_results: Dict[str, Any], 
+            company_info: Dict[str, Any],
+            customer_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Bereitet alle dynamischen Daten für das PDF vor"""
         
         print("🔄 Bereite dynamische Daten für PDF vor...")
