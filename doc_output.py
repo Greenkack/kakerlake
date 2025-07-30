@@ -14,6 +14,9 @@ from typing import Dict, Any, Optional, List, Callable
 import base64
 import traceback
 import os
+# doc_output.py (Ausschnitt)
+from txt_to_pdf_integration import generate_pdf_from_txt_files
+
 
 
 # --- Fallback-Funktionsreferenzen ---
@@ -1378,10 +1381,11 @@ def render_pdf_ui(
                 # Debug-Info
                 st.code("TXT-System wird jetzt ausgeführt - NICHT das alte System!")
 
-                # DIREKT das TXT-System verwenden - KEINE anderen Systeme!
                 from txt_to_pdf_integration import generate_pdf_from_txt_files
 
-                pdf_bytes = generate_pdf_from_txt_files()
+                pdf_bytes = generate_pdf_from_txt_files(
+                    project_data=project_data, analysis_results=analysis_results
+                )
 
                 if pdf_bytes:
                     st.success(
