@@ -14,26 +14,18 @@ from typing import Dict, Any, Optional
 import traceback
 
 
-def generate_pdf_from_txt_files(
-    project_data: Dict[str, Any] = None,
-    analysis_results: Dict[str, Any] = None,
-    **kwargs
-) -> Optional[bytes]:
-    """
-    Generiert PDF aus TXT-Dateien im input-Ordner
-    """
+def generate_pdf_from_txt_files(project_data=True, analysis_results=True, **kwargs):
     try:
-        # Platzhalter ersetzen, wenn Daten übergeben wurden
+        # Vor jeder PDF-Erzeugung: Platzhalter in den TXT-Dateien ersetzen
         try:
-            if project_data or analysis_results:
-                # Direktes Aufrufen der Aktualisierungsfunktion – kein erneuter Import!
-                update_txt_files_from_project_data(
-                    project_data or {}, analysis_results or {}
-                )
+            update_txt_files_from_project_data(
+                project_data or {}, analysis_results or {}
+            )
         except Exception as update_err:
-            # Fehler beim Aktualisieren führen nicht zum Abbruch der PDF-Erzeugung
             print(f"⚠️ TXT-Update vor PDF-Erstellung fehlgeschlagen: {update_err}")
-        # Pfade definieren
+
+   
+        # Pfade definierent
         base_dir = os.getcwd()
         pdf_script = os.path.join(base_dir, "pdf_erstellen_komplett.py")
         output_pdf = os.path.join(base_dir, "recreated_full.pdf")
