@@ -8,7 +8,7 @@ anzahl_seiten = len([f for f in os.listdir(OUTPUT_DIR) if f.endswith("_details.t
 
 for seite in range(1, anzahl_seiten + 1):
     detailfile = os.path.join(OUTPUT_DIR, f"seite_{seite}_details.txt")
-    
+
     # Seitengröße laden
     with open(detailfile, "r", encoding="utf-8") as df:
         seiten_info = df.readline().split(":")[1].strip().split(",")
@@ -20,9 +20,9 @@ for seite in range(1, anzahl_seiten + 1):
     # Texte exakt einfügen
     textfile = os.path.join(OUTPUT_DIR, f"seite_{seite}_texte.txt")
     with open(textfile, "r", encoding="utf-8") as tf:
-        blocks = tf.read().split('-'*40)
+        blocks = tf.read().split("-" * 40)
         for block in blocks:
-            lines = block.strip().split('\n')
+            lines = block.strip().split("\n")
             if len(lines) >= 5:
                 text = lines[0][6:]
                 position = eval(lines[1][10:])
@@ -67,7 +67,14 @@ for seite in range(1, anzahl_seiten + 1):
                     rect = fitz.Rect(rect_coords)
                     shape.draw_rect(rect)
             shape.finish(color=(0, 0, 0), fill=None, width=0.5)
+            
+        from txt_to_pdf_integration import generate_pdf_from_txt_files
+
+        pdf_bytes = generate_pdf_from_txt_files(
+            project_data=project_data, analysis_results=analysis_results
+        )
+            
 
 # PDF speichern
 pdf_neu.save("output/final_recreated.pdf")
-print("✅ PDF exakt neu erstellt.")
+print(" PDF exakt neu erstellt.")
