@@ -1,0 +1,144 @@
+!!python/object/apply:collections.OrderedDict
+- - - '01'
+    - !!python/object/apply:collections.OrderedDict
+      - - - '50_000'
+          - - 56.4
+            - 657.1
+        - - '40_000'
+          - - 56.4
+            - 630.1
+        - - '30_000'
+          - - 56.4
+            - 603.9
+        - - '20_000'
+          - - 56.4
+            - 576.9
+        - - '10_000'
+          - - 56.4
+            - 550.7
+        - - '0'
+          - - 71.6
+            - 523.7
+        - - eur
+          - - 111.0
+            - 617.2
+        - - '36_958'
+          - - 209.8
+            - 650.2
+        - - '29_150'
+          - - 98.0
+            - 629.2
+        - - ohne_batteriespeichersystem
+          - - 311.5
+            - 326.3
+        - - mit_batteriespeichersystem
+          - - 311.5
+            - 301.6
+        - - was_bedeutet_ertrag
+          - - 58.6
+            - 453.0
+        - - ertr_ge_sind_die_gesamten_einsparungen_durch
+          - - 58.6
+            - 435.1
+        - - eigenstromproduktion_und_einnahmen_aus_dem
+          - - 58.6
+            - 425.4
+        - - stromverkauf_abz_glich_betriebskosten_ber_nutzungsdauer
+          - - 58.6
+            - 415.7
+        - - der_photovoltaikanlage_batteriespeichers
+          - - 58.6
+            - 405.9
+        - - verzinsung_ihres_kapitals_interner_zinsfu
+          - - 39.6
+            - 359.3
+        - - 1_kwh_solarstrom_vom_eigenen_dach_kostet_sie
+          - - 311.5
+            - 359.3
+        - - wirtschaftlichkeit
+          - - 39.6
+            - 769.3
+        - - berechnungsgrundlagen
+          - - 39.6
+            - 226.5
+        - - energieversorger
+          - - 39.6
+            - 205.8
+        - - standard_de
+          - - 266.4
+            - 205.8
+        - - unterhalt_pv
+          - - 334.5
+            - 205.8
+        - - 1_invest_p_a
+          - - 490.2
+            - 188.6
+        - - stromprodukt
+          - - 39.6
+            - 188.6
+        - - verbrauch_32_cent
+          - - 244.7
+            - 188.6
+        - - unterhalt_batterie
+          - - 334.5
+            - 188.6
+        - - pv_nutzungsdauer
+          - - 39.6
+            - 171.4
+        - - 20_jahre
+          - - 279.9
+            - 171.4
+        - - inflation_strompreise
+          - - 334.5
+            - 171.4
+        - - 5_00_j_hrlich
+          - - 492.4
+            - 171.4
+        - - eigenkapitalkosten
+          - - 39.6
+            - 154.1
+        - - '1'
+          - - 298.8
+            - 154.1
+        - - ertrag_ber_20_jahre
+          - - 54.9
+            - 701.5
+        - - rendite
+          - - 54.9
+            - 378.5
+        - - '12_7'
+          - - 256.1
+            - 326.3
+        - - '9_7'
+          - - 261.8
+            - 301.6
+        - - der_interne_zinsfu_entspricht_der_mittleren_j_hrlichen
+          - - 51.0
+            - 271.8
+        - - rendite_ihres_kapitals_ber_die_gesamte_laufzeit
+          - - 58.6
+            - 262.0
+        - - produktionskosten
+          - - 326.8
+            - 378.5
+        - - 8_9_cent
+          - - 517.8
+            - 326.3
+        - - 13_5_cent
+          - - 512.0
+            - 301.6
+        - - ber_nutzungsdauer_der_photovoltaikanlage_inkl
+          - - 322.8
+            - 271.8
+        - - kapitalkosten_sowie_investition_und_unterhalt
+          - - 330.5
+            - 262.0
+        - - tom_90
+          - - 39.7
+            - 27.3
+        - - '29_11_2024'
+          - - 285.3
+            - 27.3
+        - - '3'
+          - - 549.4
+            - 27.3

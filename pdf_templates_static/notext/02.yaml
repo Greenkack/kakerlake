@@ -1,0 +1,150 @@
+!!python/object/apply:collections.OrderedDict
+- - - '01'
+    - !!python/object/apply:collections.OrderedDict
+      - - - warum_speise_ich_strom_ins
+          - - 379.5
+            - 633.4
+        - - netz_ein
+          - - 379.5
+            - 619.9
+        - - sie_k_nnen_ihren_solarstrom
+          - - 379.5
+            - 590.0
+        - - direkt_verbrauchen_oder_in_ihrem
+          - - 379.5
+            - 572.0
+        - - batteriespeicher
+          - - 379.5
+            - 554.0
+        - - zwischenspeichern
+          - - 379.5
+            - 536.0
+        - - bersch_sse_werden_ins
+          - - 379.5
+            - 518.0
+        - - stromnetz_eingespeist
+          - - 379.5
+            - 500.0
+        - - warum_brauche_ich_strom_vom
+          - - 379.5
+            - 311.9
+        - - netz
+          - - 379.5
+            - 142.6
+        - - selbst_wenn_ihre
+          - - 379.5
+            - 268.5
+        - - solarstromanlage_ber_das
+          - - 379.5
+            - 250.5
+        - - ganze_jahr_gesehen_mehr_strom
+          - - 379.5
+            - 232.5
+        - - produziert_als_sie_verbrauchen
+          - - 379.5
+            - 214.5
+        - - ben_tigen_sie_z_b_in
+          - - 379.5
+            - 196.5
+        - - wintern_chten_trotz
+          - - 379.5
+            - 178.6
+        - - batteriespeichers_strom_vom
+          - - 379.5
+            - 160.6
+        - - unabh_ngigkeit_eigenverbrauch
+          - - 39.6
+            - 769.3
+        - - eigenverbrauch_wohin_geht_mein_strom
+          - - 54.9
+            - 701.5
+        - - '19'
+          - - 133.3
+            - 560.0
+        - - '24'
+          - - 191.8
+            - 560.0
+        - - ''
+          - - 192.7
+            - 232.5
+        - - '58'
+          - - 230.7
+            - 565.2
+        - - ihre_stromproduktion_pro_jahr
+          - - 127.0
+            - 647.1
+        - - 8_251_kwh
+          - - 171.3
+            - 635.1
+        - - batterie
+          - - 73.6
+            - 262.6
+        - - 1_562_kwh
+          - - 63.2
+            - 572.1
+        - - direktverbrauch
+          - - 212.0
+            - 516.7
+        - - 1_945_kwh
+          - - 171.3
+            - 313.6
+        - - stromnetz
+          - - 279.4
+            - 262.6
+        - - 4_745_kwh
+          - - 279.4
+            - 572.1
+        - - ihr_eigenverbrauch
+          - - 152.0
+            - 471.7
+        - - '42'
+          - - 186.0
+            - 459.7
+        - - wie_viel_von_ihrem_solarstrom_verbrauchen_sie_selber
+          - - 73.8
+            - 443.2
+        - - unabh_ngigkeit_woher_kommt_mein_strom
+          - - 54.9
+            - 380.0
+        - - '22'
+          - - 133.3
+            - 244.5
+        - - '32'
+          - - 190.3
+            - 244.5
+        - - '46'
+          - - 230.7
+            - 244.5
+        - - ihr_direktverbrauch_pro_jahr
+          - - 131.9
+            - 325.6
+        - - 1_313_kwh
+          - - 63.2
+            - 250.6
+        - - ihr_stromverbrauch
+          - - 212.0
+            - 195.2
+        - - 6_000_kwh
+          - - 212.0
+            - 183.2
+        - - 2_742_kwh
+          - - 279.4
+            - 250.6
+        - - ihr_unabh_ngigkeitsgrad
+          - - 138.9
+            - 150.2
+        - - '54'
+          - - 186.0
+            - 138.2
+        - - wie_viel_von_ihrem_strombedarf_decken_sie_selber
+          - - 82.2
+            - 121.8
+        - - tom_90
+          - - 39.7
+            - 27.3
+        - - '29_11_2024'
+          - - 285.3
+            - 27.3
+        - - '2'
+          - - 549.4
+            - 27.3

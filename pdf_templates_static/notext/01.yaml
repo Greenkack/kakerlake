@@ -1,0 +1,132 @@
+!!python/object/apply:collections.OrderedDict
+- - - '01'
+    - !!python/object/apply:collections.OrderedDict
+      - - - ersparnis_ber_20_jahre
+          - - 297.4
+            - 445.5
+        - - mit_batteriespeicher
+          - - 297.4
+            - 462.9
+        - - 36_958_00_eur
+          - - 418.8
+            - 473.5
+        - - ohne_batteriespeicher
+          - - 297.4
+            - 434.4
+        - - 29_150_00_eur
+          - - 418.8
+            - 445.0
+        - - ''
+          - - 297.4
+            - 413.5
+        - - inkl_photovoltaikanlage_batteriespeicher_installation_mwst
+          - - 314.4
+            - 411.2
+        - - f_rdergelder
+          - - 316.4
+            - 401.4
+        - - '30'
+          - - 394.1
+            - 214.5
+        - - heizung
+          - - 294.5
+            - 289.6
+        - - w_rmepumpe
+          - - 394.1
+            - 291.0
+        - - warmwasser
+          - - 294.5
+            - 264.1
+        - - elektrischer_boiler
+          - - 394.1
+            - 265.5
+        - - verbrauch
+          - - 294.5
+            - 238.7
+        - - 6_000_kwh_jahr
+          - - 394.1
+            - 240.0
+        - - dachneigung
+          - - 294.5
+            - 213.2
+        - - solaranlage
+          - - 294.5
+            - 187.7
+        - - 8_4_kwp
+          - - 394.1
+            - 189.0
+        - - batterie
+          - - 294.5
+            - 162.2
+        - - 6_1_kwh
+          - - 394.1
+            - 163.6
+        - - jahresertrag
+          - - 294.5
+            - 136.7
+        - - 8_251_92_kwh_jahr
+          - - 394.1
+            - 138.1
+        - - pers_nliche_zusammenfassung
+          - - 39.6
+            - 769.3
+        - - ihres_pv_systems
+          - - 39.6
+            - 733.3
+        - - qwe_qe
+          - - 39.6
+            - 668.5
+        - - auf_den_w_rden_23
+          - - 39.6
+            - 644.7
+        - - 22359_hamburg
+          - - 39.6
+            - 622.9
+        - - tel_0155555555
+          - - 39.6
+            - 600.4
+        - - oemertimur_gmail_com
+          - - 39.6
+            - 578.0
+        - - tommatech_gmbh
+          - - 297.4
+            - 668.5
+        - - zeppelinstra_e_14
+          - - 297.4
+            - 644.7
+        - - 85748_garching_b_m_nchen
+          - - 297.4
+            - 622.9
+        - - tel_49_89_1250_36_860
+          - - 297.4
+            - 600.4
+        - - mail_tommatech_de
+          - - 297.4
+            - 578.0
+        - - kennzahlen_ihres_pv_systems
+          - - 54.9
+            - 512.6
+        - - unabh_ngigkeitsgrad
+          - - 48.3
+            - 381.0
+        - - '54'
+          - - 81.2
+            - 441.3
+        - - eigenverbrauch
+          - - 174.7
+            - 381.0
+        - - '42'
+          - - 194.5
+            - 441.3
+        - - ihr_neues_energiesystem
+          - - 54.9
+            - 338.0
+        - - tom_90
+          - - 39.7
+            - 27.3
+        - - '29_11_2024'
+          - - 285.3
+            - 27.3
+        - - '1'
+          - - 549.4
+            - 27.3
